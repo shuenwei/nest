@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/NavBar";
 import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
