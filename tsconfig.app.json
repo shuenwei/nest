@@ -13,6 +13,12 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
 
+    /* Path alias support */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
     /* Required for project references */
     "composite": true,
     "noEmit": false,
