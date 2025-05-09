@@ -1,16 +1,8 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Settings,
-  Bell,
-  Users,
-  Globe,
-  CreditCard,
-  HelpCircle,
-  ChevronRight,
-} from "lucide-react";
+import { Settings, Bell, Globe, ChevronRight } from "lucide-react";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings },
@@ -44,7 +36,7 @@ const SettingsPage = () => {
 
         <Card className="mb-6 py-0 shadow-xs">
           <CardContent className="px-0 divide-y">
-            {menuItems.map(({ label, icon: Icon }, index) => (
+            {menuItems.map(({ label, icon: Icon }) => (
               <div
                 key={label}
                 className="flex items-center justify-between px-4 py-3"

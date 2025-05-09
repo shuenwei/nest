@@ -21,7 +21,7 @@ import {
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight, User2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface DisplayNamePageProps {
   onBack: () => void;
