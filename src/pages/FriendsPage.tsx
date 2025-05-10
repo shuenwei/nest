@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/NavBar";
@@ -16,6 +17,7 @@ import {
 const FriendsPage = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const navigate = useNavigate();
 
   const friends = [
     { name: "Alex Wong", tag: "@alexwong", amount: 85.5 },
@@ -59,7 +61,7 @@ const FriendsPage = () => {
               className="pl-9 rounded-xl"
             />
           </div>
-          <Button className="rounded-xl h-11 has-[>svg]:pl-5">
+          <Button size="leftIcon" className="rounded-xl h-11">
             <UserPlus className="size-4" />
             Add
           </Button>
@@ -80,7 +82,11 @@ const FriendsPage = () => {
         </div>
 
         {filteredFriends.map(({ name, tag, amount }, idx) => (
-          <Card key={idx} className="mb-3 py-4 shadow-xs">
+          <Card
+            key={idx}
+            className="mb-3 py-4 shadow-xs"
+            onClick={() => navigate(`/friends/${encodeURIComponent(tag)}`)}
+          >
             <CardContent className="px-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">

@@ -100,7 +100,7 @@ const TelegramUsernamePage: FC<TelegramUsernamePageProps> = ({
               <Button type="button" variant="outline" onClick={onBack}>
                 Back
               </Button>
-              <Button type="submit">
+              <Button size="rightIcon" type="submit">
                 Next
                 <ChevronRight />
               </Button>

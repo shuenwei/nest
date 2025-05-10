@@ -5,6 +5,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import SettingsPage from "./pages/SettingsPage";
 import FriendsPage from "./pages/FriendsPage";
 import HistoryPage from "./pages/HistoryPage";
+import ViewFriendPage from "./pages/ViewFriendPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/friends/:friendId" element={<ViewFriendPage />} />
       </Routes>
     </Router>
   );

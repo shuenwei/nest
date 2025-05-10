@@ -27,5 +27,4 @@
   "include": ["src", "vite-env.d.ts"],
   "exclude": ["dist", "node_modules"]
 
-  /* -- remove or keep 'references' only if configured as above -- */
 }

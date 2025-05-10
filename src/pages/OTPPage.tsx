@@ -25,7 +25,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 interface OTPPageProps {
   username: string;
@@ -100,7 +100,7 @@ const OTPPage: FC<OTPPageProps> = ({
                       <FormControl>
                         <InputOTP
                           maxLength={6}
-                          pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                          pattern={REGEXP_ONLY_DIGITS}
                           {...field}
                         >
                           <InputOTPGroup className="grid grid-cols-6 gap-2 w-full">
@@ -124,7 +124,7 @@ const OTPPage: FC<OTPPageProps> = ({
                 <Button type="button" variant="outline" onClick={onBack}>
                   Back
                 </Button>
-                <Button type="submit">
+                <Button size="rightIcon" type="submit">
                   Next
                   <ChevronRight />
                 </Button>
