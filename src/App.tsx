@@ -6,6 +6,7 @@ import SettingsPage from "./pages/SettingsPage";
 import FriendsPage from "./pages/FriendsPage";
 import HistoryPage from "./pages/HistoryPage";
 import ViewFriendPage from "./pages/ViewFriendPage";
+import NotificationPage from "./pages/NotificationPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/friends/:friendId" element={<ViewFriendPage />} />
+        <Route path="/notifications" element={<NotificationPage />} />
       </Routes>
     </Router>
   );

@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardFooter, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import TransactionCard, { Transaction } from "@/components/TransactionCard";
 
@@ -49,9 +48,9 @@ const ViewFriendPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
-      <div className="w-full max-w-sm pt-10 pb-24">
+      <div className="w-full max-w-sm pt-5 pb-24">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
             className="flex items-center gap-2 px-0 has-[>svg]:pr-0"

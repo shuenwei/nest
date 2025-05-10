@@ -1,14 +1,24 @@
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MoveDownLeft, MoveUpRight } from "lucide-react";
+import { MoveDownLeft, MoveUpRight, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Hello, Shuen Wei! 👋</h1>
+          <Button
+            onClick={() => navigate("/notifications")}
+            variant="ghost"
+            size="icon"
+          >
+            <Bell className="size-6" />
+          </Button>
         </div>
 
         <div className="mb-2 flex justify-between items-center">
