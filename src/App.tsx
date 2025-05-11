@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import WelcomePage from "./pages/WelcomePage";
 import DashboardPage from "./pages/DashboardPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -7,10 +13,22 @@ import FriendsPage from "./pages/FriendsPage";
 import HistoryPage from "./pages/HistoryPage";
 import ViewFriendPage from "./pages/ViewFriendPage";
 import NotificationPage from "./pages/NotificationPage";
+import SplitPurchasePage from "./pages/SplitPurchasePage";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
+
+  return null;
+};
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"
@@ -27,6 +45,7 @@ function App() {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/friends/:friendId" element={<ViewFriendPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
+        <Route path="/splitpurchase" element={<SplitPurchasePage />} />
       </Routes>
     </Router>
   );

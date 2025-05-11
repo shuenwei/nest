@@ -63,6 +63,7 @@ const NavBar = () => {
                         className="justify-start text-lg font-medium h-10 px-3"
                         onClick={() => {
                           setDrawerOpen(false);
+                          navigate("/splitpurchase");
                         }}
                       >
                         <ShoppingBag className="size-5 mr-2" />
