@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-        "vercel-build": "npm install --legacy-peer-deps && tsc -b && vite build"
+    "vercel-build": "npm install --legacy-peer-deps && tsc -b && vite build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
