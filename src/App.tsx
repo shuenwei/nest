@@ -5,6 +5,8 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner";
+
 import WelcomePage from "./pages/WelcomePage";
 import DashboardPage from "./pages/DashboardPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -19,7 +21,7 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return null;
@@ -47,6 +49,7 @@ function App() {
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/splitpurchase" element={<SplitPurchasePage />} />
       </Routes>
+      <Toaster />
     </Router>
   );
 }
