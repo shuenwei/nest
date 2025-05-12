@@ -957,7 +957,6 @@ const SplitPurchasePage = () => {
                     <FormControl>
                       <Textarea
                         placeholder="Add notes about this expense..."
-                        className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
