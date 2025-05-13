@@ -16,6 +16,7 @@ import HistoryPage from "./pages/HistoryPage";
 import ViewFriendPage from "./pages/ViewFriendPage";
 import NotificationPage from "./pages/NotificationPage";
 import SplitPurchasePage from "./pages/SplitPurchasePage";
+import CurrencyPreferencesPage from "./pages/CurrencyPreferencesPage";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -48,6 +49,10 @@ function App() {
         <Route path="/friends/:friendId" element={<ViewFriendPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/splitpurchase" element={<SplitPurchasePage />} />
+        <Route
+          path="/settings/currency"
+          element={<CurrencyPreferencesPage />}
+        />
       </Routes>
       <Toaster />
     </Router>

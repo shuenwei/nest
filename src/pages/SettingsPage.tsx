@@ -2,15 +2,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Bell, Globe, ChevronRight } from "lucide-react";
+import { Settings, CircleDollarSign, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const menuItems = [
-  { label: "Account Settings", icon: Settings },
-  { label: "Notifications", icon: Bell },
-  { label: "Currency Preferences", icon: Globe },
+  { label: "Account Settings", icon: Settings, path: "" },
+  {
+    label: "Currency Preferences",
+    icon: CircleDollarSign,
+    path: "/settings/currency",
+  },
 ];
 
 const SettingsPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
@@ -36,10 +41,11 @@ const SettingsPage = () => {
 
         <Card className="mb-6 py-0 shadow-xs">
           <CardContent className="px-0 divide-y">
-            {menuItems.map(({ label, icon: Icon }) => (
+            {menuItems.map(({ label, icon: Icon, path }) => (
               <div
                 key={label}
                 className="flex items-center justify-between px-4 py-3"
+                onClick={() => navigate(path)}
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />

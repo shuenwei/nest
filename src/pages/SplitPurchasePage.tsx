@@ -902,7 +902,8 @@ const SplitPurchasePage = () => {
                                   </span>
                                   <Input
                                     {...amountField}
-                                    type="decimal"
+                                    type="text"
+                                    inputMode="decimal"
                                     placeholder="0.00"
                                     className="pl-12"
                                     onChange={(e) => {
