@@ -61,8 +61,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// Mock default exchange rates that would normally come from the backend
-// Rates are expressed as 1 SGD = X Foreign Currency
+// Mock default exchange rates
 const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
   USD: 0.74,
   EUR: 0.68,
@@ -71,6 +70,15 @@ const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
   CNY: 5.36,
   SGD: 1.0,
 };
+
+// Mock friends
+const friends = [
+  { id: "1", name: "Alex Wong" },
+  { id: "2", name: "Mei Lin" },
+  { id: "3", name: "Raj Patel" },
+  { id: "4", name: "Sarah Johnson" },
+  { id: "5", name: "David Chen" },
+];
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -217,7 +225,7 @@ const ExchangeRateDialog: React.FC<ExchangeRateDialogProps> = ({
                   onChange={(e) => handleSgdAmountChange(e.target.value)}
                   className="flex-1"
                 />
-                <div>SGD</div>
+                <div className="pl-3">SGD</div>
               </div>
             </div>
 
@@ -385,17 +393,8 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
   }
 };
 
-const currencies = ["SGD", "USD", "EUR", "GBP", "JPY", "CNY"];
-
-const friends = [
-  { id: "1", name: "Alex Wong" },
-  { id: "2", name: "Mei Lin" },
-  { id: "3", name: "Raj Patel" },
-  { id: "4", name: "Sarah Johnson" },
-  { id: "5", name: "David Chen" },
-];
-
 const formSchema = z.object({
+  transactiontype: z.string(),
   transactionname: z.string().min(1, "Transaction name is required"),
   amount: z.string().refine((val) => /^\d+(\.\d{1,2})?$/.test(val)),
   currency: z.string(),
@@ -433,6 +432,7 @@ const SplitPurchasePage = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      transactiontype: "purchase",
       transactionname: "",
       amount: "",
       currency: "SGD",
@@ -579,8 +579,6 @@ const SplitPurchasePage = () => {
     const finalData = {
       ...values,
       amountInSgd: sgdAmount.toFixed(2),
-      originalAmount: originalAmount.toFixed(2),
-      originalCurrency: values.currency,
       exchangeRate: currentExchangeRate,
       manualSplitsInSgd: sgdManualSplits,
     };
@@ -603,8 +601,9 @@ const SplitPurchasePage = () => {
       }
     }
 
-    // Continue with submission
-    toast.success("Expense split and added successfully!");
+    toast.success("Success!", {
+      description: "Expense split added successfully!",
+    });
     navigate("/dashboard");
   }
 
@@ -683,11 +682,13 @@ const SplitPurchasePage = () => {
                               <SelectValue placeholder="Select currency" />
                             </SelectTrigger>
                             <SelectContent>
-                              {currencies.map((curr) => (
-                                <SelectItem key={curr} value={curr}>
-                                  {curr}
-                                </SelectItem>
-                              ))}
+                              {Object.keys(DEFAULT_EXCHANGE_RATES).map(
+                                (curr) => (
+                                  <SelectItem key={curr} value={curr}>
+                                    {curr}
+                                  </SelectItem>
+                                )
+                              )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -713,7 +714,7 @@ const SplitPurchasePage = () => {
                           type="button"
                           variant="ghost"
                           size="leftIcon"
-                          className="h-5 px-0"
+                          className="h-5 has-[>svg]:px-1"
                           onClick={() => setShowExchangeRateDialog(true)}
                         >
                           <RefreshCw />
@@ -901,7 +902,7 @@ const SplitPurchasePage = () => {
                                   </span>
                                   <Input
                                     {...amountField}
-                                    type="text"
+                                    type="decimal"
                                     placeholder="0.00"
                                     className="pl-12"
                                     onChange={(e) => {
