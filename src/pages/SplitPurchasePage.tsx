@@ -289,7 +289,7 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
         <div className="text-sm font-medium text-muted-foreground">
           Split Preview (in SGD)
         </div>
-        <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <div className="bg-secondary rounded-lg p-3 space-y-2">
           {selectedPeople.map((person, index) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{person}</span>
@@ -618,7 +618,14 @@ const SplitPurchasePage = () => {
           <ArrowLeft className="size-5" />
           <span className="text-base font-medium">Back</span>
         </Button>
-        <h1 className="text-2xl font-bold mb-6">Add Expense</h1>
+
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Split Purchase</h1>
+          <p className="text-muted-foreground text-sm">
+            Add a new purchase split.
+          </p>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <Card className="p-6 mb-4">

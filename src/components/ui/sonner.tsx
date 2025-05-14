@@ -14,6 +14,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           bottom: "2rem",
+          fontFamily: "'Outfit', sans-serif",
         } as React.CSSProperties
       }
       {...props}

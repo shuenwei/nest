@@ -56,7 +56,7 @@ const ViewFriendPage = () => {
             className="flex items-center gap-2 px-0 has-[>svg]:pr-0"
             onClick={() => navigate(-1)}
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="size-5" />
             <span className="text-base font-medium">Back</span>
           </Button>
           <div className="flex gap-3">
@@ -123,7 +123,16 @@ const ViewFriendPage = () => {
             </div>
           </CardContent>
           <CardFooter className="px-4">
-            <Button className="w-full rounded-xl">Settle Up</Button>
+            <Button
+              className="w-full rounded-xl"
+              onClick={() =>
+                navigate("/settleup", {
+                  state: { amount: friend.amount, friendName: friend.name },
+                })
+              }
+            >
+              Settle Up
+            </Button>
           </CardFooter>
         </Card>
 
