@@ -72,6 +72,10 @@ const NavBar = () => {
                       <Button
                         variant="ghost"
                         className="justify-start text-lg font-medium h-10 px-3"
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          navigate("/splitbill");
+                        }}
                       >
                         <Utensils className="size-5 mr-2" />
                         Restaurant Bill

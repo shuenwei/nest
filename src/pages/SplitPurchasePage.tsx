@@ -5,13 +5,7 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Check,
-  ChevronDown,
-  ArrowLeft,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Minus, Plus, ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -60,6 +54,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 // Mock default exchange rates
 const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
@@ -214,7 +210,7 @@ const ExchangeRateDialog: React.FC<ExchangeRateDialogProps> = ({
           <TabsContent value="sgd" className="space-y-4 py-4">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="font-medium">
+                <div className="whitespace-nowrap font-medium">
                   {amount} {currency} =
                 </div>
               </div>
@@ -817,51 +813,57 @@ const SplitPurchasePage = () => {
                               variant="outline"
                               role="combobox"
                               aria-expanded={openPeopleSelect}
-                              className="w-full justify-between text-left font-normal px-4"
-                              type="button"
+                              className="w-full justify-between text-left font-normal px-3"
                             >
                               {field.value.length > 0
                                 ? `${field.value.length} people selected`
                                 : "Select people"}
-                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-full p-0">
                             <Command>
-                              <CommandInput
-                                placeholder="Search people..."
-                                autoFocus={false}
-                              />
+                              <CommandInput placeholder="Search people..." />
                               <CommandList>
                                 <CommandEmpty>No person found.</CommandEmpty>
                                 <CommandGroup>
+                                  <CommandItem
+                                    value="You"
+                                    onSelect={() => {
+                                      const newValue = field.value.includes(
+                                        "You"
+                                      )
+                                        ? field.value.filter((v) => v !== "You")
+                                        : [...field.value, "You"];
+                                      field.onChange(newValue);
+                                    }}
+                                  >
+                                    <Checkbox
+                                      checked={field.value.includes("You")}
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    You
+                                  </CommandItem>
                                   {friends.map((friend) => (
                                     <CommandItem
                                       key={friend.id}
                                       value={friend.name}
                                       onSelect={() => {
-                                        if (field.value.includes(friend.name)) {
-                                          field.onChange(
-                                            field.value.filter(
-                                              (name: string) =>
-                                                name !== friend.name
+                                        const newValue = field.value.includes(
+                                          friend.name
+                                        )
+                                          ? field.value.filter(
+                                              (v) => v !== friend.name
                                             )
-                                          );
-                                        } else {
-                                          field.onChange([
-                                            ...field.value,
-                                            friend.name,
-                                          ]);
-                                        }
+                                          : [...field.value, friend.name];
+                                        field.onChange(newValue);
                                       }}
                                     >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          field.value.includes(friend.name)
-                                            ? "opacity-100"
-                                            : "opacity-0"
+                                      <Checkbox
+                                        checked={field.value.includes(
+                                          friend.name
                                         )}
+                                        className="mr-2 h-4 w-4"
                                       />
                                       {friend.name}
                                     </CommandItem>
@@ -873,6 +875,32 @@ const SplitPurchasePage = () => {
                         </Popover>
                       </FormControl>
                       <FormMessage />
+                      {field.value.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {field.value.map((person) => (
+                            <Badge
+                              key={person}
+                              variant="secondary"
+                              className="flex items-center gap-1"
+                            >
+                              {person}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 p-0 text-muted-foreground/50 hover:text-foreground"
+                                onClick={() => {
+                                  field.onChange(
+                                    field.value.filter((v) => v !== person)
+                                  );
+                                }}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />

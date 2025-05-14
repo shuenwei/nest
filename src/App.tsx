@@ -16,6 +16,7 @@ import HistoryPage from "./pages/HistoryPage";
 import ViewFriendPage from "./pages/ViewFriendPage";
 import NotificationPage from "./pages/NotificationPage";
 import SplitPurchasePage from "./pages/SplitPurchasePage";
+import SplitBillPage from "./pages/SplitBillPage";
 import CurrencyPreferencesPage from "./pages/CurrencyPreferencesPage";
 import SettleUpPage from "./pages/SettleUpPage";
 
@@ -50,6 +51,7 @@ function App() {
         <Route path="/friends/:friendId" element={<ViewFriendPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/splitpurchase" element={<SplitPurchasePage />} />
+        <Route path="/splitbill" element={<SplitBillPage />} />
         <Route path="/settleup" element={<SettleUpPage />} />
         <Route
           path="/settings/currency"
