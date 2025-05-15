@@ -56,6 +56,7 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 
 // Mock default exchange rates
 const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
@@ -164,7 +165,7 @@ const ExchangeRateDialog: React.FC<ExchangeRateDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Set Currency Conversion</DialogTitle>
           <DialogDescription>
@@ -418,6 +419,8 @@ const SplitPurchasePage = () => {
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const navigate = useNavigate();
 
+  usePreserveScroll();
+
   // State for exchange rates
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(
     DEFAULT_EXCHANGE_RATES
@@ -604,8 +607,8 @@ const SplitPurchasePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
-      <div className="w-full max-w-sm pt-5 pb-24">
+    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4 overscroll-none">
+      <div className="w-full max-w-sm pt-5 pb-30">
         <Button
           variant="ghost"
           className="flex items-center gap-2 px-0 has-[>svg]:pr-0 mb-8"

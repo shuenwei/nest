@@ -4,6 +4,7 @@ import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, CircleDollarSign, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "" },
@@ -16,6 +17,7 @@ const menuItems = [
 
 const SettingsPage = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
@@ -27,13 +29,20 @@ const SettingsPage = () => {
         <Card className="mb-6 p-4 shadow-xs">
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
-              <AvatarImage src="" alt="Your Username" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage
+                src={user?.profilePhoto || ""}
+                alt={user?.displayName}
+              />
+              <AvatarFallback>
+                {user?.displayName?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-semibold text-sm">Your Username</div>
+              <div className="font-semibold text-sm">
+                {user?.displayName || "User Not Logged In"}
+              </div>
               <div className="text-muted-foreground text-xs">
-                @your_username
+                @{user?.username || "unknown"}
               </div>
             </div>
           </div>

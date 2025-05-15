@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, type FC } from "react";
 import {
   Card,
@@ -26,6 +28,9 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import axios from "axios";
+import { toast } from "sonner";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface OTPPageProps {
   username: string;
@@ -57,9 +62,27 @@ const OTPPage: FC<OTPPageProps> = ({
     defaultValues: { code: otp },
   });
 
-  const handleSubmit = (data: OTPFormValues) => {
-    setOtp(data.code);
-    onNext();
+  const handleSubmit = async (data: OTPFormValues) => {
+    try {
+      const response = await axios.post(`${apiUrl}/auth/verifycode`, {
+        username,
+        code: data.code,
+      });
+
+      if (response.data.valid) {
+        setOtp(data.code);
+        onNext();
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+        form.setError("code", {
+          message:
+            "Invalid OTP :( If you need to send another message to the bot, click 'Back'.",
+        });
+      }
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      toast.error("Something went wrong. Please try again later.");
+    }
   };
 
   return (
@@ -72,19 +95,37 @@ const OTPPage: FC<OTPPageProps> = ({
         <CardHeader className="px-6 pb-2">
           <CardTitle>Enter the 6-digit code sent to your Telegram</CardTitle>
           <CardDescription>
-            To receive your OTP, message <strong>@SplityApp_bot</strong>.
+            To receive your OTP, message <strong>@nestExpenseApp_bot</strong> by
+            clicking on the button.
           </CardDescription>
         </CardHeader>
 
         {!showInput ? (
           <CardContent className="space-y-4 px-6">
             <a
-              href={`https://t.me/SplityApp_bot?start=verify_${username}`}
+              href={`https://t.me/nestExpenseApp_bot?start=verify_${username}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button className="w-full" onClick={() => setShowInput(true)}>
-                Click here to message @SplityApp_bot
+              <Button
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    const res = await axios.post(
+                      `${apiUrl}/auth/sendcode/${username}`
+                    );
+                    if (res.status === 200) {
+                      setShowInput(true);
+                    } else {
+                      toast.error("Failed to send OTP. Please try again.");
+                    }
+                  } catch (err) {
+                    console.error("Failed to send OTP:", err);
+                    toast.error("Failed to send OTP. Please try again later.");
+                  }
+                }}
+              >
+                Click here to message @nestExpenseApp_bot
               </Button>
             </a>
           </CardContent>

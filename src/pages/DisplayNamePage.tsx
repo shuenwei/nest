@@ -22,10 +22,13 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
+import axios from "axios";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface DisplayNamePageProps {
   onBack: () => void;
   onNext: () => void;
+  username: string;
   displayName: string;
   setDisplayName: (value: string) => void;
 }
@@ -38,6 +41,7 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
   onBack,
   onNext,
   displayName,
+  username,
   setDisplayName,
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,9 +51,20 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    setDisplayName(data.displayName.trim());
-    onNext();
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    const name = data.displayName.trim();
+    try {
+      await axios.patch(`${apiUrl}/user/displayname/${username}`, {
+        displayName: name,
+      });
+      setDisplayName(name);
+      onNext();
+    } catch (err) {
+      console.error("Failed to update display name:", err);
+      form.setError("displayName", {
+        message: "Failed to update name. Please try again.",
+      });
+    }
   };
 
   return (

@@ -1,10 +1,5 @@
 import { useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 
 import WelcomePage from "./pages/WelcomePage";
@@ -24,7 +19,10 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
   }, [pathname]);
 
   return null;
@@ -32,7 +30,7 @@ const ScrollToTop = () => {
 
 function App() {
   return (
-    <Router>
+    <>
       <ScrollToTop />
       <Routes>
         <Route
@@ -59,7 +57,7 @@ function App() {
         />
       </Routes>
       <Toaster />
-    </Router>
+    </>
   );
 }
 

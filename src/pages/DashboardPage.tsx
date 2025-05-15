@@ -4,9 +4,11 @@ import FriendCard from "@/components/FriendCard";
 import { MoveDownLeft, MoveUpRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/contexts/UserContext";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const friends = [
     { name: "Alex Wong", username: "alexwong", amount: 85.5 },
@@ -21,7 +23,9 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Hello, Shuen Wei! 👋</h1>
+          <h1 className="text-2xl font-bold">
+            Hello, {user?.displayName || "there"}! 👋
+          </h1>
           <Button
             onClick={() => navigate("/notifications")}
             variant="ghost"
@@ -78,7 +82,6 @@ const DashboardPage = () => {
             />
           ))}
       </div>
-
       <Navbar />
     </div>
   );
