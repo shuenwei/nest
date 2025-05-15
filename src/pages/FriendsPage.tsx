@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/NavBar";
+import FriendCard from "@/components/FriendCard";
 import { UserPlus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,18 +21,18 @@ const FriendsPage = () => {
   const navigate = useNavigate();
 
   const friends = [
-    { name: "Alex Wong", tag: "@alexwong", amount: 85.5 },
-    { name: "Mei Lin", tag: "@meilin", amount: -45.2 },
-    { name: "Raj Patel", tag: "@rajp", amount: 120.75 },
-    { name: "Sarah Chen", tag: "@sarahc", amount: -30.0 },
-    { name: "John Tan", tag: "@johntan", amount: 0.0 },
-    { name: "Lisa Kim", tag: "@lisakim", amount: 15.3 },
+    { name: "Alex Wong", username: "alexwong", amount: 85.5 },
+    { name: "Mei Lin", username: "meilin", amount: -45.2 },
+    { name: "Raj Patel", username: "rajp", amount: 120.75 },
+    { name: "Sarah Chen", username: "sarahc", amount: -30.0 },
+    { name: "John Tan", username: "johntan", amount: 0.0 },
+    { name: "Lisa Kim", username: "lisakim", amount: 15.3 },
   ];
 
   const filteredFriends = friends.filter((friend) => {
     const matchesSearch =
       friend.name.toLowerCase().includes(search.toLowerCase()) ||
-      friend.tag.toLowerCase().includes(search.toLowerCase());
+      friend.username.toLowerCase().includes(search.toLowerCase());
 
     if (filter === "owes") return matchesSearch && friend.amount < 0;
     if (filter === "owed") return matchesSearch && friend.amount > 0;
@@ -81,60 +82,13 @@ const FriendsPage = () => {
           </Select>
         </div>
 
-        {filteredFriends.map(({ name, tag, amount }, idx) => (
-          <Card
-            key={idx}
-            className="mb-3 py-4 shadow-xs"
-            onClick={() => navigate(`/friends/${encodeURIComponent(tag)}`)}
-          >
-            <CardContent className="px-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="" alt={name} />
-                  <AvatarFallback>
-                    {name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-semibold">{name}</div>
-                  <div className="text-muted-foreground text-xs">{tag}</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <p
-                  className={`text-xs font-medium mb-0.5 ${
-                    amount < 0
-                      ? "text-red-500"
-                      : amount > 0
-                      ? "text-green-600"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {amount < 0
-                    ? "You owe"
-                    : amount > 0
-                    ? "Owes you"
-                    : "Settled up"}
-                </p>
-                <p
-                  className={`font-semibold ${
-                    amount < 0
-                      ? "text-red-600"
-                      : amount > 0
-                      ? "text-green-700"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {amount === 0 ? "$0.00" : `$${Math.abs(amount).toFixed(2)}`}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        {filteredFriends.map(({ name, username, amount }, idx) => (
+          <FriendCard
+            name={name}
+            username={username}
+            amount={amount}
+            idx={idx}
+          />
         ))}
       </div>
       <Navbar />

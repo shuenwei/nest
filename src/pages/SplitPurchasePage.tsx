@@ -618,7 +618,7 @@ const SplitPurchasePage = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Split Purchase</h1>
           <p className="text-muted-foreground text-sm">
-            Add a new purchase split.
+            Add a new purchase split
           </p>
         </div>
 

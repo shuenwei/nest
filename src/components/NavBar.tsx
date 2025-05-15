@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const NavBar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -82,10 +83,13 @@ const NavBar = () => {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium h-10 px-3"
+                        className="justify-start text-lg font-medium text-muted-foreground hover:text-muted-foreground h-10 px-3"
                       >
                         <CalendarSync className="size-5 mr-2" />
-                        Recurring Subscription
+                        <span className="flex items-center gap-2">
+                          Recurring Subscription
+                          <Badge variant="secondary">Coming Soon</Badge>
+                        </span>
                       </Button>
                       <Button
                         variant="ghost"

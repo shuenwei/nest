@@ -254,7 +254,9 @@ const SettleUpPage = () => {
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
 
   const location = useLocation();
-  const passedAmount = location.state?.amount ?? null;
+  const rawAmount = location.state?.amount ?? null;
+  const passedAmount =
+    rawAmount !== null ? Math.abs(rawAmount).toFixed(2) : null;
   const friendName = location.state?.friendName ?? null;
 
   const form = useForm<FormValues>({
@@ -372,7 +374,7 @@ const SettleUpPage = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Settle Up</h1>
           <p className="text-muted-foreground text-sm">
-            Record transfers between you and your friends.
+            Record transfers among friends
           </p>
         </div>
 

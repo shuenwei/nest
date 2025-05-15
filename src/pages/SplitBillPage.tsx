@@ -266,7 +266,7 @@ const formSchema = z.object({
     z.object({
       name: z.string().min(1, "Item name is required"),
       price: z.string().refine((val) => /^\d+(\.\d{1,2})?$/.test(val), {
-        message: "Price must be a number with up to 2 decimal places",
+        message: "Invalid price",
       }),
       sharedBy: z.array(z.string()).min(1, "Select at least one person"),
     })
@@ -862,70 +862,71 @@ const SplitBillPage = () => {
                         </Button>
                       )}
                     </div>
-
-                    {/* Item Name */}
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Item Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., Pasta, Pizza"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Item Price */}
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.price`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Price</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              {currency && (
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                  {currency === "SGD" ? "$" : currency}
-                                </span>
-                              )}
+                    <div className="flex justify-between items-start flex gap-4">
+                      {/* Item Name */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.name`}
+                        render={({ field }) => (
+                          <FormItem className="basis-3/5">
+                            <FormLabel>Item Name</FormLabel>
+                            <FormControl>
                               <Input
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="0.00"
-                                className="pl-12"
+                                placeholder="e.g., Pasta, Pizza"
                                 {...field}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  if (validatePrice(value)) {
-                                    field.onChange(value);
-                                  }
-                                }}
                               />
-                            </div>
-                          </FormControl>
-                          {currency !== "SGD" &&
-                            field.value &&
-                            !isNaN(Number.parseFloat(field.value)) && (
-                              <FormDescription className="text-xs">
-                                ≈ $
-                                {(
-                                  Number.parseFloat(field.value) /
-                                  currentExchangeRate
-                                ).toFixed(2)}{" "}
-                                SGD
-                              </FormDescription>
-                            )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Item Price */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.price`}
+                        render={({ field }) => (
+                          <FormItem className="basis-2/5">
+                            <FormLabel>Price</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                {currency && (
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                    {currency === "SGD" ? "$" : currency}
+                                  </span>
+                                )}
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="0.00"
+                                  className="pl-12"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (validatePrice(value)) {
+                                      field.onChange(value);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </FormControl>
+                            {currency !== "SGD" &&
+                              field.value &&
+                              !isNaN(Number.parseFloat(field.value)) && (
+                                <FormDescription className="text-xs">
+                                  ≈ $
+                                  {(
+                                    Number.parseFloat(field.value) /
+                                    currentExchangeRate
+                                  ).toFixed(2)}{" "}
+                                  SGD
+                                </FormDescription>
+                              )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     {/* Shared By */}
                     <FormField
@@ -1032,27 +1033,33 @@ const SplitBillPage = () => {
                     name="discountType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Discount</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select discount type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">No Discount</SelectItem>
-                              <SelectItem value="amount">
-                                Fixed Amount
-                              </SelectItem>
-                              <SelectItem value="percentage">
-                                Percentage
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <FormLabel>Discount</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select discount type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">
+                                  No Discount
+                                </SelectItem>
+                                <SelectItem value="amount">
+                                  Fixed Amount
+                                </SelectItem>
+                                <SelectItem value="percentage">
+                                  Percentage
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </div>
                       </FormItem>
                     )}
                   />
@@ -1129,9 +1136,6 @@ const SplitBillPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <FormLabel>Service Charge</FormLabel>
-                    <FormDescription>
-                      Add service charge to the bill
-                    </FormDescription>
                   </div>
                   <FormField
                     control={form.control}
@@ -1155,7 +1159,6 @@ const SplitBillPage = () => {
                     name="serviceChargePercentage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Charge Percentage</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
@@ -1185,7 +1188,6 @@ const SplitBillPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <FormLabel>GST</FormLabel>
-                    <FormDescription>Add GST to the bill</FormDescription>
                   </div>
                   <FormField
                     control={form.control}
@@ -1209,7 +1211,6 @@ const SplitBillPage = () => {
                     name="gstPercentage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>GST Percentage</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
