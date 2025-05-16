@@ -43,11 +43,15 @@ const OnboardingPage = () => {
         onBack={() => setStep("telegram")}
         onNext={async () => {
           try {
-            const res = await axios.get(`${apiUrl}/user/${username}`);
-            const { displayName: fetchedName, hasSignedUp } = res.data;
+            const res = await axios.get(`${apiUrl}/user/username/${username}`);
+            const {
+              displayName: fetchedName,
+              hasSignedUp,
+              telegramId,
+            } = res.data;
 
             setUser(res.data);
-            localStorage.setItem("username", username);
+            localStorage.setItem("telegramId", telegramId);
 
             if (hasSignedUp) {
               navigate("/dashboard");
@@ -67,7 +71,7 @@ const OnboardingPage = () => {
   if (step === "displayname") {
     return (
       <DisplayNamePage
-        username={username}
+        telegramId={parseInt(localStorage.getItem("telegramId")!)}
         displayName={displayName}
         setDisplayName={setDisplayName}
         onBack={() => setStep("otp")}

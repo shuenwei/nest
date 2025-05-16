@@ -28,7 +28,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 interface DisplayNamePageProps {
   onBack: () => void;
   onNext: () => void;
-  username: string;
+  telegramId: number;
   displayName: string;
   setDisplayName: (value: string) => void;
 }
@@ -41,7 +41,7 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
   onBack,
   onNext,
   displayName,
-  username,
+  telegramId,
   setDisplayName,
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,7 +54,7 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     const name = data.displayName.trim();
     try {
-      await axios.patch(`${apiUrl}/user/displayname/${username}`, {
+      await axios.patch(`${apiUrl}/user/displayname/${telegramId}`, {
         displayName: name,
       });
       setDisplayName(name);

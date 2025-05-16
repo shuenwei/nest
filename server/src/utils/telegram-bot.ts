@@ -40,12 +40,12 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       return;
     }
 
-    // ✅ Send OTP
+    // Send OTP
     bot.sendMessage(chatId, `✅ Your OTP code is: *${otpDoc.code}*\n\nIt expires in 5 minutes.`, {
       parse_mode: 'Markdown',
     });
 
-    // ✅ Fetch profile photo and convert to buffer
+    // Fetch profile photo and convert to buffer
     const photoData = await bot.getUserProfilePhotos(telegramUser.id, { limit: 1 });
     const fileId = photoData.total_count > 0 ? photoData.photos[0][0].file_id : null;
 
@@ -58,15 +58,35 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       profilePhotoBuffer = Buffer.from(response.data);
     }
 
-    // ✅ Save user info to MongoDB
+    // Save user info to MongoDB
+    const existingUser = await User.findOne({
+      $or: [
+        { telegramId: telegramUser.id.toString() },
+        { username: telegramUser.username }
+      ]
+    });
+
+    const updateData: any = {
+      telegramId: telegramUser.id.toString(), // Store as string if your schema uses string
+      username: telegramUser.username,
+      profilePhoto: profilePhotoBuffer,
+      verifiedAt: new Date(),
+    };
+
+    // Only set displayName if not already defined
+    if (!existingUser?.displayName) {
+      updateData.displayName = `${telegramUser.first_name ?? ''} ${telegramUser.last_name ?? ''}`.trim();
+    }
+
+    // Find and update by telegramId or username, or create if not found
     await User.findOneAndUpdate(
-      { userId: telegramUser.id },
       {
-        username: telegramUser.username,
-        displayName: `${telegramUser.first_name ?? ''} ${telegramUser.last_name ?? ''}`.trim(),
-        profilePhoto: profilePhotoBuffer,
-        verifiedAt: new Date(),
+        $or: [
+          { telegramId: telegramUser.id.toString() },
+          { username: telegramUser.username }
+        ]
       },
+      updateData,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
   } catch (error) {

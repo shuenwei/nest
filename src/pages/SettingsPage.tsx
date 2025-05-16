@@ -17,7 +17,14 @@ const menuItems = [
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
+
+  const handleLogout = () => {
+    localStorage.removeItem("telegramId"); // or "telegramId" if that's what you're using
+    setUser(null); // reset context
+    navigate("/"); // redirect to homepage or login
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
@@ -66,7 +73,7 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        <Button variant="link" className="w-full">
+        <Button variant="link" className="w-full" onClick={handleLogout}>
           Log Out
         </Button>
       </div>

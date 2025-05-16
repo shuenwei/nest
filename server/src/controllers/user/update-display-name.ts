@@ -2,17 +2,17 @@ import { Request, Response } from 'express';
 import { User } from '../../models/User';
 
 const updateDisplayName = async (req: Request, res: Response): Promise<void> => {
-  const { username } = req.params;
+  const { telegramId } = req.params;
   const { displayName } = req.body;
 
-  if (!displayName || !username) {
+  if (!displayName || !telegramId) {
     res.status(400).json({ error: 'Missing display name or username' });
     return;
   }
 
   try {
     const updated = await User.findOneAndUpdate(
-  { username },
+  { telegramId },
   {
     displayName,
     hasSignedUp: true

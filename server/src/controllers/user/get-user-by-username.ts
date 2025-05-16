@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { User } from '../../models/User';
 
-const getUser = async (req: Request, res: Response): Promise<void> => {
+const getUserByUsername = async (req: Request, res: Response): Promise<void> => {
   const { username } = req.params;
 
   try {
@@ -17,12 +17,13 @@ const getUser = async (req: Request, res: Response): Promise<void> => {
       : null;
 
     res.status(200).json({
+      id: user._id.toString(),
       username: user.username,
       displayName: user.displayName,
-      profilePhoto: base64Photo,
-      userId: user.userId,
+      telegramId: user.telegramId,
       verifiedAt: user.verifiedAt,
       hasSignedUp: user.hasSignedUp,
+      profilePhoto: base64Photo,
     });
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -30,4 +31,4 @@ const getUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export default getUser;
+export default getUserByUsername;
