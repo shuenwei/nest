@@ -14,6 +14,7 @@ import SplitPurchasePage from "./pages/SplitPurchasePage";
 import SplitBillPage from "./pages/SplitBillPage";
 import CurrencyPreferencesPage from "./pages/CurrencyPreferencesPage";
 import SettleUpPage from "./pages/SettleUpPage";
+import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const ScrollToTop = () => {
@@ -72,6 +73,7 @@ function App() {
             path="/settings/currency"
             element={<CurrencyPreferencesPage />}
           />
+          <Route path="/settings/account" element={<AccountSettingsPage />} />
         </Route>
       </Routes>
       <Toaster />

@@ -5,9 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, CircleDollarSign, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { toast } from "sonner";
 
 const menuItems = [
-  { label: "Account Settings", icon: Settings, path: "" },
+  { label: "Account Settings", icon: Settings, path: "/settings/account" },
   {
     label: "Currency Preferences",
     icon: CircleDollarSign,
@@ -22,6 +23,7 @@ const SettingsPage = () => {
   const handleLogout = () => {
     localStorage.removeItem("telegramId"); // or "telegramId" if that's what you're using
     setUser(null); // reset context
+    toast.success("You are now logged out!");
     navigate("/"); // redirect to homepage or login
   };
 

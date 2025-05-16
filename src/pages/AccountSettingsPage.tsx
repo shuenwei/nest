@@ -1,0 +1,176 @@
+"use client";
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import axios from "axios";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/contexts/UserContext";
+import { useEffect } from "react";
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
+// Form schema
+const formSchema = z.object({
+  displayName: z.string().min(1, "Display name is required"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const AccountSettingsPage = () => {
+  const navigate = useNavigate();
+  const { user, setUser } = useUser();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      displayName: "",
+    },
+  });
+
+  useEffect(() => {
+    if (user?.displayName) {
+      form.reset({ displayName: user.displayName });
+    }
+  }, [user?.displayName, form]);
+
+  const onSubmit = async (data: FormValues) => {
+    if (!user?.telegramId) {
+      toast.error("User information not found");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await axios.patch(
+        `${apiUrl}/user/displayname/${user.telegramId}`,
+        {
+          displayName: data.displayName,
+        }
+      );
+
+      if (response.data && response.data.user) {
+        setUser({
+          ...user,
+          displayName: data.displayName,
+        });
+        toast.success("Display name updated successfully");
+        navigate("/settings");
+      }
+    } catch (error) {
+      console.error("Failed to update display name:", error);
+      toast.error("Failed to update display name");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
+      <div className="w-full max-w-sm pt-5 pb-24">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 px-0 has-[>svg]:pr-0"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="size-5" />
+            <span className="text-base font-medium">Back</span>
+          </Button>
+        </div>
+
+        {/* Page title */}
+        <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Profile Photo Card */}
+            <Card className="shadow-xs">
+              <CardTitle className="px-6">Profile Photo</CardTitle>
+              <CardContent className="px-6">
+                <div className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage
+                      src={user?.profilePhoto || ""}
+                      alt={user?.displayName}
+                    />
+                    <AvatarFallback className="text-xl">
+                      {user?.displayName?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Your profile photo is synced with the profile photo found
+                      on your Telegram account
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Information Card */}
+            <Card className="shadow-xs">
+              <CardTitle className="px-6">User Information</CardTitle>
+              <CardContent className="px-6 space-y-4">
+                {/* Display Name */}
+                <FormField
+                  control={form.control}
+                  name="displayName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Username (disabled) */}
+                <div className="space-y-2">
+                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <Input
+                    id="username"
+                    value={`@${user?.username || ""}`}
+                    disabled
+                  />
+                  <FormDescription>
+                    Your username is linked to your Telegram account and cannot
+                    be changed.
+                  </FormDescription>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Submit Button */}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+};
+
+export default AccountSettingsPage;

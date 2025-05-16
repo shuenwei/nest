@@ -67,7 +67,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     });
 
     const updateData: any = {
-      telegramId: telegramUser.id.toString(), // Store as string if your schema uses string
+      telegramId: telegramUser.id.toString(),
       username: telegramUser.username,
       profilePhoto: profilePhotoBuffer,
       verifiedAt: new Date(),

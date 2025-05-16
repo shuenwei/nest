@@ -6,6 +6,7 @@ import DisplayNamePage from "./DisplayNamePage";
 import AllSetPage from "./AllSetPage";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
+import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -54,6 +55,7 @@ const OnboardingPage = () => {
             localStorage.setItem("telegramId", telegramId);
 
             if (hasSignedUp) {
+              toast.success("You are now logged in!");
               navigate("/dashboard");
             } else {
               setDisplayName(fetchedName);
@@ -61,7 +63,6 @@ const OnboardingPage = () => {
             }
           } catch (err) {
             console.error("Error fetching user after OTP:", err);
-            setStep("displayname");
           }
         }}
       />
@@ -84,7 +85,10 @@ const OnboardingPage = () => {
     <AllSetPage
       displayName={displayName}
       username={username}
-      onFinish={() => (window.location.href = "/dashboard")}
+      onFinish={() => {
+        toast.success("You are now logged in!");
+        window.location.href = "/dashboard";
+      }}
     />
   );
 };
