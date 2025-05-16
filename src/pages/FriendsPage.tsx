@@ -1,10 +1,10 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/NavBar";
 import FriendCard from "@/components/FriendCard";
-import { UserPlus, Search } from "lucide-react";
+import { UserPlus, Search, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,20 +14,203 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import axios from "axios";
+import { useUser } from "@/contexts/UserContext";
 
 const FriendsPage = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const navigate = useNavigate();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
+  const [pendingUsername, setPendingUsername] = useState("");
+  const [friends, setFriends] = useState<
+    Array<{
+      id: string;
+      name: string;
+      username: string;
+      profilePhoto?: string | null;
+      amount: number;
+    }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const friends = [
-    { name: "Alex Wong", username: "alexwong", amount: 85.5 },
-    { name: "Mei Lin", username: "meilin", amount: -45.2 },
-    { name: "Raj Patel", username: "rajp", amount: 120.75 },
-    { name: "Sarah Chen", username: "sarahc", amount: -30.0 },
-    { name: "John Tan", username: "johntan", amount: 0.0 },
-    { name: "Lisa Kim", username: "lisakim", amount: 15.3 },
-  ];
+  const { user } = useUser();
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Load friends when component mounts
+  useEffect(() => {
+    if (user?.friends && Array.isArray(user.friends)) {
+      const formattedFriends = user.friends.map((friend) => ({
+        id: friend.id,
+        name: friend.displayName,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+        amount: 0, // Placeholder — will be replaced when balance API is ready
+      }));
+
+      setFriends(formattedFriends);
+    }
+  }, [user]);
+
+  // Form schema for adding a friend
+  const addFriendSchema = z.object({
+    username: z
+      .string()
+      .min(1, "Username is required")
+      .refine((val) => !val.startsWith("@"), {
+        message: "Please enter username without the @ symbol",
+      })
+      .refine((val) => !/\s/.test(val), {
+        message: "Username must not contain spaces",
+      }),
+  });
+
+  // Form schema for creating a new user
+  const createUserSchema = z.object({
+    displayName: z.string().min(1, "Display name is required"),
+  });
+
+  // Form for adding a friend
+  const addFriendForm = useForm<z.infer<typeof addFriendSchema>>({
+    resolver: zodResolver(addFriendSchema),
+    defaultValues: {
+      username: "",
+    },
+  });
+
+  // Form for creating a new user
+  const createUserForm = useForm<z.infer<typeof createUserSchema>>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      displayName: "",
+    },
+  });
+
+  // Handle adding a friend
+  const onAddFriend = async (data: z.infer<typeof addFriendSchema>) => {
+    if (!user?.telegramId) {
+      toast.error("You must be logged in to add friends");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Check if user exists
+      const response = await axios.get(
+        `${apiUrl}/user/username/${data.username}`
+      );
+
+      if (response.data) {
+        // User exists, add them as a friend using the addfriend endpoint
+        const friendResponse = await axios.get(
+          `${apiUrl}/user/username/${data.username}`
+        );
+        const friend = friendResponse.data;
+
+        await axios.post(`${apiUrl}/user/addfriend`, {
+          userId: user.id,
+          friendId: friend.id,
+        });
+
+        // Add the new friend to the list frontend
+        const newFriend = {
+          id: friend.id,
+          name: friend.displayName,
+          username: friend.username,
+          profilePhoto: friend.profilePhoto,
+          amount: 0, // Placeholder
+        };
+
+        setFriends((prev) => [...prev, newFriend]);
+
+        toast.success(`${response.data.displayName} added to your friends!`);
+        setIsAddDialogOpen(false);
+        addFriendForm.reset();
+      }
+    } catch (error: any) {
+      // User doesn't exist
+      if (error.response && error.response.status === 404) {
+        setPendingUsername(data.username);
+        setIsAddDialogOpen(false);
+        setIsCreateUserDialogOpen(true);
+      } else {
+        toast.error("Failed to add friend");
+        console.error("Error adding friend:", error);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle creating a new user
+  const onCreateUser = async (data: z.infer<typeof createUserSchema>) => {
+    if (!user?.telegramId) {
+      toast.error("You must be logged in to add friends");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Create a new user using the create endpoint
+      const createResponse = await axios.post(`${apiUrl}/user/create`, {
+        username: pendingUsername,
+        displayName: data.displayName,
+      });
+
+      if (createResponse.data) {
+        // Add the newly created user as a friend
+        const createdUser = createResponse.data;
+
+        await axios.post(`${apiUrl}/user/addfriend`, {
+          userId: user.id,
+          friendId: createdUser.id,
+        });
+
+        // Add the new friend to the list frontend
+        const newFriend = {
+          id: createdUser.id,
+          name: createdUser.displayName,
+          username: createdUser.username,
+          profilePhoto: createdUser.profilePhoto,
+          amount: 0, // Placeholder
+        };
+
+        setFriends((prev) => [...prev, newFriend]);
+
+        toast.success(`${data.displayName} added to your friends!`);
+        setIsCreateUserDialogOpen(false);
+        createUserForm.reset();
+        setPendingUsername("");
+      }
+    } catch (error) {
+      toast.error("Failed to create user");
+      console.error("Error creating user:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredFriends = friends.filter((friend) => {
     const matchesSearch =
@@ -62,7 +245,12 @@ const FriendsPage = () => {
               className="pl-9 rounded-xl"
             />
           </div>
-          <Button size="leftIcon" className="rounded-xl h-11">
+          <Button
+            size="leftIcon"
+            className="rounded-xl h-11"
+            onClick={() => setIsAddDialogOpen(true)}
+            disabled={!user}
+          >
             <UserPlus className="size-4" />
             Add
           </Button>
@@ -82,15 +270,134 @@ const FriendsPage = () => {
           </Select>
         </div>
 
-        {filteredFriends.map(({ name, username, amount }, idx) => (
+        {filteredFriends.map(({ id, name, username, amount, profilePhoto }) => (
           <FriendCard
+            key={id}
             name={name}
             username={username}
+            profilePhoto={profilePhoto}
             amount={amount}
-            idx={idx}
           />
         ))}
+
+        {filteredFriends.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No friends found.
+          </div>
+        )}
       </div>
+
+      {/* Add Friend Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add friend</DialogTitle>
+            <DialogDescription>
+              Enter your friend's Telegram username
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...addFriendForm}>
+            <form
+              onSubmit={addFriendForm.handleSubmit(onAddFriend)}
+              className="space-y-4"
+            >
+              <FormField
+                control={addFriendForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telegram Username</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          @
+                        </span>
+                        <Input
+                          placeholder="username"
+                          className="pl-7"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  You are able to add your friends even if they aren't on Nest
+                  yet. They will be able to view their transaction history upon
+                  account creation.
+                </AlertDescription>
+              </Alert>
+
+              <DialogFooter>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Adding..." : "Add Friend"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create User Dialog */}
+      <Dialog
+        open={isCreateUserDialogOpen}
+        onOpenChange={setIsCreateUserDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>@{pendingUsername} isn't on Nest yet.</DialogTitle>
+            <DialogDescription>
+              Enter a display name for @{pendingUsername}. This will be how
+              others see them on the app until they create an account.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...createUserForm}>
+            <form
+              onSubmit={createUserForm.handleSubmit(onCreateUser)}
+              className="space-y-4"
+            >
+              <FormField
+                control={createUserForm.control}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Display Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Shaun" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateUserDialogOpen(false);
+                    setIsAddDialogOpen(true);
+                  }}
+                  disabled={isLoading}
+                >
+                  Back
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Adding..." : "Add Friend"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
       <Navbar />
     </div>
   );

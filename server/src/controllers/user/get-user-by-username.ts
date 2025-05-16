@@ -1,11 +1,20 @@
 import { Request, Response } from 'express';
 import { User } from '../../models/User';
+import { Types } from 'mongoose';
+
+interface IFriend {
+  _id: Types.ObjectId;
+  username: string;
+  displayName: string;
+  profilePhoto?: Buffer;
+}
 
 const getUserByUsername = async (req: Request, res: Response): Promise<void> => {
   const { username } = req.params;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username })
+    .populate<{ friends: IFriend[] }>('friends', 'username displayName profilePhoto');
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
@@ -16,6 +25,8 @@ const getUserByUsername = async (req: Request, res: Response): Promise<void> => 
       ? `data:image/jpeg;base64,${user.profilePhoto.toString('base64')}`
       : null;
 
+    const friends = Array.isArray(user.friends) ? user.friends : [];
+
     res.status(200).json({
       id: user._id.toString(),
       username: user.username,
@@ -24,6 +35,14 @@ const getUserByUsername = async (req: Request, res: Response): Promise<void> => 
       verifiedAt: user.verifiedAt,
       hasSignedUp: user.hasSignedUp,
       profilePhoto: base64Photo,
+      friends: friends.map(friend => ({
+        id: friend._id.toString(),
+        username: friend.username,
+        displayName: friend.displayName,
+        profilePhoto: friend.profilePhoto
+          ? `data:image/jpeg;base64,${friend.profilePhoto.toString('base64')}`
+          : null,
+      })),
     });
   } catch (error) {
     console.error('Error fetching user:', error);

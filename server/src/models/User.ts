@@ -1,15 +1,22 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  telegramId: { type: String, unique: true },
+  telegramId: { type: String },
   username: { type: String, required: true, unique: true },
   displayName: { type: String },
   profilePhoto: { type: Buffer },
-  verifiedAt: { type: Date, default: Date.now },
+  verifiedAt: { type: Date },
   hasSignedUp: {
     type: Boolean,
     default: false,
   },
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: []
+    },
+  ],
 });
 
 export const User = mongoose.model('User', UserSchema);

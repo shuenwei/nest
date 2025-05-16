@@ -120,7 +120,7 @@ const AccountSettingsPage = () => {
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
                       Your profile photo is synced with the profile photo found
-                      on your Telegram account
+                      on your Telegram account.
                     </p>
                   </div>
                 </div>

@@ -7,7 +7,7 @@ interface FriendCardProps {
   name: string;
   username: string;
   amount: number;
-  idx?: number;
+  profilePhoto?: string | null;
   footer?: ReactNode;
   disableClick?: boolean;
 }
@@ -16,7 +16,7 @@ export function FriendCard({
   name,
   username,
   amount,
-  idx,
+  profilePhoto,
   footer,
   disableClick = false,
 }: FriendCardProps) {
@@ -24,7 +24,6 @@ export function FriendCard({
 
   return (
     <Card
-      key={username}
       className="mb-3 py-4 shadow-xs"
       onClick={
         disableClick
@@ -38,7 +37,7 @@ export function FriendCard({
       <CardContent className="px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src="" alt={name} />
+            <AvatarImage src={profilePhoto ? profilePhoto : ""} alt={name} />
             <AvatarFallback>
               {name
                 .split(" ")

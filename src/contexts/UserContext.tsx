@@ -7,6 +7,13 @@ import {
 } from "react";
 import axios from "axios";
 
+interface Friend {
+  id: string;
+  username: string;
+  displayName: string;
+  profilePhoto?: string;
+}
+
 interface User {
   id: string;
   telegramId?: string;
@@ -15,6 +22,7 @@ interface User {
   profilePhoto?: string;
   verifiedAt?: string;
   hasSignedUp: boolean;
+  friends: Friend[];
 }
 
 interface UserContextValue {

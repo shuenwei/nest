@@ -74,12 +74,7 @@ const DashboardPage = () => {
         {friends
           .filter(({ amount }) => amount !== 0)
           .map(({ name, username, amount }, idx) => (
-            <FriendCard
-              name={name}
-              username={username}
-              amount={amount}
-              idx={idx}
-            />
+            <FriendCard name={name} username={username} amount={amount} />
           ))}
       </div>
       <Navbar />
