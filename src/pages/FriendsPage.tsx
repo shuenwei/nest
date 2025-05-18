@@ -145,7 +145,7 @@ const FriendsPage = () => {
 
         setFriends((prev) => [...prev, newFriend]);
 
-        toast.success(`${response.data.displayName} added to your friends!`);
+        toast.success(`${response.data.displayName} added!`);
         setIsAddDialogOpen(false);
         addFriendForm.reset();
       }
@@ -199,7 +199,7 @@ const FriendsPage = () => {
 
         setFriends((prev) => [...prev, newFriend]);
 
-        toast.success(`${data.displayName} added to your friends!`);
+        toast.success(`${data.displayName} added!`);
         setIsCreateUserDialogOpen(false);
         createUserForm.reset();
         setPendingUsername("");

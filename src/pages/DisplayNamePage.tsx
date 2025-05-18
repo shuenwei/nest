@@ -28,7 +28,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 interface DisplayNamePageProps {
   onBack: () => void;
   onNext: () => void;
-  telegramId: number;
+  telegramId: string;
   displayName: string;
   setDisplayName: (value: string) => void;
 }
