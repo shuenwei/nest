@@ -1,5 +1,5 @@
 import { Ring2 } from "ldrs/react";
-import "ldrs/react/ring2.css";
+import "ldrs/react/Ring2.css";
 
 const LoadingScreen = () => {
   return (
