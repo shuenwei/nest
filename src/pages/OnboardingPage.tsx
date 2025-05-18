@@ -72,7 +72,7 @@ const OnboardingPage = () => {
   if (step === "displayname") {
     return (
       <DisplayNamePage
-        telegramId={parseInt(localStorage.getItem("telegramId")!)}
+        telegramId={localStorage.getItem("telegramId")!}
         displayName={displayName}
         setDisplayName={setDisplayName}
         onBack={() => setStep("otp")}
