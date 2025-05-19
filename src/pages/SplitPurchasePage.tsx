@@ -716,7 +716,7 @@ const SplitPurchasePage = () => {
                               <Button
                                 variant="outline"
                                 role="combobox"
-                                className="w-full justify-between text-left font-normal px-3"
+                                className="w-full justify-between text-left font-normal px-3 h-11"
                               >
                                 {field.value
                                   ? SUPPORTED_CURRENCIES.find(
@@ -737,7 +737,7 @@ const SplitPurchasePage = () => {
                                       value={`${curr.code} ${curr.name}`}
                                       onSelect={() => field.onChange(curr.code)}
                                     >
-                                      {curr.code} ({curr.name})
+                                      {curr.code}
                                     </CommandItem>
                                   ))}
                                 </CommandGroup>
