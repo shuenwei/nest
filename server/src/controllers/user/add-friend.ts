@@ -33,6 +33,11 @@ const addFriend = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (user.friends.includes(friend._id)) {
+      res.status(400).json({ error: 'User is already your friend' });
+      return;
+    }
+
     // Add friendId to user.friends (no duplicates)
     await User.findByIdAndUpdate(userId, {
       $addToSet: { friends: friend._id },

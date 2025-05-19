@@ -24,8 +24,8 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
 }) => {
   return (
     <Card className={`mb-3 py-3 shadow-xs ${className}`}>
-      <CardContent className="px-4">
-        <div className="flex justify-between items-start">
+      <CardContent className="px-0 divide-y">
+        <div className="px-4 pb-3 flex justify-between items-start">
           <div className="flex gap-2">
             <span className="text-3xl pr-1">{transaction.icon}</span>
             <div>
@@ -48,26 +48,27 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             </p>
           </div>
         </div>
-        <div className="-mx-4 sm:-mx-6 lg:-mx-8 border-t border-gray-200 mt-3 mb-3"></div>
-        <div className="text-xs text-muted-foreground mb-1">
-          {transaction.type === "settle"
-            ? ""
-            : `Split with ${transaction.people.length} people`}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {transaction.type === "settle" ? (
-            <>
-              <Badge variant="secondary">{transaction.paidBy}</Badge>
-              <span className="text-muted-foreground">→</span>
-              <Badge variant="secondary">{transaction.receivedBy}</Badge>
-            </>
-          ) : (
-            transaction.people.map((p) => (
-              <Badge key={p} variant="secondary">
-                {p}
-              </Badge>
-            ))
-          )}
+        <div className="px-4 mt-3">
+          <div className="text-xs text-muted-foreground mb-1">
+            {transaction.type === "settle"
+              ? ""
+              : `Split with ${transaction.people.length} people`}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {transaction.type === "settle" ? (
+              <>
+                <Badge variant="secondary">{transaction.paidBy}</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="secondary">{transaction.receivedBy}</Badge>
+              </>
+            ) : (
+              transaction.people.map((p) => (
+                <Badge key={p} variant="secondary">
+                  {p}
+                </Badge>
+              ))
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

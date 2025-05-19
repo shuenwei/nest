@@ -17,6 +17,7 @@ const verifyVerificationCode = async (req: Request, res: Response): Promise<void
       return;
     }
 
+    await VerificationCode.deleteOne({ _id: otpRecord._id });
     res.status(200).json({ valid: true });
   } catch (err) {
     console.error('Error verifying OTP:', err);

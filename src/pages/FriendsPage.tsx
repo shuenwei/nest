@@ -155,6 +155,15 @@ const FriendsPage = () => {
         setPendingUsername(data.username);
         setIsAddDialogOpen(false);
         setIsCreateUserDialogOpen(true);
+      } else if (
+        error.response.status === 400 &&
+        error.response.data?.error === "User is already your friend"
+      ) {
+        addFriendForm.setError("username", {
+          type: "manual",
+          message: `@${data.username} is already your friend.`,
+        });
+        toast.error(`@${data.username} is already your friend.`);
       } else {
         toast.error("Failed to add friend");
         console.error("Error adding friend:", error);
@@ -288,7 +297,13 @@ const FriendsPage = () => {
       </div>
 
       {/* Add Friend Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <Dialog
+        open={isAddDialogOpen}
+        onOpenChange={(open) => {
+          setIsAddDialogOpen(open);
+          if (!open) addFriendForm.reset();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add friend</DialogTitle>

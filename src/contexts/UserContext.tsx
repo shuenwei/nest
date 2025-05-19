@@ -38,10 +38,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const delay = new Promise((resolve) => setTimeout(resolve, 500));
+
   useEffect(() => {
     const fetchUser = async () => {
       const storedTelegramId = localStorage.getItem("telegramId");
       if (!storedTelegramId) {
+        await delay;
         setLoading(false);
         return;
       }
@@ -50,6 +53,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`
         );
         setUser(res.data);
+        await delay;
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch user:", err);
