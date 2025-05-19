@@ -559,6 +559,13 @@ const SplitBillPage = () => {
     // Calculate final breakdown
     const breakdown = calculatePersonBreakdown();
 
+    const splitsInSgd = Object.fromEntries(
+      Object.entries(calculatePersonBreakdown()).map(([user, d]) => [
+        user,
+        d.amountInSGD,
+      ])
+    );
+
     // Create the final data object
     const finalData = {
       ...values,
@@ -575,6 +582,7 @@ const SplitBillPage = () => {
       totalInSGD: calculateTotalInSGD(),
       exchangeRate: currentExchangeRate,
       breakdown,
+      splitsInSgd,
     };
 
     console.log("Submitting bill split:", finalData);

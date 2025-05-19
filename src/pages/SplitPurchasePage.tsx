@@ -5,7 +5,14 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Minus, Plus, ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  ArrowLeft,
+  AlertCircle,
+  RefreshCw,
+  ChevronDown,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -57,25 +64,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
-
-// Mock default exchange rates
-const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
-  USD: 0.74,
-  EUR: 0.68,
-  GBP: 0.58,
-  JPY: 113.5,
-  CNY: 5.36,
-  SGD: 1.0,
-};
-
-// Mock friends
-const friends = [
-  { id: "1", name: "Alex Wong" },
-  { id: "2", name: "Mei Lin" },
-  { id: "3", name: "Raj Patel" },
-  { id: "4", name: "Sarah Johnson" },
-  { id: "5", name: "David Chen" },
-];
+import { useUser } from "@/contexts/UserContext";
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -254,9 +244,10 @@ interface SplitCalculationProps {
   amount: string;
   selectedPeople: string[];
   splitMethod: "even" | "manual";
-  manualSplits: { person: string; amount: string }[];
+  manualSplits: { user: string; amount: string }[];
   currency: string;
   exchangeRate: number;
+  getFriendNameById: (id: string) => string;
 }
 
 const SplitCalculation: React.FC<SplitCalculationProps> = ({
@@ -266,6 +257,7 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
   manualSplits,
   currency,
   exchangeRate,
+  getFriendNameById,
 }) => {
   // Don't show anything if no people are selected or amount is invalid
   if (!selectedPeople.length || !amount || isNaN(Number.parseFloat(amount))) {
@@ -279,7 +271,7 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
   if (splitMethod === "even") {
     // Even split calculation
     const totalPeople = selectedPeople.length; // Only split among selected people
-    const perPersonAmount = totalPeople > 0 ? sgdAmount / totalPeople : 0;
+    const peruserAmount = totalPeople > 0 ? sgdAmount / totalPeople : 0;
 
     return (
       <div className="mt-4 space-y-2">
@@ -287,10 +279,10 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
           Split Preview (in SGD)
         </div>
         <div className="bg-secondary rounded-lg p-3 space-y-2">
-          {selectedPeople.map((person, index) => (
+          {selectedPeople.map((user, index) => (
             <div key={index} className="flex justify-between items-center">
-              <span className="text-sm">{person}</span>
-              <span className="font-medium">${perPersonAmount.toFixed(2)}</span>
+              <span className="text-sm">{getFriendNameById(user)}</span>
+              <span className="font-medium">${peruserAmount.toFixed(2)}</span>
             </div>
           ))}
           <div className="pt-1 mt-1 border-t border-border flex justify-between items-center">
@@ -335,7 +327,7 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
         <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
           {manualSplitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
-              <span className="text-sm">{split.person}</span>
+              <span className="text-sm">{getFriendNameById(split.user)}</span>
               <span className="font-medium">
                 ${split.amountInSgd.toFixed(2)}
               </span>
@@ -398,10 +390,10 @@ const formSchema = z.object({
   date: z.date(),
   paidBy: z.string(),
   splitMethod: z.enum(["even", "manual"]),
-  selectedPeople: z.array(z.string()).nonempty("Select at least one person"),
+  selectedPeople: z.array(z.string()).nonempty("Select at least one user"),
   manualSplits: z.array(
     z.object({
-      person: z.string(),
+      user: z.string(),
       amount: z
         .string()
         .refine((val) => !val || /^\d+(\.\d{1,2})?$/.test(val), {
@@ -421,10 +413,38 @@ const SplitPurchasePage = () => {
 
   usePreserveScroll();
 
+  const { user } = useUser();
+
+  const [friends, setFriends] = useState<
+    Array<{
+      id: string;
+      name: string;
+      username: string;
+      profilePhoto?: string | null;
+    }>
+  >([]);
+
+  const currentUserId = user?.id ?? "missing user";
+
+  useEffect(() => {
+    if (user?.friends && Array.isArray(user.friends)) {
+      const formattedFriends = user.friends.map((friend) => ({
+        id: friend.id,
+        name: friend.displayName,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      }));
+
+      setFriends(formattedFriends);
+    }
+  }, [user]);
+
+  const getFriendNameById = (id: string) =>
+    id === currentUserId
+      ? "You"
+      : friends.find((f) => f.id === id)?.name ?? "Unknown";
+
   // State for exchange rates
-  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(
-    DEFAULT_EXCHANGE_RATES
-  );
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
 
@@ -436,7 +456,7 @@ const SplitPurchasePage = () => {
       amount: "",
       currency: "SGD",
       date: new Date(),
-      paidBy: "You",
+      paidBy: currentUserId,
       splitMethod: "even",
       selectedPeople: [],
       manualSplits: [],
@@ -459,35 +479,54 @@ const SplitPurchasePage = () => {
 
   // Handle currency change
   useEffect(() => {
-    if (currency === "SGD") {
+    const fetchRate = async () => {
+      if (currency === "SGD") {
+        setCurrentExchangeRate(1);
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://open.er-api.com/v6/latest/SGD`);
+        const data = await res.json();
+
+        if (
+          data &&
+          data.result === "success" &&
+          typeof data.rates?.[currency] === "number"
+        ) {
+          setCurrentExchangeRate(data.rates[currency]);
+        } else {
+          console.warn("Invalid rate received from public API.");
+          setCurrentExchangeRate(1);
+        }
+      } catch (err) {
+        console.error("Failed to fetch exchange rate from public API:", err);
+        setCurrentExchangeRate(1);
+      }
+    };
+
+    if (currency && currency !== "SGD") {
+      fetchRate();
+    } else {
       setCurrentExchangeRate(1);
-      setSgdEquivalent(null);
-    } else if (currency && amount && Number.parseFloat(amount) > 0) {
-      // If we have a stored exchange rate, use it and prompt for confirmation
-      const storedRate = exchangeRates[currency] || 1;
-      setCurrentExchangeRate(storedRate);
-    } else if (currency) {
-      // Just set the rate without showing dialog (no amount yet)
-      const storedRate = exchangeRates[currency] || 1;
-      setCurrentExchangeRate(storedRate);
     }
-  }, [currency, exchangeRates]);
+  }, [currency]);
 
   // Update manual splits when selected people change
   useEffect(() => {
-    const currentPeople = new Set(manualSplits.map((split) => split.person));
+    const currentPeople = new Set(manualSplits.map((split) => split.user));
     const newSplits = [...manualSplits];
 
     // Add new people
-    selectedPeople.forEach((person) => {
-      if (!currentPeople.has(person)) {
-        newSplits.push({ person, amount: "" });
+    selectedPeople.forEach((user) => {
+      if (!currentPeople.has(user)) {
+        newSplits.push({ user, amount: "" });
       }
     });
 
     // Remove people who are no longer selected
     const filteredSplits = newSplits.filter((split) =>
-      selectedPeople.includes(split.person)
+      selectedPeople.includes(split.user)
     );
 
     // If amount is available and split method is even, pre-fill with even amounts
@@ -515,14 +554,6 @@ const SplitPurchasePage = () => {
   ) => {
     setCurrentExchangeRate(rate);
     setSgdEquivalent(sgdAmount);
-
-    // Update the exchange rate in our local state
-    if (currency !== "SGD") {
-      setExchangeRates((prev) => ({
-        ...prev,
-        [currency]: rate,
-      }));
-    }
   };
 
   // Auto-distribute remaining amount when in manual mode
@@ -537,8 +568,8 @@ const SplitPurchasePage = () => {
     const numericAmount = Number.parseFloat(amount);
     const evenAmount = (numericAmount / selectedPeople.length).toFixed(2);
 
-    const newSplits = selectedPeople.map((person) => ({
-      person,
+    const newSplits = selectedPeople.map((user) => ({
+      user,
       amount: evenAmount,
     }));
 
@@ -569,7 +600,7 @@ const SplitPurchasePage = () => {
           ? splitAmount
           : splitAmount / currentExchangeRate;
       return {
-        person: split.person,
+        user: split.user,
         amount: splitAmountInSgd.toFixed(2),
       };
     });
@@ -579,7 +610,7 @@ const SplitPurchasePage = () => {
       ...values,
       amountInSgd: sgdAmount.toFixed(2),
       exchangeRate: currentExchangeRate,
-      manualSplitsInSgd: sgdManualSplits,
+      splitsInSgd: sgdManualSplits,
     };
 
     console.log("Submitting with SGD conversion:", finalData);
@@ -680,30 +711,46 @@ const SplitPurchasePage = () => {
                       <FormItem className="col-span-2 w-full">
                         <FormLabel>Currency</FormLabel>
                         <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select currency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.keys(DEFAULT_EXCHANGE_RATES).map(
-                                (curr) => (
-                                  <SelectItem key={curr} value={curr}>
-                                    {curr}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className="w-full justify-between text-left font-normal px-3"
+                              >
+                                {field.value
+                                  ? SUPPORTED_CURRENCIES.find(
+                                      (c) => c.code === field.value
+                                    )?.code
+                                  : "Select currency"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput placeholder="Search currency..." />
+                                <CommandEmpty>No currency found.</CommandEmpty>
+                                <CommandGroup>
+                                  {SUPPORTED_CURRENCIES.map((curr) => (
+                                    <CommandItem
+                                      key={curr.code}
+                                      value={`${curr.code} ${curr.name}`}
+                                      onSelect={() => field.onChange(curr.code)}
+                                    >
+                                      {curr.code} ({curr.name})
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {/* --- Exchange‑rate + button (full‑width row) ------------------- */}
+                  {/* --- Exchange‑rate + button ------------------- */}
                   {currency !== "SGD" &&
                     amount &&
                     !isNaN(Number.parseFloat(amount)) && (
@@ -748,9 +795,9 @@ const SplitPurchasePage = () => {
                           <SelectValue placeholder="Select who paid" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="You">You</SelectItem>
+                          <SelectItem value={currentUserId}>You</SelectItem>
                           {friends.map((friend) => (
-                            <SelectItem key={friend.id} value={friend.name}>
+                            <SelectItem key={friend.id} value={friend.id}>
                               {friend.name}
                             </SelectItem>
                           ))}
@@ -828,21 +875,25 @@ const SplitPurchasePage = () => {
                             <Command>
                               <CommandInput placeholder="Search people..." />
                               <CommandList>
-                                <CommandEmpty>No person found.</CommandEmpty>
+                                <CommandEmpty>No user found.</CommandEmpty>
                                 <CommandGroup>
                                   <CommandItem
-                                    value="You"
+                                    value={currentUserId}
                                     onSelect={() => {
                                       const newValue = field.value.includes(
-                                        "You"
+                                        currentUserId
                                       )
-                                        ? field.value.filter((v) => v !== "You")
-                                        : [...field.value, "You"];
+                                        ? field.value.filter(
+                                            (v) => v !== currentUserId
+                                          )
+                                        : [...field.value, currentUserId];
                                       field.onChange(newValue);
                                     }}
                                   >
                                     <Checkbox
-                                      checked={field.value.includes("You")}
+                                      checked={field.value.includes(
+                                        currentUserId
+                                      )}
                                       className="mr-2 h-4 w-4"
                                     />
                                     You
@@ -850,21 +901,21 @@ const SplitPurchasePage = () => {
                                   {friends.map((friend) => (
                                     <CommandItem
                                       key={friend.id}
-                                      value={friend.name}
+                                      value={friend.id}
                                       onSelect={() => {
                                         const newValue = field.value.includes(
-                                          friend.name
+                                          friend.id
                                         )
                                           ? field.value.filter(
-                                              (v) => v !== friend.name
+                                              (v) => v !== friend.id
                                             )
-                                          : [...field.value, friend.name];
+                                          : [...field.value, friend.id];
                                         field.onChange(newValue);
                                       }}
                                     >
                                       <Checkbox
                                         checked={field.value.includes(
-                                          friend.name
+                                          friend.id
                                         )}
                                         className="mr-2 h-4 w-4"
                                       />
@@ -880,13 +931,13 @@ const SplitPurchasePage = () => {
                       <FormMessage />
                       {field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((person) => (
+                          {field.value.map((userId) => (
                             <Badge
-                              key={person}
+                              key={userId}
                               variant="secondary"
                               className="flex items-center gap-1"
                             >
-                              {person}
+                              {getFriendNameById(userId)}
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -894,7 +945,7 @@ const SplitPurchasePage = () => {
                                 className="h-4 w-4 p-0 text-muted-foreground/50 hover:text-foreground"
                                 onClick={() => {
                                   field.onChange(
-                                    field.value.filter((v) => v !== person)
+                                    field.value.filter((v) => v !== userId)
                                   );
                                 }}
                               >
@@ -926,7 +977,9 @@ const SplitPurchasePage = () => {
                     {manualSplitFields.map((field, index) => (
                       <div key={field.id} className="flex items-center gap-3">
                         <div className="flex-grow-0 min-w-[120px]">
-                          <span className="text-sm">{field.person}</span>
+                          <span className="text-sm">
+                            {getFriendNameById(field.user)}
+                          </span>
                         </div>
                         <FormField
                           control={form.control}
@@ -983,6 +1036,7 @@ const SplitPurchasePage = () => {
                   manualSplits={manualSplits}
                   currency={currency}
                   exchangeRate={currentExchangeRate}
+                  getFriendNameById={getFriendNameById}
                 />
               </div>
             </Card>

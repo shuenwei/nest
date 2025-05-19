@@ -48,8 +48,8 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             </p>
           </div>
         </div>
-        <div className="px-4 mt-3">
-          <div className="text-xs text-muted-foreground mb-1">
+        <div className="px-4">
+          <div className="text-xs text-muted-foreground mb-1  mt-3">
             {transaction.type === "settle"
               ? ""
               : `Split with ${transaction.people.length} people`}
