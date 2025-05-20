@@ -726,9 +726,14 @@ const SplitPurchasePage = () => {
                                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
+                            <PopoverContent
+                              side="bottom"
+                              align="center"
+                              avoidCollisions={false}
+                              className="w-25 p-0"
+                            >
                               <Command>
-                                <CommandInput placeholder="Search currency..." />
+                                <CommandInput placeholder="Search" />
                                 <CommandEmpty>No currency found.</CommandEmpty>
                                 <CommandGroup>
                                   {SUPPORTED_CURRENCIES.map((curr) => (
@@ -871,7 +876,12 @@ const SplitPurchasePage = () => {
                               <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            avoidCollisions={false}
+                            className="w-full p-0"
+                          >
                             <Command>
                               <CommandInput placeholder="Search people..." />
                               <CommandList>
