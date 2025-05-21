@@ -12,7 +12,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, refreshUser } = useUser();
 
   const [step, setStep] = useState<
     "telegram" | "otp" | "displayname" | "allset"
@@ -53,6 +53,7 @@ const OnboardingPage = () => {
 
             setUser(res.data);
             localStorage.setItem("telegramId", telegramId);
+            refreshUser();
 
             if (hasSignedUp) {
               toast.success("You are now logged in!");
