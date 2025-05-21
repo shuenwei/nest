@@ -81,6 +81,12 @@ const HistoryPage = () => {
             onClick={() => navigate(`/history/${item._id}`)}
           />
         ))}
+
+        {filtered.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No transactions found.
+          </div>
+        )}
       </div>
       <Navbar />
     </div>

@@ -98,6 +98,12 @@ const ViewFriendPage = () => {
         {friendTransactions.map((txn) => (
           <TransactionCard key={txn._id} transactionId={txn._id} />
         ))}
+
+        {friendTransactions.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No transactions found.
+          </div>
+        )}
       </div>
     </div>
   );
