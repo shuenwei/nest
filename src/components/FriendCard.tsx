@@ -3,24 +3,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
 
+import { useUser } from "@/contexts/UserContext";
+
 interface FriendCardProps {
-  name: string;
-  username: string;
-  amount: number;
-  profilePhoto?: string | null;
+  userId: string;
   footer?: ReactNode;
   disableClick?: boolean;
 }
 
 export function FriendCard({
-  name,
-  username,
-  amount,
-  profilePhoto,
+  userId,
   footer,
   disableClick = false,
 }: FriendCardProps) {
   const navigate = useNavigate();
+  const { user } = useUser();
+  const friend = user?.friends.find((f) => f.id === userId);
+  if (!friend) return null;
+  const { id, displayName, username, profilePhoto, balance } = friend;
 
   return (
     <Card
@@ -28,18 +28,18 @@ export function FriendCard({
       onClick={
         disableClick
           ? undefined
-          : () =>
-              navigate(`/friends/${encodeURIComponent(username)}`, {
-                state: { name, username, amount },
-              })
+          : () => navigate(`/friends/${encodeURIComponent(id)}`)
       }
     >
       <CardContent className="px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={profilePhoto ? profilePhoto : ""} alt={name} />
+            <AvatarImage
+              src={profilePhoto ? profilePhoto : ""}
+              alt={displayName}
+            />
             <AvatarFallback>
-              {name
+              {displayName
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
@@ -48,32 +48,32 @@ export function FriendCard({
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-semibold">{name}</div>
+            <div className="font-semibold">{displayName}</div>
             <div className="text-muted-foreground text-xs">@{username}</div>
           </div>
         </div>
         <div className="text-right">
           <p
             className={`text-xs font-medium mb-0.5 ${
-              amount < 0
+              balance < 0
                 ? "text-red-500"
-                : amount > 0
+                : balance > 0
                 ? "text-green-600"
                 : "text-muted-foreground"
             }`}
           >
-            {amount < 0 ? "You owe" : amount > 0 ? "Owes you" : "Settled up"}
+            {balance < 0 ? "You owe" : balance > 0 ? "Owes you" : "Settled up"}
           </p>
           <p
             className={`font-semibold ${
-              amount < 0
+              balance < 0
                 ? "text-red-600"
-                : amount > 0
+                : balance > 0
                 ? "text-green-700"
                 : "text-muted-foreground"
             }`}
           >
-            {amount === 0 ? "$0.00" : `$${Math.abs(amount).toFixed(2)}`}
+            {balance === 0 ? "$0.00" : `$${Math.abs(balance)}`}
           </p>
         </div>
       </CardContent>

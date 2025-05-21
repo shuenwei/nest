@@ -56,7 +56,7 @@ const FriendsPage = () => {
   >([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { user } = useUser();
+  const { user, refreshUser } = useUser();
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // Load friends when component mounts
@@ -67,7 +67,7 @@ const FriendsPage = () => {
         name: friend.displayName,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        amount: 0, // Placeholder — will be replaced when balance API is ready
+        amount: friend.balance || 0,
       }));
 
       setFriends(formattedFriends);
@@ -143,7 +143,7 @@ const FriendsPage = () => {
           amount: 0, // Placeholder
         };
 
-        setFriends((prev) => [...prev, newFriend]);
+        await refreshUser();
 
         toast.success(`${response.data.displayName} added!`);
         setIsAddDialogOpen(false);
@@ -197,16 +197,7 @@ const FriendsPage = () => {
           friendId: createdUser.id,
         });
 
-        // Add the new friend to the list frontend
-        const newFriend = {
-          id: createdUser.id,
-          name: createdUser.displayName,
-          username: createdUser.username,
-          profilePhoto: createdUser.profilePhoto,
-          amount: 0, // Placeholder
-        };
-
-        setFriends((prev) => [...prev, newFriend]);
+        await refreshUser();
 
         toast.success(`${data.displayName} added!`);
         setIsCreateUserDialogOpen(false);
@@ -280,13 +271,7 @@ const FriendsPage = () => {
         </div>
 
         {filteredFriends.map(({ id, name, username, amount, profilePhoto }) => (
-          <FriendCard
-            key={id}
-            name={name}
-            username={username}
-            profilePhoto={profilePhoto}
-            amount={amount}
-          />
+          <FriendCard key={id} userId={id} />
         ))}
 
         {filteredFriends.length === 0 && (

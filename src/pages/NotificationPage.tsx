@@ -6,18 +6,8 @@ import { useNavigate } from "react-router-dom";
 const notifications: { id: number; message: string; date: string }[] = [
   {
     id: 1,
-    message: "Alex Wong paid you $20 for Lunch",
+    message: "Hello there! Welcome to Nest :)",
     date: "Today",
-  },
-  {
-    id: 2,
-    message: "You settled up with Mei Lin",
-    date: "Yesterday",
-  },
-  {
-    id: 3,
-    message: "Raj Patel added you to a group",
-    date: "2 days ago",
   },
 ];
 

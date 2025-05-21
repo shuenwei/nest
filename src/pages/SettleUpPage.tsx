@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, RefreshCw, ArrowRight } from "lucide-react";
+import { ArrowLeft, RefreshCw, ArrowRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,26 +37,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Mock default exchange rates
-const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
-  USD: 0.74,
-  EUR: 0.68,
-  GBP: 0.58,
-  JPY: 113.5,
-  CNY: 5.36,
-  SGD: 1.0,
-};
-
-// Mock friends
-const friends = [
-  { id: "1", name: "Alex Wong" },
-  { id: "2", name: "Mei Lin" },
-  { id: "3", name: "Raj Patel" },
-  { id: "4", name: "Sarah Johnson" },
-  { id: "5", name: "David Chen" },
-];
+import { useUser } from "@/contexts/UserContext";
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import axios from "axios";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -246,10 +243,38 @@ const SettleUpPage = () => {
   const navigate = useNavigate();
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
 
+  const { user, refreshUser } = useUser();
+
+  const [friends, setFriends] = useState<
+    Array<{
+      id: string;
+      name: string;
+      username: string;
+      profilePhoto?: string | null;
+    }>
+  >([]);
+
+  const currentUserId = user?.id ?? "missing user";
+
+  useEffect(() => {
+    if (user?.friends && Array.isArray(user.friends)) {
+      const formattedFriends = user.friends.map((friend) => ({
+        id: friend.id,
+        name: friend.displayName,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      }));
+
+      setFriends(formattedFriends);
+    }
+  }, [user]);
+
+  const getFriendNameById = (id: string) =>
+    id === currentUserId
+      ? "You"
+      : friends.find((f) => f.id === id)?.name ?? "???";
+
   // State for exchange rates
-  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(
-    DEFAULT_EXCHANGE_RATES
-  );
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
 
@@ -257,7 +282,7 @@ const SettleUpPage = () => {
   const rawAmount = location.state?.amount ?? null;
   const passedAmount =
     rawAmount !== null ? Math.abs(rawAmount).toFixed(2) : null;
-  const friendName = location.state?.friendName ?? null;
+  const friendId = location.state?.friendId ?? null;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -279,19 +304,38 @@ const SettleUpPage = () => {
 
   // Handle currency change
   useEffect(() => {
-    if (currency === "SGD") {
+    const fetchRate = async () => {
+      if (currency === "SGD") {
+        setCurrentExchangeRate(1);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`https://open.er-api.com/v6/latest/SGD`);
+        const data = await res.data;
+
+        if (
+          data &&
+          data.result === "success" &&
+          typeof data.rates?.[currency] === "number"
+        ) {
+          setCurrentExchangeRate(data.rates[currency]);
+        } else {
+          console.warn("Invalid rate received from API.");
+          setCurrentExchangeRate(1);
+        }
+      } catch (err) {
+        console.error("Failed to fetch exchange rate from API:", err);
+        setCurrentExchangeRate(1);
+      }
+    };
+
+    if (currency && currency !== "SGD") {
+      fetchRate();
+    } else {
       setCurrentExchangeRate(1);
-      setSgdEquivalent(null);
-    } else if (currency && amount && Number.parseFloat(amount) > 0) {
-      // If we have a stored exchange rate, use it
-      const storedRate = exchangeRates[currency] || 1;
-      setCurrentExchangeRate(storedRate);
-    } else if (currency) {
-      // Just set the rate without showing dialog (no amount yet)
-      const storedRate = exchangeRates[currency] || 1;
-      setCurrentExchangeRate(storedRate);
     }
-  }, [currency, exchangeRates, amount]);
+  }, [currency]);
 
   // Handle exchange rate confirmation
   const handleExchangeRateConfirm = (
@@ -300,14 +344,6 @@ const SettleUpPage = () => {
   ) => {
     setCurrentExchangeRate(rate);
     setSgdEquivalent(sgdAmount);
-
-    // Update the exchange rate in our local state
-    if (currency !== "SGD") {
-      setExchangeRates((prev) => ({
-        ...prev,
-        [currency]: rate,
-      }));
-    }
   };
 
   // Custom validation handler for amount field
@@ -328,7 +364,7 @@ const SettleUpPage = () => {
     return sgdAmount.toFixed(2);
   };
 
-  function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     // Validate that payer and payee are not the same
     if (values.payer === values.payee) {
       toast.error("Error", {
@@ -344,19 +380,35 @@ const SettleUpPage = () => {
         ? originalAmount
         : originalAmount / currentExchangeRate;
 
-    // Create the final data object with all amounts in SGD
-    const finalData = {
-      ...values,
-      amountInSgd: sgdAmount.toFixed(2),
+    const payload = {
+      currency: values.currency,
       exchangeRate: currentExchangeRate,
+      amount: originalAmount,
+      amountInSgd: sgdAmount.toFixed(2),
+      notes: values.notes || "",
+      payer: values.payer,
+      payee: values.payee,
     };
 
-    console.log("Submitting settle up transaction:", finalData);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
+        payload
+      );
 
-    toast.success("Success!", {
-      description: "Transfer recorded!",
-    });
-    navigate("/dashboard");
+      await refreshUser();
+
+      toast.success("Success!", {
+        description: "Transfer recorded!",
+      });
+      console.log(response);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error submitting settle up:", error);
+      toast.error("Failed to submit", {
+        description: "Something went wrong. Please try again.",
+      });
+    }
   }
 
   return (
@@ -399,14 +451,14 @@ const SettleUpPage = () => {
                             <SelectValue placeholder="Who is paying?" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="You">You</SelectItem>
-                            {friendName ? (
-                              <SelectItem value={friendName}>
-                                {friendName}
+                            <SelectItem value={currentUserId}>You</SelectItem>
+                            {friendId ? (
+                              <SelectItem value={friendId}>
+                                {getFriendNameById(friendId)}
                               </SelectItem>
                             ) : (
                               friends.map((friend) => (
-                                <SelectItem key={friend.id} value={friend.name}>
+                                <SelectItem key={friend.id} value={friend.id}>
                                   {friend.name}
                                 </SelectItem>
                               ))
@@ -435,14 +487,14 @@ const SettleUpPage = () => {
                             <SelectValue placeholder="Who is receiving?" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="You">You</SelectItem>
-                            {friendName ? (
-                              <SelectItem value={friendName}>
-                                {friendName}
+                            <SelectItem value={currentUserId}>You</SelectItem>
+                            {friendId ? (
+                              <SelectItem value={friendId}>
+                                {getFriendNameById(friendId)}
                               </SelectItem>
                             ) : (
                               friends.map((friend) => (
-                                <SelectItem key={friend.id} value={friend.name}>
+                                <SelectItem key={friend.id} value={friend.id}>
                                   {friend.name}
                                 </SelectItem>
                               ))
@@ -491,23 +543,44 @@ const SettleUpPage = () => {
                       <FormItem className="col-span-2 w-full">
                         <FormLabel>Currency</FormLabel>
                         <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select currency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.keys(DEFAULT_EXCHANGE_RATES).map(
-                                (curr) => (
-                                  <SelectItem key={curr} value={curr}>
-                                    {curr}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className="w-full justify-between text-left font-normal px-3 h-11"
+                              >
+                                {field.value
+                                  ? SUPPORTED_CURRENCIES.find(
+                                      (c) => c.code === field.value
+                                    )?.code
+                                  : "Select currency"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              side="bottom"
+                              align="center"
+                              avoidCollisions={false}
+                              className="w-25 p-0"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Search" />
+                                <CommandEmpty>No currency found.</CommandEmpty>
+                                <CommandGroup>
+                                  {SUPPORTED_CURRENCIES.map((curr) => (
+                                    <CommandItem
+                                      key={curr.code}
+                                      value={`${curr.code} ${curr.name}`}
+                                      onSelect={() => field.onChange(curr.code)}
+                                    >
+                                      {curr.code}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -569,14 +642,18 @@ const SettleUpPage = () => {
                   {/* Visual representation of the payment */}
                   <div className="flex items-center justify-center gap-3 py-2">
                     <div className="w-1/3 text-center">
-                      <div className="font-medium">{payer || "???"}</div>
+                      <div className="font-medium">
+                        {getFriendNameById(payer)}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         Paying
                       </div>
                     </div>
                     <ArrowRight className="size-5 text-muted-foreground" />
                     <div className="w-1/3 text-center">
-                      <div className="font-medium">{payee || "???"}</div>
+                      <div className="font-medium">
+                        {getFriendNameById(payee) || "???"}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         Receiving
                       </div>

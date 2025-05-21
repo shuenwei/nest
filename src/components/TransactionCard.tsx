@@ -1,39 +1,72 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
-
-export interface Transaction {
-  transactionName: string;
-  date: string;
-  amount: number;
-  paidBy: string;
-  icon: string;
-  people: string[];
-  type: "expense" | "settle";
-  receivedBy?: string;
-}
+import { useUser } from "@/contexts/UserContext";
+import { Transaction } from "@/lib/transaction";
 
 interface TransactionCardProps {
-  transaction: Transaction;
+  transactionId: string;
   className?: string;
+  onClick?: () => void;
 }
 
 const TransactionCard: React.FC<TransactionCardProps> = ({
-  transaction,
+  transactionId,
   className = "",
+  onClick,
 }) => {
+  const { user, transactions } = useUser();
+
+  const friends = user?.friends || [];
+  const transaction = transactions.find((t) => t._id === transactionId);
+
+  if (!transaction) return null;
+
+  const iconMap: Record<Transaction["type"], string> = {
+    settleup: "💸",
+    purchase: "🛒",
+    bill: "🍔",
+  };
+
+  const formatDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    const formattedTime = date
+      .toLocaleTimeString("en-GB", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase()
+      .replace(":", ".")
+      .replace(/\s?(am|pm)/, (_, suffix) => suffix);
+    return `${formattedDate} ${formattedTime}`;
+  };
+
+  const getUserDisplayName = (userId: string) => {
+    if (userId === user?.id) return "You";
+    return friends.find((f) => f.id === userId)?.displayName ?? "???";
+  };
+
+  const icon = iconMap[transaction.type];
   return (
-    <Card className={`mb-3 py-3 shadow-xs ${className}`}>
+    <Card className={`mb-3 py-3 shadow-xs ${className}`} onClick={onClick}>
       <CardContent className="px-0 divide-y">
         <div className="px-4 pb-3 flex justify-between items-start">
           <div className="flex gap-2">
-            <span className="text-3xl pr-1">{transaction.icon}</span>
+            <span className="text-3xl pr-1">{icon}</span>
             <div>
               <div className="font-semibold text-sm">
                 {transaction.transactionName}
               </div>
               <div className="text-muted-foreground text-xs">
-                {transaction.date}
+                {formatDateTime(transaction.date)}
               </div>
             </div>
           </div>
@@ -42,29 +75,36 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
               ${transaction.amount.toFixed(2)}
             </p>
             <p className="text-muted-foreground text-xs">
-              {transaction.type === "settle"
+              {transaction.type === "settleup"
                 ? `Transferred`
-                : `Paid by ${transaction.paidBy}`}
+                : `Paid by ${getUserDisplayName(transaction.paidBy)}`}
             </p>
           </div>
         </div>
         <div className="px-4">
           <div className="text-xs text-muted-foreground mb-1  mt-3">
-            {transaction.type === "settle"
+            {transaction.type === "settleup"
               ? ""
-              : `Split with ${transaction.people.length} people`}
+              : `Split with ${transaction.splitsInSgd.length} people`}
           </div>
           <div className="flex flex-wrap gap-2">
-            {transaction.type === "settle" ? (
+            {transaction.type === "settleup" ? (
               <>
-                <Badge variant="secondary">{transaction.paidBy}</Badge>
+                <Badge variant="secondary" className="font-semibold">
+                  {getUserDisplayName(transaction.payer)}
+                </Badge>
                 <span className="text-muted-foreground">→</span>
-                <Badge variant="secondary">{transaction.receivedBy}</Badge>
+                <Badge variant="secondary" className="font-semibold">
+                  {getUserDisplayName(transaction.payee)}
+                </Badge>
               </>
             ) : (
-              transaction.people.map((p) => (
-                <Badge key={p} variant="secondary">
-                  {p}
+              transaction.splitsInSgd.map((p) => (
+                <Badge key={p.user} variant="secondary">
+                  <span className="font-semibold">
+                    {getUserDisplayName(p.user)}
+                  </span>{" "}
+                  ${p.amount.toFixed(2)}
                 </Badge>
               ))
             )}

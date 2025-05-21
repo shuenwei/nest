@@ -6,6 +6,7 @@ import mongo from './utils/mongo'; // Mongoose connect logic
 import { PORT } from './constants';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
+import transactionRoutes from './routes/transaction';
 import './utils/telegram-bot';
 
 // Immediately connect to DB and attach routes before Cloud Run starts handling
@@ -22,6 +23,7 @@ const setup = async () => {
 
   app.use('/auth', authRoutes);
   app.use('/user', userRoutes);
+  app.use('/transaction', transactionRoutes);
 
   // Local dev server (optional)
   if (process.env.NODE_ENV !== 'production') {

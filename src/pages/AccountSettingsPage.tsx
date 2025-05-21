@@ -36,7 +36,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AccountSettingsPage = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, refreshUser } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
@@ -68,10 +68,7 @@ const AccountSettingsPage = () => {
       );
 
       if (response.data && response.data.user) {
-        setUser({
-          ...user,
-          displayName: data.displayName,
-        });
+        refreshUser();
         toast.success("Display name updated successfully");
         navigate("/settings");
       }

@@ -10,14 +10,18 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useUser();
 
-  const friends = [
-    { name: "Alex Wong", username: "alexwong", amount: 85.5 },
-    { name: "Mei Lin", username: "meilin", amount: -45.2 },
-    { name: "Raj Patel", username: "rajp", amount: 120.75 },
-    { name: "Sarah Chen", username: "sarahc", amount: -30.0 },
-    { name: "John Tan", username: "johntan", amount: 0.0 },
-    { name: "Lisa Kim", username: "lisakim", amount: 15.3 },
-  ];
+  if (!user) return null;
+
+  const friendsOwe = user.friends
+    .reduce((sum, f) => sum + (f.balance && f.balance > 0 ? f.balance : 0), 0)
+    .toFixed(2);
+
+  const youOwe = Math.abs(
+    user.friends.reduce(
+      (sum, f) => sum + (f.balance && f.balance < 0 ? f.balance : 0),
+      0
+    )
+  ).toFixed(2);
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
@@ -45,7 +49,9 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-0">
                 <p className="text-sm text-muted-foreground">Friends owe</p>
-                <p className="text-green-600 font-bold text-lg">$206.25</p>
+                <p className="text-green-600 font-bold text-lg">
+                  ${friendsOwe}
+                </p>
               </div>
               <div className="bg-green-200 text-green-700 rounded-full p-3">
                 <MoveDownLeft className="w-5 h-5" />
@@ -56,7 +62,7 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-0">
                 <p className="text-sm text-muted-foreground">You owe</p>
-                <p className="text-red-600 font-bold text-lg">$75.20</p>
+                <p className="text-red-600 font-bold text-lg">${youOwe}</p>
               </div>
               <div className="bg-red-200 text-red-700 rounded-full p-3">
                 <MoveUpRight className="w-5 h-5" />
@@ -71,10 +77,10 @@ const DashboardPage = () => {
           </h2>
         </div>
 
-        {friends
-          .filter(({ amount }) => amount !== 0)
-          .map(({ name, username, amount }, idx) => (
-            <FriendCard name={name} username={username} amount={amount} />
+        {user.friends
+          .filter((f) => (f.balance ?? 0) !== 0)
+          .map((f) => (
+            <FriendCard key={f.id} userId={f.id} />
           ))}
       </div>
       <Navbar />

@@ -1,44 +1,56 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import TransactionCard, { Transaction } from "@/components/TransactionCard";
+import TransactionCard from "@/components/TransactionCard";
 import FriendCard from "@/components/FriendCard";
+import { Transaction } from "@/lib/transaction";
+import LoadingScreen from "@/components/LoadingScreen";
 
-const transactions = [
-  {
-    transactionName: "Settle Up",
-    date: "7 May 2023",
-    amount: 45.5,
-    paidBy: "Alex Wong",
-    icon: "💸",
-    people: ["You", "Alex Wong"],
-    type: "settle",
-    receivedBy: "You",
-  },
-  {
-    transactionName: "Lunch at Hawker Centre",
-    date: "8 May 2023",
-    amount: 68.5,
-    paidBy: "You",
-    icon: "🍽️",
-    people: ["You", "Alex Wong"],
-    type: "expense",
-  },
-  {
-    transactionName: "Taxi ride home",
-    date: "6 May 2023",
-    amount: 24.5,
-    paidBy: "Alex Wong",
-    icon: "🚕",
-    people: ["You", "Alex Wong"],
-    type: "expense",
-  },
-];
+import { useUser } from "@/contexts/UserContext";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const ViewFriendPage = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const { name, username, amount } = state || {};
+  const { user, loading } = useUser();
+  const { friendId } = useParams<{ friendId: string }>();
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!friendId || !user) {
+      navigate("/friends");
+      return;
+    }
+
+    const friendExists = user.friends.some((f) => f.id === friendId);
+    if (!friendExists) navigate("/friends");
+  }, [loading, friendId, user, navigate]);
+
+  if (loading) return <LoadingScreen />;
+
+  if (!friendId || !user) return null;
+
+  const friend = user?.friends.find((f) => f.id === friendId)!;
+  const [friendTransactions, setFriendTransactions] = useState<Transaction[]>(
+    []
+  );
+  useEffect(() => {
+    const fetchFriendTransactions = async () => {
+      if (!user?.id || !friendId) return;
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/transaction/all/${
+            user.id
+          }/${friendId}`
+        );
+        setFriendTransactions(res.data);
+      } catch (err) {
+        console.error("Failed to fetch transactions between users:", err);
+      }
+    };
+    fetchFriendTransactions();
+  }, [user?.id, friendId]);
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
@@ -65,16 +77,14 @@ const ViewFriendPage = () => {
 
         {/* Friend Info Card */}
         <FriendCard
-          name={name}
-          username={username}
-          amount={amount}
+          userId={friendId}
           disableClick
           footer={
             <Button
               className="w-full rounded-xl"
               onClick={() =>
                 navigate("/settleup", {
-                  state: { amount: amount, friendName: name },
+                  state: { amount: friend.balance, friendId: friendId },
                 })
               }
             >
@@ -85,8 +95,8 @@ const ViewFriendPage = () => {
 
         {/* Past Transactions */}
         <div className="pt-3 mb-2 font-semibold text-lg">History</div>
-        {transactions.map((item, idx) => (
-          <TransactionCard key={idx} transaction={item as Transaction} />
+        {friendTransactions.map((txn) => (
+          <TransactionCard key={txn._id} transactionId={txn._id} />
         ))}
       </div>
     </div>

@@ -66,6 +66,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import axios from "axios";
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -383,7 +384,6 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
 };
 
 const formSchema = z.object({
-  transactiontype: z.string(),
   transactionname: z.string().min(1, "Transaction name is required"),
   amount: z.string().refine((val) => /^\d+(\.\d{1,2})?$/.test(val)),
   currency: z.string(),
@@ -413,7 +413,7 @@ const SplitPurchasePage = () => {
 
   usePreserveScroll();
 
-  const { user } = useUser();
+  const { user, refreshUser } = useUser();
 
   const [friends, setFriends] = useState<
     Array<{
@@ -451,7 +451,6 @@ const SplitPurchasePage = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      transactiontype: "purchase",
       transactionname: "",
       amount: "",
       currency: "SGD",
@@ -486,8 +485,8 @@ const SplitPurchasePage = () => {
       }
 
       try {
-        const res = await fetch(`https://open.er-api.com/v6/latest/SGD`);
-        const data = await res.json();
+        const res = await axios.get(`https://open.er-api.com/v6/latest/SGD`);
+        const data = await res.data;
 
         if (
           data &&
@@ -496,11 +495,11 @@ const SplitPurchasePage = () => {
         ) {
           setCurrentExchangeRate(data.rates[currency]);
         } else {
-          console.warn("Invalid rate received from public API.");
+          console.warn("Invalid rate received from API.");
           setCurrentExchangeRate(1);
         }
       } catch (err) {
-        console.error("Failed to fetch exchange rate from public API:", err);
+        console.error("Failed to fetch exchange rate from API:", err);
         setCurrentExchangeRate(1);
       }
     };
@@ -584,7 +583,7 @@ const SplitPurchasePage = () => {
     return true;
   };
 
-  function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     // Convert all amounts to SGD for saving
     const originalAmount = Number.parseFloat(values.amount);
     const sgdAmount =
@@ -605,16 +604,6 @@ const SplitPurchasePage = () => {
       };
     });
 
-    // Create the final data object with all amounts in SGD
-    const finalData = {
-      ...values,
-      amountInSgd: sgdAmount.toFixed(2),
-      exchangeRate: currentExchangeRate,
-      splitsInSgd: sgdManualSplits,
-    };
-
-    console.log("Submitting with SGD conversion:", finalData);
-
     // Validate that manual splits add up to the total if using manual split
     if (values.splitMethod === "manual") {
       const totalSgdAmount = sgdManualSplits.reduce((sum, item) => {
@@ -631,10 +620,42 @@ const SplitPurchasePage = () => {
       }
     }
 
-    toast.success("Success!", {
-      description: "Expense split added successfully!",
-    });
-    navigate("/dashboard");
+    const participants = Array.from(
+      new Set([...values.selectedPeople, values.paidBy])
+    );
+
+    const payload = {
+      transactionName: values.transactionname,
+      type: "purchase",
+      participants: participants,
+      currency: values.currency,
+      exchangeRate: currentExchangeRate,
+      amount: originalAmount,
+      amountInSgd: parseFloat(sgdAmount.toFixed(2)),
+      notes: values.notes ?? "",
+      date: values.date,
+      paidBy: values.paidBy,
+      splitMethod: values.splitMethod,
+      manualSplits: manualSplits,
+      splitsInSgd: sgdManualSplits,
+    };
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/transaction/purchase/create`,
+        payload
+      );
+
+      await refreshUser();
+      console.log(response);
+      toast.success("Success!", {
+        description: "Expense split added successfully!",
+      });
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Error submitting purchase:", err);
+      toast.error("Failed to save expense.");
+    }
   }
 
   return (

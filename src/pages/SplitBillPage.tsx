@@ -14,11 +14,12 @@ import {
   Minus,
   Receipt,
   RefreshCw,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -63,24 +64,9 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Mock default exchange rates
-const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
-  USD: 0.74,
-  EUR: 0.68,
-  GBP: 0.58,
-  JPY: 113.5,
-  CNY: 5.36,
-  SGD: 1.0,
-};
-
-// Mock friends
-const friends = [
-  { id: "1", name: "Alex Wong", username: "alexwong" },
-  { id: "2", name: "Mei Lin", username: "meilin" },
-  { id: "3", name: "Raj Patel", username: "rajp" },
-  { id: "4", name: "Sarah Johnson", username: "sarahj" },
-  { id: "5", name: "David Chen", username: "davidc" },
-];
+import axios from "axios";
+import { useUser } from "@/contexts/UserContext";
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -258,6 +244,7 @@ const ExchangeRateDialog: React.FC<ExchangeRateDialogProps> = ({
 // Form schema
 const formSchema = z.object({
   restaurantName: z.string().min(1, "Restaurant name is required"),
+  transactiontype: z.string(),
   date: z.date(),
   paidBy: z.string().min(1, "Payer is required"),
   currency: z.string().min(1, "Currency is required"),
@@ -287,19 +274,48 @@ const SplitBillPage = () => {
   const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
 
+  const { user, refreshUser } = useUser();
+
+  const [friends, setFriends] = useState<
+    Array<{
+      id: string;
+      name: string;
+      username: string;
+      profilePhoto?: string | null;
+    }>
+  >([]);
+
+  const currentUserId = user?.id ?? "missing user";
+
+  useEffect(() => {
+    if (user?.friends && Array.isArray(user.friends)) {
+      const formattedFriends = user.friends.map((friend) => ({
+        id: friend.id,
+        name: friend.displayName,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      }));
+
+      setFriends(formattedFriends);
+    }
+  }, [user]);
+
+  const getParticipantName = (id: string) =>
+    id === currentUserId
+      ? "You"
+      : friends.find((f) => f.id === id)?.name ?? "Unknown";
+
   // State for exchange rates
-  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(
-    DEFAULT_EXCHANGE_RATES
-  );
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      transactiontype: "bill",
       restaurantName: "",
       date: new Date(),
-      paidBy: "You",
+      paidBy: currentUserId,
       currency: "SGD",
       participants: [],
       items: [{ name: "", price: "", sharedBy: [] }],
@@ -341,15 +357,38 @@ const SplitBillPage = () => {
 
   // Handle currency change
   useEffect(() => {
-    if (currency === "SGD") {
+    const fetchRate = async () => {
+      if (currency === "SGD") {
+        setCurrentExchangeRate(1);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`https://open.er-api.com/v6/latest/SGD`);
+        const data = await res.data;
+
+        if (
+          data &&
+          data.result === "success" &&
+          typeof data.rates?.[currency] === "number"
+        ) {
+          setCurrentExchangeRate(data.rates[currency]);
+        } else {
+          console.warn("Invalid rate received from API.");
+          setCurrentExchangeRate(1);
+        }
+      } catch (err) {
+        console.error("Failed to fetch exchange rate from API:", err);
+        setCurrentExchangeRate(1);
+      }
+    };
+
+    if (currency && currency !== "SGD") {
+      fetchRate();
+    } else {
       setCurrentExchangeRate(1);
-      setSgdEquivalent(null);
-    } else if (currency) {
-      // Just set the rate without showing dialog (no amount yet)
-      const storedRate = exchangeRates[currency] || 1;
-      setCurrentExchangeRate(storedRate);
     }
-  }, [currency, exchangeRates]);
+  }, [currency]);
 
   // Handle exchange rate confirmation
   const handleExchangeRateConfirm = (
@@ -358,14 +397,6 @@ const SplitBillPage = () => {
   ) => {
     setCurrentExchangeRate(rate);
     setSgdEquivalent(sgdAmount);
-
-    // Update the exchange rate in our local state
-    if (currency !== "SGD") {
-      setExchangeRates((prev) => ({
-        ...prev,
-        [currency]: rate,
-      }));
-    }
   };
 
   // Custom validation handler for price field
@@ -534,14 +565,7 @@ const SplitBillPage = () => {
     return breakdown;
   };
 
-  // Get participant name from username
-  const getParticipantName = (username: string) => {
-    if (username === "You") return "You";
-    const friend = friends.find((f) => f.username === username);
-    return friend ? friend.name : username;
-  };
-
-  function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     // Validate that at least one item is added
     if (values.items.length === 0) {
       toast.error("Error", {
@@ -550,47 +574,82 @@ const SplitBillPage = () => {
       return;
     }
 
-    // Convert participant names to usernames for backend
-    const participantUsernames = values.participants.map((participant) => {
-      if (participant === "You") return "currentUser"; // Replace with actual current user ID in a real app
-      return participant;
-    });
+    const subtotal = calculateSubtotal();
+    const subtotalInSGD = calculateSubtotalInSGD();
+    const discount = calculateDiscount();
+    const discountInSGD = calculateDiscountInSGD();
+    const serviceChargeAmt = calculateServiceCharge();
+    const serviceChargeInSGD = calculateServiceChargeInSGD();
+    const gstAmt = calculateGST();
+    const gstAmtInSGD = calculateGSTInSGD();
+    const total = calculateTotal();
+    const totalInSGD = calculateTotalInSGD();
 
-    // Calculate final breakdown
-    const breakdown = calculatePersonBreakdown();
-
-    const splitsInSgd = Object.fromEntries(
-      Object.entries(calculatePersonBreakdown()).map(([user, d]) => [
-        user,
-        d.amountInSGD,
-      ])
+    const participants = Array.from(
+      new Set([...values.participants, values.paidBy])
     );
 
-    // Create the final data object
-    const finalData = {
-      ...values,
-      participants: participantUsernames,
-      subtotal: calculateSubtotal(),
-      subtotalInSGD: calculateSubtotalInSGD(),
-      discount: calculateDiscount(),
-      discountInSGD: calculateDiscountInSGD(),
-      serviceChargeAmount: calculateServiceCharge(),
-      serviceChargeAmountInSGD: calculateServiceChargeInSGD(),
-      gstAmount: calculateGST(),
-      gstAmountInSGD: calculateGSTInSGD(),
-      total: calculateTotal(),
-      totalInSGD: calculateTotalInSGD(),
+    const items = values.items.map((i) => ({
+      name: i.name,
+      price: parseFloat(i.price),
+      sharedBy: i.sharedBy,
+    }));
+
+    const splitObj = calculatePersonBreakdown();
+    const splitsInSgd = Object.entries(splitObj).map(([user, d]) => ({
+      user,
+      amount: parseFloat(d.amountInSGD.toFixed(2)),
+    }));
+
+    /* --------  Final payload -------- */
+    const payload = {
+      transactionName: values.restaurantName,
+      type: "bill",
+      participants,
+      currency: values.currency,
       exchangeRate: currentExchangeRate,
-      breakdown,
+      amount: total,
+      amountInSgd: parseFloat(totalInSGD.toFixed(2)),
+      notes: values.notes ?? "",
+      date: values.date,
+
+      /* bill-specific */
+      paidBy: values.paidBy,
+      items,
+      discount: discount,
+      discountInSGD: discountInSGD,
+      discountType: values.discountType,
+      discountValue: values.discountValue
+        ? parseFloat(values.discountValue)
+        : 0,
+      gst: values.gst,
+      gstPercentage: parseFloat(values.gstPercentage || "0"),
+      gstAmount: gstAmt,
+      gstAmountInSgd: gstAmtInSGD,
+      serviceCharge: values.serviceCharge,
+      serviceChargePercentage: parseFloat(
+        values.serviceChargePercentage || "0"
+      ),
+      serviceChargeAmount: serviceChargeAmt,
+      serviceChargeAmountInSgd: serviceChargeInSGD,
+      subtotal: subtotal,
+      subtotalInSgd: parseFloat(subtotalInSGD.toFixed(2)),
       splitsInSgd,
     };
 
-    console.log("Submitting bill split:", finalData);
-
-    toast.success("Success!", {
-      description: "Bill split saved successfully!",
-    });
-    navigate("/dashboard");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/transaction/bill/create`,
+        payload
+      );
+      await refreshUser();
+      console.log(response);
+      toast.success("Success!", { description: "Bill saved successfully!" });
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Error submitting bill:", err);
+      toast.error("Failed to save bill.");
+    }
   }
 
   return (
@@ -648,12 +707,9 @@ const SplitBillPage = () => {
                             <SelectValue placeholder="Select who paid" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="You">You</SelectItem>
+                            <SelectItem value={currentUserId}>You</SelectItem>
                             {friends.map((friend) => (
-                              <SelectItem
-                                key={friend.id}
-                                value={friend.username}
-                              >
+                              <SelectItem key={friend.id} value={friend.id}>
                                 {friend.name}
                               </SelectItem>
                             ))}
@@ -675,23 +731,44 @@ const SplitBillPage = () => {
                       <FormItem className="col-span-6 w-full">
                         <FormLabel>Currency</FormLabel>
                         <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select currency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.keys(DEFAULT_EXCHANGE_RATES).map(
-                                (curr) => (
-                                  <SelectItem key={curr} value={curr}>
-                                    {curr}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className="w-full justify-between text-left font-normal px-3 h-11"
+                              >
+                                {field.value
+                                  ? SUPPORTED_CURRENCIES.find(
+                                      (c) => c.code === field.value
+                                    )?.code
+                                  : "Select currency"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              side="bottom"
+                              align="center"
+                              avoidCollisions={false}
+                              className="w-full p-0"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Search" />
+                                <CommandEmpty>No currency found.</CommandEmpty>
+                                <CommandGroup>
+                                  {SUPPORTED_CURRENCIES.map((curr) => (
+                                    <CommandItem
+                                      key={curr.code}
+                                      value={`${curr.code} ${curr.name}`}
+                                      onSelect={() => field.onChange(curr.code)}
+                                    >
+                                      {curr.code}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -746,25 +823,34 @@ const SplitBillPage = () => {
                               <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            avoidCollisions={false}
+                            className="w-full p-0"
+                          >
                             <Command>
                               <CommandInput placeholder="Search people..." />
                               <CommandList>
                                 <CommandEmpty>No person found.</CommandEmpty>
                                 <CommandGroup>
                                   <CommandItem
-                                    value="You"
+                                    value={currentUserId}
                                     onSelect={() => {
                                       const newValue = field.value.includes(
-                                        "You"
+                                        currentUserId
                                       )
-                                        ? field.value.filter((v) => v !== "You")
-                                        : [...field.value, "You"];
+                                        ? field.value.filter(
+                                            (v) => v !== currentUserId
+                                          )
+                                        : [...field.value, currentUserId];
                                       field.onChange(newValue);
                                     }}
                                   >
                                     <Checkbox
-                                      checked={field.value.includes("You")}
+                                      checked={field.value.includes(
+                                        currentUserId
+                                      )}
                                       className="mr-2 h-4 w-4"
                                     />
                                     You
@@ -772,21 +858,21 @@ const SplitBillPage = () => {
                                   {friends.map((friend) => (
                                     <CommandItem
                                       key={friend.id}
-                                      value={friend.username}
+                                      value={friend.id}
                                       onSelect={() => {
                                         const newValue = field.value.includes(
-                                          friend.username
+                                          friend.id
                                         )
                                           ? field.value.filter(
-                                              (v) => v !== friend.username
+                                              (v) => v !== friend.id
                                             )
-                                          : [...field.value, friend.username];
+                                          : [...field.value, friend.id];
                                         field.onChange(newValue);
                                       }}
                                     >
                                       <Checkbox
                                         checked={field.value.includes(
-                                          friend.username
+                                          friend.id
                                         )}
                                         className="mr-2 h-4 w-4"
                                       />
@@ -835,19 +921,7 @@ const SplitBillPage = () => {
             {/* Items Card */}
             <Card className="p-6">
               <CardContent className="p-0 space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold">Items</h2>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() =>
-                      append({ name: "", price: "", sharedBy: [] })
-                    }
-                  >
-                    <Plus className="mr-1 h-4 w-4" />
-                    Add Item
-                  </Button>
-                </div>
+                <h2 className="text-lg font-semibold">Items</h2>
 
                 {fields.map((field, index) => (
                   <div
@@ -957,7 +1031,12 @@ const SplitBillPage = () => {
                                   <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
+                              <PopoverContent
+                                side="bottom"
+                                align="center"
+                                avoidCollisions={false}
+                                className="w-full p-0"
+                              >
                                 <Command>
                                   <CommandInput placeholder="Search people..." />
                                   <CommandList>
@@ -1027,6 +1106,16 @@ const SplitBillPage = () => {
                   </div>
                 ))}
               </CardContent>
+              <CardFooter className="p-0 space-y-6">
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() => append({ name: "", price: "", sharedBy: [] })}
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Add Item
+                </Button>
+              </CardFooter>
             </Card>
 
             {/* Additional Charges Card */}

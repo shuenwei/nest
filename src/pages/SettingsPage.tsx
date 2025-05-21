@@ -9,11 +9,6 @@ import { toast } from "sonner";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
-  {
-    label: "Currency Preferences",
-    icon: CircleDollarSign,
-    path: "/settings/currency",
-  },
 ];
 
 const SettingsPage = () => {
