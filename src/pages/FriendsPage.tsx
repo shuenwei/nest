@@ -145,7 +145,9 @@ const FriendsPage = () => {
 
         await refreshUser();
 
-        toast.success(`${response.data.displayName} added!`);
+        toast.success(
+          `${response.data.displayName} has been added as a friend!`
+        );
         setIsAddDialogOpen(false);
         addFriendForm.reset();
       }
@@ -199,7 +201,7 @@ const FriendsPage = () => {
 
         await refreshUser();
 
-        toast.success(`${data.displayName} added!`);
+        toast.success(`${data.displayName} has been added as a friend!`);
         setIsCreateUserDialogOpen(false);
         addFriendForm.reset();
         createUserForm.reset();

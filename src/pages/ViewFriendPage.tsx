@@ -1,6 +1,6 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, UserRoundX } from "lucide-react";
+import { ArrowLeft, UserRoundX, AlertCircle } from "lucide-react";
 import TransactionCard from "@/components/TransactionCard";
 import FriendCard from "@/components/FriendCard";
 import { Transaction } from "@/lib/transaction";
@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { useUser } from "@/contexts/UserContext";
 import { useEffect, useState } from "react";
@@ -87,7 +88,7 @@ const ViewFriendPage = () => {
         },
       });
 
-      toast.success(`${friendName} removed successfully`);
+      toast.success(`${friendName} has been removed as a friend.`);
       navigate("/friends");
     } catch (error) {
       console.error("Error removing friend:", error);
@@ -97,10 +98,10 @@ const ViewFriendPage = () => {
           error.response?.data?.error?.includes("outstanding balance")
         ) {
           toast.error(
-            `Failed to remove friend as you have outstanding balance with ${friendName}. Settle it before removing them.`
+            `Oops! Failed to remove friend as you have an outstanding balance of $${friend.balance} with ${friendName}. You can only remove friends with no balances.`
           );
         } else {
-          toast.error(`Failed to remove ${friendName}.`);
+          toast.error(`Failed to remove ${friendName} as friend.`);
         }
       } else {
         toast.error("An unexpected error occurred.");
@@ -136,8 +137,15 @@ const ViewFriendPage = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Remove Friend</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to remove {friendName} as friend? This
+                  Are you sure you want to remove {friendName} as a friend? This
                   action cannot be undone.
+                  <Alert className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      You are only able to remove a friend if you have settled
+                      all balances with them.
+                    </AlertDescription>
+                  </Alert>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
