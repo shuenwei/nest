@@ -7,6 +7,7 @@ interface IFriend {
   username: string;
   displayName: string;
   profilePhoto?: Buffer;
+  hasSignedUp: boolean;
 }
 
 const getUserByTelegramId = async (req: Request, res: Response): Promise<void> => {
@@ -14,7 +15,7 @@ const getUserByTelegramId = async (req: Request, res: Response): Promise<void> =
 
   try {
     const user = await User.findOne({ telegramId })
-      .populate<{ friends: IFriend[] }>('friends', 'username displayName profilePhoto');
+      .populate<{ friends: IFriend[] }>('friends', 'username displayName profilePhoto hasSignedUp');
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });
@@ -39,6 +40,7 @@ const getUserByTelegramId = async (req: Request, res: Response): Promise<void> =
         id: friend._id.toString(),
         username: friend.username,
         displayName: friend.displayName,
+        hasSignedUp: friend.hasSignedUp,
         profilePhoto: friend.profilePhoto
           ? `data:image/jpeg;base64,${friend.profilePhoto.toString('base64')}`
           : null,

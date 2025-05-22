@@ -1,4 +1,5 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
@@ -20,7 +21,8 @@ export function FriendCard({
   const { user } = useUser();
   const friend = user?.friends.find((f) => f.id === userId);
   if (!friend) return null;
-  const { id, displayName, username, profilePhoto, balance } = friend;
+  const { id, displayName, username, profilePhoto, hasSignedUp, balance } =
+    friend;
 
   return (
     <Card
@@ -48,7 +50,14 @@ export function FriendCard({
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-semibold">{displayName}</div>
+            <div className="font-semibold">
+              {displayName}
+              {hasSignedUp && (
+                <Badge className="ml-1" variant="secondary">
+                  Nest User
+                </Badge>
+              )}
+            </div>
             <div className="text-muted-foreground text-xs">@{username}</div>
           </div>
         </div>

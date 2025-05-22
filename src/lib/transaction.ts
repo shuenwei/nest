@@ -1,7 +1,7 @@
 interface BaseTransaction {
   _id: string;
   transactionName: string;
-  type: "purchase" | "bill" | "settleup";
+  type: "purchase" | "bill" | "settleup" | "recurring";
   participants: string[];
   currency: string;
   exchangeRate: number;
@@ -62,7 +62,15 @@ export interface SettleUpTransaction extends BaseTransaction {
   payee: string;
 }
 
+export interface RecurringTransaction extends BaseTransaction {
+  type: "recurring";
+  paidBy: string;
+  splitsInSgd: Split[];
+  templateId: string;
+}
+
 export type Transaction =
   | PurchaseTransaction
   | BillTransaction
-  | SettleUpTransaction;
+  | SettleUpTransaction
+  | RecurringTransaction;

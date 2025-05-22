@@ -75,11 +75,7 @@ const HistoryPage = () => {
         </div>
 
         {filtered.map((item) => (
-          <TransactionCard
-            key={item._id}
-            transactionId={item._id}
-            onClick={() => navigate(`/history/${item._id}`)}
-          />
+          <TransactionCard key={item._id} transactionId={item._id} />
         ))}
 
         {filtered.length === 0 && (

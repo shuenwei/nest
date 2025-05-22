@@ -12,9 +12,9 @@ import ViewFriendPage from "./pages/ViewFriendPage";
 import NotificationPage from "./pages/NotificationPage";
 import SplitPurchasePage from "./pages/SplitPurchasePage";
 import SplitBillPage from "./pages/SplitBillPage";
-import CurrencyPreferencesPage from "./pages/CurrencyPreferencesPage";
 import SettleUpPage from "./pages/SettleUpPage";
 import AccountSettingsPage from "./pages/AccountSettingsPage";
+import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const ScrollToTop = () => {
@@ -64,15 +64,15 @@ function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route
+            path="/history/:transactionId"
+            element={<ViewTransactionPage />}
+          />
           <Route path="/friends/:friendId" element={<ViewFriendPage />} />
           <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/splitpurchase" element={<SplitPurchasePage />} />
           <Route path="/splitbill" element={<SplitBillPage />} />
           <Route path="/settleup" element={<SettleUpPage />} />
-          <Route
-            path="/settings/currency"
-            element={<CurrencyPreferencesPage />}
-          />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
         </Route>
       </Routes>

@@ -15,6 +15,7 @@ interface Friend {
   displayName: string;
   profilePhoto?: string;
   balance: number;
+  hasSignedUp: boolean;
 }
 
 interface User {

@@ -201,6 +201,7 @@ const FriendsPage = () => {
 
         toast.success(`${data.displayName} added!`);
         setIsCreateUserDialogOpen(false);
+        addFriendForm.reset();
         createUserForm.reset();
         setPendingUsername("");
       }

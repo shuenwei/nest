@@ -25,43 +25,43 @@ const getBalances = async (req: Request, res: Response): Promise<void> => {
           /* 3-a  Only keep transactions that involve user or friends */
           {
             $match: {
-              $or: [
-                { paidBy: { $in: [userObjId, ...friendIds] } },
-                { participants: { $in: [userObjId, ...friendIds] } },
-                { "splitsInSgd.user": { $in: [userObjId, ...friendIds] } },
-                { payer: { $in: [userObjId, ...friendIds] } },
-                { payee: { $in: [userObjId, ...friendIds] } }
-              ]
-            }
+              $or: [{ participants: { $in: [userObjId, ...friendIds] } }],
+            },
           },
 
           /* 3-b  Normalise purchase/bill and settle-up rows */
           {
             $facet: {
               purchaseBill: [
-                { $match: { type: { $in: ["purchase", "bill"] } } },
+                {
+                  $match: { type: { $in: ["purchase", "bill", "recurring"] } },
+                },
                 { $unwind: "$splitsInSgd" },
                 {
                   $project: {
-                    from:   "$paidBy",
-                    to:     "$splitsInSgd.user",
-                    amount: "$splitsInSgd.amount"
-                  }
-                }
+                    from: "$paidBy",
+                    to: "$splitsInSgd.user",
+                    amount: "$splitsInSgd.amount",
+                  },
+                },
               ],
               settleup: [
                 { $match: { type: "settleup" } },
                 {
                   $project: {
-                    from:   "$payer",
-                    to:     "$payee",
-                    amount: "$amountInSgd"
-                  }
-                }
-              ]
-            }
+                    from: "$payer",
+                    to: "$payee",
+                    amount: "$amountInSgd",
+                  },
+                },
+              ],
+            },
           },
-          { $project: { rows: { $concatArrays: ["$purchaseBill", "$settleup"] } } },
+          {
+            $project: {
+              rows: { $concatArrays: ["$purchaseBill", "$settleup"] },
+            },
+          },
           { $unwind: "$rows" },
           { $replaceRoot: { newRoot: "$rows" } },
 
@@ -72,15 +72,15 @@ const getBalances = async (req: Request, res: Response): Promise<void> => {
           {
             $project: {
               friend: {
-                $cond: [{ $eq: ["$from", userObjId] }, "$to", "$from"]
+                $cond: [{ $eq: ["$from", userObjId] }, "$to", "$from"],
               },
               debit: {
-                $cond: [{ $eq: ["$from", userObjId] }, "$amount", 0]
+                $cond: [{ $eq: ["$from", userObjId] }, "$amount", 0],
               },
               credit: {
-                $cond: [{ $eq: ["$to", userObjId] }, "$amount", 0]
-              }
-            }
+                $cond: [{ $eq: ["$to", userObjId] }, "$amount", 0],
+              },
+            },
           },
 
           /* 3-e  Net per-friend balance */
@@ -88,27 +88,31 @@ const getBalances = async (req: Request, res: Response): Promise<void> => {
             $group: {
               _id: "$friend",
               totalDebit: { $sum: "$debit" },
-              totalCredit: { $sum: "$credit" }
-            }
+              totalCredit: { $sum: "$credit" },
+            },
           },
           {
             $project: {
               _id: 0,
               friendId: "$_id",
-              amount: { $round: [{$subtract: ["$totalDebit", "$totalCredit"] }, 2]}
-            }
-          }
+              amount: {
+                $round: [{ $subtract: ["$totalDebit", "$totalCredit"] }, 2],
+              },
+            },
+          },
         ];
 
         /* ── 4. Run aggregation & merge zeros ──────────────────────────── */
         const aggResult = await Transaction.aggregate(pipeline);
 
         const balanceMap = new Map<string, number>();
-        aggResult.forEach(r => balanceMap.set(r.friendId.toString(), r.amount));
+        aggResult.forEach((r) =>
+          balanceMap.set(r.friendId.toString(), r.amount)
+        );
 
-        const balances = friendIds.map(fid => ({
+        const balances = friendIds.map((fid) => ({
           friendId: fid.toString(),
-          amount: balanceMap.get(fid.toString()) ?? 0
+          amount: balanceMap.get(fid.toString()) ?? 0,
         }));
 
         /* ── 5. Send final response ────────────────────────────────────── */

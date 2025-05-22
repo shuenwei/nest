@@ -3,19 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import React from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Transaction } from "@/lib/transaction";
+import { useNavigate } from "react-router-dom";
 
 interface TransactionCardProps {
   transactionId: string;
   className?: string;
-  onClick?: () => void;
 }
 
 const TransactionCard: React.FC<TransactionCardProps> = ({
   transactionId,
   className = "",
-  onClick,
 }) => {
   const { user, transactions } = useUser();
+  const navigate = useNavigate();
 
   const friends = user?.friends || [];
   const transaction = transactions.find((t) => t._id === transactionId);
@@ -26,6 +26,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     settleup: "💸",
     purchase: "🛒",
     bill: "🍔",
+    recurring: "🔁",
   };
 
   const formatDateTime = (isoString: string) => {
@@ -56,7 +57,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
 
   const icon = iconMap[transaction.type];
   return (
-    <Card className={`mb-3 py-3 shadow-xs ${className}`} onClick={onClick}>
+    <Card
+      className={`mb-3 py-3 shadow-xs ${className}`}
+      onClick={() => navigate(`/history/${transaction._id}`)}
+    >
       <CardContent className="px-0 divide-y">
         <div className="px-4 pb-3 flex justify-between items-start">
           <div className="flex gap-2">
@@ -72,7 +76,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
           </div>
           <div className="text-right">
             <p className="font-semibold text-sm">
-              ${transaction.amount.toFixed(2)}
+              ${transaction.amountInSgd.toFixed(2)}
             </p>
             <p className="text-muted-foreground text-xs">
               {transaction.type === "settleup"
@@ -87,6 +91,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
               ? ""
               : `Split with ${transaction.splitsInSgd.length} people`}
           </div>
+
           <div className="flex flex-wrap gap-2">
             {transaction.type === "settleup" ? (
               <>
