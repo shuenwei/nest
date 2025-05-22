@@ -410,6 +410,7 @@ const SplitPurchasePage = () => {
   const [openPeopleSelect, setOpenPeopleSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   usePreserveScroll();
 
@@ -639,7 +640,7 @@ const SplitPurchasePage = () => {
       manualSplits: manualSplits,
       splitsInSgd: sgdManualSplits,
     };
-
+    setIsSubmitting(true);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/purchase/create`,
@@ -651,10 +652,12 @@ const SplitPurchasePage = () => {
       toast.success("Success!", {
         description: "Expense split added successfully!",
       });
-      navigate("/dashboard");
+      navigate("/history");
     } catch (err) {
       console.error("Error submitting purchase:", err);
       toast.error("Failed to save expense.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -1091,8 +1094,8 @@ const SplitPurchasePage = () => {
               />
             </Card>
 
-            <Button type="submit" className="w-full">
-              Save Expense
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Expense"}
             </Button>
           </form>
         </Form>

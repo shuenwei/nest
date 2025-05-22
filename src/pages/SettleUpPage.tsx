@@ -245,6 +245,8 @@ const SettleUpPage = () => {
 
   const { user, refreshUser } = useUser();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [friends, setFriends] = useState<
     Array<{
       id: string;
@@ -390,6 +392,8 @@ const SettleUpPage = () => {
       payee: values.payee,
     };
 
+    setIsSubmitting(true);
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
@@ -402,12 +406,14 @@ const SettleUpPage = () => {
         description: "Transfer recorded!",
       });
       console.log(response);
-      navigate("/dashboard");
+      navigate("/history");
     } catch (error) {
       console.error("Error submitting settle up:", error);
       toast.error("Failed to submit", {
         description: "Something went wrong. Please try again.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -691,8 +697,8 @@ const SettleUpPage = () => {
               </Card>
             )}
 
-            <Button type="submit" className="w-full">
-              Record Payment
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Record Payment"}
             </Button>
           </form>
         </Form>

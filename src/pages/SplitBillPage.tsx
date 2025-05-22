@@ -273,6 +273,7 @@ const SplitBillPage = () => {
   const navigate = useNavigate();
   const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { user, refreshUser } = useUser();
 
@@ -637,6 +638,8 @@ const SplitBillPage = () => {
       splitsInSgd,
     };
 
+    setIsSubmitting(true);
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/bill/create`,
@@ -645,10 +648,12 @@ const SplitBillPage = () => {
       await refreshUser();
       console.log(response);
       toast.success("Success!", { description: "Bill saved successfully!" });
-      navigate("/dashboard");
+      navigate("/history");
     } catch (err) {
       console.error("Error submitting bill:", err);
       toast.error("Failed to save bill.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -1491,8 +1496,8 @@ const SplitBillPage = () => {
                 </Card>
               )}
 
-            <Button type="submit" className="w-full">
-              Save Bill Split
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Bill Split"}
             </Button>
           </form>
         </Form>

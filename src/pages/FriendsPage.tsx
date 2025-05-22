@@ -271,7 +271,7 @@ const FriendsPage = () => {
           </Select>
         </div>
 
-        {filteredFriends.map(({ id, name, username, amount, profilePhoto }) => (
+        {filteredFriends.map(({ id }) => (
           <FriendCard key={id} userId={id} />
         ))}
 

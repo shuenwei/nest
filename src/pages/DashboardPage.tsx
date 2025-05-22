@@ -23,6 +23,8 @@ const DashboardPage = () => {
     )
   ).toFixed(2);
 
+  const filteredFriends = user.friends.filter((f) => (f.balance ?? 0) !== 0);
+
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
@@ -77,11 +79,15 @@ const DashboardPage = () => {
           </h2>
         </div>
 
-        {user.friends
-          .filter((f) => (f.balance ?? 0) !== 0)
-          .map((f) => (
-            <FriendCard key={f.id} userId={f.id} />
-          ))}
+        {filteredFriends.map((f) => (
+          <FriendCard key={f.id} userId={f.id} />
+        ))}
+
+        {filteredFriends.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            You are all settled up!
+          </div>
+        )}
       </div>
       <Navbar />
     </div>
