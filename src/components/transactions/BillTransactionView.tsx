@@ -36,7 +36,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
         <h3 className="text-sm font-semibold mb-2">Items</h3>
         <div className="space-y-3">
           {transaction.items.map((item, index) => (
-            <div key={index} className="bg-secondary/30 p-3 rounded-lg">
+            <div key={index} className="bg-secondary/70 p-3 rounded-lg">
               <div className="flex justify-between mb-1">
                 <span className="font-medium">{item.name}</span>
                 <span>
@@ -57,9 +57,9 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
       {/* Bill Summary */}
       <div>
         <h3 className="text-sm font-semibold mb-2">Bill Summary</h3>
-        <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm">Subtotal</span>
+            <span>Subtotal</span>
             <div className="text-right">
               <div>
                 {transaction.currency} {transaction.subtotal.toFixed(2)}
@@ -148,7 +148,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
       {/* Splits Section */}
       <div>
         <h3 className="text-sm font-semibold mb-2">Split Details</h3>
-        <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
           {transaction.splitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{getUserDisplayName(split.user)}</span>
@@ -162,7 +162,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
       {transaction.notes && (
         <div>
           <h3 className="text-sm font-semibold mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-lg">
+          <p className="text-sm text-muted-foreground bg-secondary/70 p-3 rounded-lg">
             {transaction.notes}
           </p>
         </div>
