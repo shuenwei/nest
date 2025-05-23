@@ -275,6 +275,8 @@ const SplitBillPage = () => {
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const token = localStorage.getItem("token");
+
   const { user, refreshUser } = useUser();
 
   const [friends, setFriends] = useState<
@@ -365,15 +367,16 @@ const SplitBillPage = () => {
       }
 
       try {
-        const res = await axios.get(`https://open.er-api.com/v6/latest/SGD`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/exchange/${currency}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.data;
 
-        if (
-          data &&
-          data.result === "success" &&
-          typeof data.rates?.[currency] === "number"
-        ) {
-          setCurrentExchangeRate(data.rates[currency]);
+        if (data) {
+          setCurrentExchangeRate(data.rate);
         } else {
           console.warn("Invalid rate received from API.");
           setCurrentExchangeRate(1);
@@ -641,7 +644,6 @@ const SplitBillPage = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/bill/create`,
         payload,

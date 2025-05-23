@@ -247,6 +247,8 @@ const SettleUpPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const token = localStorage.getItem("token");
+
   const [friends, setFriends] = useState<
     Array<{
       id: string;
@@ -313,15 +315,16 @@ const SettleUpPage = () => {
       }
 
       try {
-        const res = await axios.get(`https://open.er-api.com/v6/latest/SGD`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/exchange/${currency}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.data;
 
-        if (
-          data &&
-          data.result === "success" &&
-          typeof data.rates?.[currency] === "number"
-        ) {
-          setCurrentExchangeRate(data.rates[currency]);
+        if (data) {
+          setCurrentExchangeRate(data.rate);
         } else {
           console.warn("Invalid rate received from API.");
           setCurrentExchangeRate(1);
@@ -395,7 +398,6 @@ const SettleUpPage = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
         payload,
