@@ -2,6 +2,7 @@ import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
 import { VerificationCode } from "../models/VerificationCode";
 import { User } from "../models/User";
+import { processReceipt } from "./azureDocumentIntelligence";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -51,7 +52,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     }
 
     // Please wait message to fetch user details.
-    bot.sendMessage(chatId, `🕘 Please wait...`, {
+    bot.sendMessage(chatId, `🕘 Please wait while we fetch your OTP code...`, {
       parse_mode: "Markdown",
     });
 
@@ -110,14 +111,67 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     // Send OTP
     bot.sendMessage(
       chatId,
-      `✅ Your OTP code is: *${otpDoc.code}*\n\nIt expires in 5 minutes.`,
+      `✅ Your OTP code is: *\`${otpDoc.code}\`*\n\nIt expires in 5 minutes`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "MarkdownV2",
       }
     );
   } catch (error) {
     console.error("Telegram bot error:", error);
     bot.sendMessage(chatId, "⚠️ Something went wrong. Please try again later.");
+  }
+});
+
+bot.on("photo", async (msg) => {
+  const chatId = msg.chat.id;
+  const photoArray = msg.photo;
+
+  if (!photoArray || photoArray.length === 0) {
+    bot.sendMessage(
+      chatId,
+      "❌ No image found. Please send a photo of the receipt."
+    );
+    return;
+  }
+
+  bot.sendMessage(chatId, "🧾 Processing receipt, please wait...");
+
+  try {
+    const fileId = photoArray[photoArray.length - 1].file_id;
+    const file = await bot.getFile(fileId);
+    const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+
+    const { restaurantName, items } = await processReceipt(fileUrl);
+
+    if (!restaurantName || items.length === 0) {
+      bot.sendMessage(
+        chatId,
+        `⚠️ Unable to extract receipt details. Try again with a clearer image.`
+      );
+      return;
+    }
+
+    // Construct query params
+    const params = new URLSearchParams();
+    params.append("rName", restaurantName);
+    items.forEach((item) => {
+      params.append("n", item.name);
+      params.append("p", item.price);
+    });
+
+    const fullUrl = `https://nest.shuenwei.dev/splitbill?${params.toString()}`;
+
+    bot.sendMessage(chatId, "✅ Your receipt has been processed!", {
+      reply_markup: {
+        inline_keyboard: [[{ text: "Split This Bill", url: fullUrl }]],
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    bot.sendMessage(
+      chatId,
+      "⚠️ Something went wrong while processing the receipt."
+    );
   }
 });
 

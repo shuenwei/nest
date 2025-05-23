@@ -2,6 +2,7 @@
 
 import type React from "react";
 
+import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -274,6 +275,7 @@ const SplitBillPage = () => {
   const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const token = localStorage.getItem("token");
 
@@ -336,6 +338,32 @@ const SplitBillPage = () => {
     control: form.control,
     name: "items",
   });
+
+  useEffect(() => {
+    const restaurantName = searchParams.get("rName") ?? "";
+    const itemNames = searchParams.getAll("n");
+    const itemPrices = searchParams.getAll("p");
+
+    if (restaurantName) {
+      form.setValue("restaurantName", restaurantName);
+    }
+
+    if (itemNames.length > 0 || itemPrices.length > 0) {
+      if (itemNames.length !== itemPrices.length || itemNames.length === 0) {
+        toast.error("Woops! There is an error with the pre-fill!");
+        return;
+      }
+
+      const items = itemNames.map((name, idx) => ({
+        name,
+        price: itemPrices[idx] ?? "",
+        sharedBy: [],
+      }));
+
+      form.setValue("items", items);
+      toast.success("Your receipt has been pre-filled!");
+    }
+  }, [searchParams]);
 
   // Watch for changes to update UI
   const participants = form.watch("participants");
