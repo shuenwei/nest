@@ -759,12 +759,12 @@ const SplitPurchasePage = () => {
                               side="bottom"
                               align="center"
                               avoidCollisions={false}
-                              className="w-25 p-0"
+                              className="w-30 p-0"
                             >
                               <Command>
                                 <CommandInput placeholder="Search" />
                                 <CommandEmpty>No currency found.</CommandEmpty>
-                                <CommandGroup>
+                                <CommandGroup className="max-h-70 overflow-y-auto">
                                   {SUPPORTED_CURRENCIES.map((curr) => (
                                     <CommandItem
                                       key={curr.code}
@@ -915,7 +915,7 @@ const SplitPurchasePage = () => {
                               <CommandInput placeholder="Search people..." />
                               <CommandList>
                                 <CommandEmpty>No user found.</CommandEmpty>
-                                <CommandGroup>
+                                <CommandGroup className="max-h-70 overflow-y-auto">
                                   <CommandItem
                                     value={currentUserId}
                                     onSelect={() => {

@@ -800,7 +800,7 @@ const SplitBillPage = () => {
                               <Command>
                                 <CommandInput placeholder="Search" />
                                 <CommandEmpty>No currency found.</CommandEmpty>
-                                <CommandGroup>
+                                <CommandGroup className="max-h-70 overflow-y-auto">
                                   {SUPPORTED_CURRENCIES.map((curr) => (
                                     <CommandItem
                                       key={curr.code}
@@ -878,7 +878,7 @@ const SplitBillPage = () => {
                               <CommandInput placeholder="Search people..." />
                               <CommandList>
                                 <CommandEmpty>No person found.</CommandEmpty>
-                                <CommandGroup>
+                                <CommandGroup className="max-h-70 overflow-y-auto">
                                   <CommandItem
                                     value={currentUserId}
                                     onSelect={() => {
@@ -1088,7 +1088,7 @@ const SplitBillPage = () => {
                                     <CommandEmpty>
                                       No person found.
                                     </CommandEmpty>
-                                    <CommandGroup>
+                                    <CommandGroup className="max-h-70 overflow-y-auto">
                                       {participants.map((participant) => (
                                         <CommandItem
                                           key={participant}
