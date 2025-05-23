@@ -57,6 +57,7 @@ const FriendsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { user, refreshUser } = useUser();
+  const token = localStorage.getItem("token");
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // Load friends when component mounts
@@ -119,20 +120,34 @@ const FriendsPage = () => {
     try {
       // Check if user exists
       const response = await axios.get(
-        `${apiUrl}/user/username/${data.username}`
+        `${apiUrl}/user/username/${data.username}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (response.data) {
         // User exists, add them as a friend using the addfriend endpoint
         const friendResponse = await axios.get(
-          `${apiUrl}/user/username/${data.username}`
+          `${apiUrl}/user/username/${data.username}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         const friend = friendResponse.data;
 
-        await axios.post(`${apiUrl}/user/addfriend`, {
-          userId: user.id,
-          friendId: friend.id,
-        });
+        await axios.post(
+          `${apiUrl}/user/addfriend`,
+          {
+            userId: user.id,
+            friendId: friend.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         // Add the new friend to the list frontend
         const newFriend = {
@@ -185,19 +200,35 @@ const FriendsPage = () => {
     setIsLoading(true);
     try {
       // Create a new user using the create endpoint
-      const createResponse = await axios.post(`${apiUrl}/user/create`, {
-        username: pendingUsername,
-        displayName: data.displayName,
-      });
+      const createResponse = await axios.post(
+        `${apiUrl}/user/create`,
+        {
+          username: pendingUsername,
+          displayName: data.displayName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (createResponse.data) {
         // Add the newly created user as a friend
         const createdUser = createResponse.data;
 
-        await axios.post(`${apiUrl}/user/addfriend`, {
-          userId: user.id,
-          friendId: createdUser.id,
-        });
+        await axios.post(
+          `${apiUrl}/user/addfriend`,
+          {
+            userId: user.id,
+            friendId: createdUser.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         await refreshUser();
 

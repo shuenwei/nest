@@ -12,7 +12,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const { setUser, refreshUser } = useUser();
+  const { refreshUser } = useUser();
 
   const [step, setStep] = useState<
     "telegram" | "otp" | "displayname" | "allset"
@@ -44,20 +44,22 @@ const OnboardingPage = () => {
         onBack={() => setStep("telegram")}
         onNext={async () => {
           try {
-            const res = await axios.get(`${apiUrl}/user/username/${username}`);
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`${apiUrl}/user/username/${username}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
             const {
               displayName: fetchedName,
               hasSignedUp,
               telegramId,
             } = res.data;
 
-            setUser(res.data);
             localStorage.setItem("telegramId", telegramId);
-            refreshUser();
 
             if (hasSignedUp) {
               toast.success("You are now logged in!");
               navigate("/dashboard");
+              refreshUser();
             } else {
               setDisplayName(fetchedName);
               setStep("displayname");

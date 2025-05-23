@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
 import axios from "axios";
 const apiUrl = import.meta.env.VITE_API_URL;
+import { useUser } from "@/contexts/UserContext";
 
 interface DisplayNamePageProps {
   onBack: () => void;
@@ -44,6 +45,8 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
   telegramId,
   setDisplayName,
 }) => {
+  const { refreshUser } = useUser();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,10 +57,17 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     const name = data.displayName.trim();
     try {
-      await axios.patch(`${apiUrl}/user/displayname/${telegramId}`, {
-        displayName: name,
-      });
-      setDisplayName(name);
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        `${apiUrl}/user/displayname/${telegramId}`,
+        {
+          displayName: name,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      refreshUser();
       onNext();
     } catch (err) {
       console.error("Failed to update display name:", err);

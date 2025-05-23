@@ -71,12 +71,13 @@ const OTPPage: FC<OTPPageProps> = ({
 
       if (response.data.valid) {
         setOtp(data.code);
+        localStorage.setItem("token", response.data.token);
         onNext();
       } else {
         toast.error("Invalid OTP. Please try again.");
         form.setError("code", {
           message:
-            "Invalid OTP :( If you need to send another message to the bot, click 'Back'.",
+            "Invalid OTP! If you need to send another message to the bot, click 'Back'.",
         });
       }
     } catch (err) {

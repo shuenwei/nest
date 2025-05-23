@@ -395,9 +395,13 @@ const SettleUpPage = () => {
     setIsSubmitting(true);
 
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
-        payload
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       await refreshUser();

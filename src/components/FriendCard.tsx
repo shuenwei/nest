@@ -82,7 +82,7 @@ export function FriendCard({
                 : "text-muted-foreground"
             }`}
           >
-            {balance === 0 ? "$0.00" : `$${Math.abs(balance)}`}
+            {balance === 0 ? "$0.00" : `$${Math.abs(balance).toFixed(2)}`}
           </p>
         </div>
       </CardContent>

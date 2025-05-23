@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import LoadingScreen from "@/components/LoadingScreen";
 import { Transaction } from "@/lib/transaction";
+import { toast } from "sonner";
 
 interface Friend {
   id: string;
@@ -49,21 +50,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     const storedTelegramId = localStorage.getItem("telegramId");
-    if (!storedTelegramId) {
+    const token = localStorage.getItem("token");
+    if (!storedTelegramId || !token) {
       await delay;
       setLoading(false);
       return;
     }
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`
+        `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       const userData = res.data;
       setUser(userData);
 
       try {
         const balanceRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/transaction/balances/${userData.id}`
+          `${import.meta.env.VITE_API_URL}/transaction/balances/${userData.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         const balanceMap = new Map(
           balanceRes.data.balances.map(
@@ -81,7 +89,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const transRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/transaction/all/${userData.id}`
+          `${import.meta.env.VITE_API_URL}/transaction/all/${userData.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setTransactions(transRes.data.transactions);
       } catch (err) {
@@ -93,6 +104,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       console.error("Failed to fetch user:", err);
       setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("telegramId");
+      toast.error("Please re-login.");
     }
   };
 

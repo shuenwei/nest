@@ -59,8 +59,12 @@ const ViewTransactionPage = () => {
 
     setIsDeleting(true);
     try {
+      const token = localStorage.getItem("token");
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/transaction/${transactionId}`
+        `${import.meta.env.VITE_API_URL}/transaction/${transactionId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       await refreshUser();
       toast.success("Transaction deleted successfully");

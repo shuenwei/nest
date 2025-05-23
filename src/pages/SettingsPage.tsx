@@ -13,11 +13,12 @@ const menuItems = [
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, refreshUser } = useUser();
 
   const handleLogout = () => {
-    localStorage.removeItem("telegramId"); // or "telegramId" if that's what you're using
-    setUser(null); // reset context
+    localStorage.removeItem("telegramId");
+    localStorage.removeItem("token");
+    refreshUser();
     toast.success("You are now logged out!");
     navigate("/"); // redirect to homepage or login
   };

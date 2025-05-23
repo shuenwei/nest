@@ -60,10 +60,14 @@ const AccountSettingsPage = () => {
 
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.patch(
         `${apiUrl}/user/displayname/${user.telegramId}`,
         {
           displayName: data.displayName,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

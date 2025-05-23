@@ -30,6 +30,7 @@ const ViewFriendPage = () => {
   const [isRemoving, setIsRemoving] = useState(false);
   const { friendId } = useParams<{ friendId: string }>();
   const [isFetching, setIsFetching] = useState(false);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (loading) return;
@@ -62,7 +63,10 @@ const ViewFriendPage = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/transaction/all/${
             user.id
-          }/${friendId}`
+          }/${friendId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setFriendTransactions(res.data);
       } catch (err) {
@@ -86,6 +90,7 @@ const ViewFriendPage = () => {
           userId: user.id,
           friendId: friendId,
         },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       toast.success(`${friendName} has been removed as a friend.`);
