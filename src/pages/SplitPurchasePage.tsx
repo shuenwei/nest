@@ -940,7 +940,7 @@ const SplitPurchasePage = () => {
                                   {friends.map((friend) => (
                                     <CommandItem
                                       key={friend.id}
-                                      value={friend.id}
+                                      value={friend.name}
                                       onSelect={() => {
                                         const newValue = field.value.includes(
                                           friend.id

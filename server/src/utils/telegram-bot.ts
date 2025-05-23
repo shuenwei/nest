@@ -134,7 +134,10 @@ bot.on("photo", async (msg) => {
     return;
   }
 
-  bot.sendMessage(chatId, "🧾 Processing receipt, please wait...");
+  const processingMsg = await bot.sendMessage(
+    chatId,
+    "🧾 Processing receipt, please wait..."
+  );
 
   try {
     const fileId = photoArray[photoArray.length - 1].file_id;
@@ -142,6 +145,8 @@ bot.on("photo", async (msg) => {
     const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 
     const { restaurantName, items } = await processReceipt(fileUrl);
+
+    await bot.deleteMessage(chatId, processingMsg.message_id);
 
     if (!restaurantName || items.length === 0) {
       bot.sendMessage(
@@ -161,11 +166,18 @@ bot.on("photo", async (msg) => {
 
     const fullUrl = `https://nest.shuenwei.dev/splitbill?${params.toString()}`;
 
-    bot.sendMessage(chatId, "✅ Your receipt has been processed!", {
-      reply_markup: {
-        inline_keyboard: [[{ text: "Split This Bill", url: fullUrl }]],
-      },
-    });
+    bot.sendMessage(
+      chatId,
+      `✅ Your *${restaurantName}* receipt has been processed!`,
+      {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "Split this bill on the app", url: fullUrl }],
+          ],
+        },
+      }
+    );
   } catch (err) {
     console.error(err);
     bot.sendMessage(

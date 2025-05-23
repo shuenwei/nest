@@ -897,7 +897,7 @@ const SplitBillPage = () => {
                                   {friends.map((friend) => (
                                     <CommandItem
                                       key={friend.id}
-                                      value={friend.id}
+                                      value={friend.name}
                                       onSelect={() => {
                                         const newValue = field.value.includes(
                                           friend.id
@@ -1086,7 +1086,9 @@ const SplitBillPage = () => {
                                       {participants.map((participant) => (
                                         <CommandItem
                                           key={participant}
-                                          value={participant}
+                                          value={getParticipantName(
+                                            participant
+                                          )}
                                           onSelect={() => {
                                             const newValue =
                                               field.value.includes(participant)
@@ -1408,7 +1410,7 @@ const SplitBillPage = () => {
 
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subtotal</span>
+                        <span>Subtotal</span>
                         <div className="text-right">
                           <div>
                             {currency} {calculateSubtotal().toFixed(2)}
