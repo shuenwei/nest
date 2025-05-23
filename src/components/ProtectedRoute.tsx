@@ -11,7 +11,6 @@ const ProtectedRoute = () => {
 
   useEffect(() => {
     const validateToken = async () => {
-      console.log("check");
       if (!token) {
         setIsValid(false);
         setIsLoading(false);

@@ -697,7 +697,13 @@ const SplitBillPage = () => {
         <Button
           variant="ghost"
           className="flex items-center gap-2 px-0 has-[>svg]:pr-0 mb-8"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/dashboard");
+            }
+          }}
         >
           <ArrowLeft className="size-5" />
           <span className="text-base font-medium">Back</span>
