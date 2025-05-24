@@ -125,6 +125,19 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
 bot.on("photo", async (msg) => {
   const chatId = msg.chat.id;
   const photoArray = msg.photo;
+  const telegramUser = msg.from;
+
+  const checkUser = await User.findOne({
+    telegramId: telegramUser?.id.toString(),
+  });
+
+  if (!checkUser) {
+    bot.sendMessage(
+      chatId,
+      "⛔️ You are not authorised to use the bill scanning function."
+    );
+    return;
+  }
 
   if (!photoArray || photoArray.length === 0) {
     bot.sendMessage(

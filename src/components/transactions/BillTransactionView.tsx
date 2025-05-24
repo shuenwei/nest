@@ -39,7 +39,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
             <div key={index} className="bg-secondary/70 p-3 rounded-lg">
               <div className="flex justify-between mb-1">
                 <span className="font-medium">{item.name}</span>
-                <span>
+                <span className="text-right">
                   {transaction.currency} {item.price.toFixed(2)}
                 </span>
               </div>
@@ -66,7 +66,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
               </div>
               {transaction.currency !== "SGD" && (
                 <div className="text-xs text-muted-foreground">
-                  SGD ${transaction.subtotalInSgd.toFixed(2)}
+                  SGD {transaction.subtotalInSgd.toFixed(2)}
                 </div>
               )}
             </div>
@@ -85,7 +85,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
                 </div>
                 {transaction.currency !== "SGD" && (
                   <div className="text-xs text-muted-foreground">
-                    SGD -${transaction.discountInSGD.toFixed(2)}
+                    SGD -{transaction.discountInSGD.toFixed(2)}
                   </div>
                 )}
               </div>
@@ -120,7 +120,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
                 </div>
                 {transaction.currency !== "SGD" && (
                   <div className="text-xs text-muted-foreground">
-                    SGD ${transaction.gstAmountInSgd.toFixed(2)}
+                    SGD {transaction.gstAmountInSgd.toFixed(2)}
                   </div>
                 )}
               </div>
@@ -137,7 +137,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
               </div>
               {transaction.currency !== "SGD" && (
                 <div className="text-xs font-normal text-muted-foreground">
-                  SGD ${transaction.amountInSgd.toFixed(2)}
+                  SGD {transaction.amountInSgd.toFixed(2)}
                 </div>
               )}
             </div>
@@ -151,8 +151,8 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
         <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
           {transaction.splitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
-              <span className="text-sm">{getUserDisplayName(split.user)}</span>
-              <span className="font-medium">${split.amount.toFixed(2)}</span>
+              <span>{getUserDisplayName(split.user)}</span>
+              <span>${split.amount.toFixed(2)}</span>
             </div>
           ))}
         </div>
