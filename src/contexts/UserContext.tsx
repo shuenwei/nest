@@ -45,6 +45,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   const delay = new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -65,6 +66,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       );
       const userData = res.data;
       setUser(userData);
+      setProgress(40);
 
       try {
         const balanceRes = await axios.get(
@@ -87,6 +89,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to fetch balances:", err);
       }
 
+      setProgress(70);
+
       try {
         const transRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/transaction/all/${userData.id}`,
@@ -99,14 +103,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to fetch transactions:", err);
         setTransactions([]);
       }
+
+      setProgress(100);
+      
       await delay;
       setLoading(false);
     } catch (err) {
+      if (axios.isAxiosError(err)) {
+      const message = err.response?.data?.message;
+
+
+      if (message === "Token not provided" || message === "Invalid token")  {
       console.error("Failed to fetch user:", err);
       setUser(null);
       localStorage.removeItem("token");
       localStorage.removeItem("telegramId");
       toast.error("Please re-login.");
+      } else {
+        toast.error("Something went wrong. Please refresh your app.");
+      }
+        }
     }
   };
 
@@ -119,7 +135,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     init();
   }, []);
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen progress={progress} />;
 
   return (
     <UserContext.Provider
