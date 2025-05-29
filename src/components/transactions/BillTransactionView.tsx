@@ -145,6 +145,14 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
         </div>
       </div>
 
+      {/* Exchange Rate */}
+      <div>
+        <h3 className="text-sm font-semibold mb-2">Exchange Rate</h3>
+        <p className="text-sm">
+          1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency} 
+        </p>
+      </div>
+      
       {/* Splits Section */}
       <div>
         <h3 className="text-sm font-semibold mb-2">Split Details</h3>
