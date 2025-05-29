@@ -54,12 +54,14 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
       </div>
 
       {/* Exchange Rate */}
+      {transaction.currency !== "SGD" && (
       <div>
         <h3 className="text-sm font-semibold mb-2">Exchange Rate</h3>
         <p className="text-sm">
           1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency} 
         </p>
       </div>
+      )}
 
       {/* Splits Section */}
       <div>
