@@ -5,14 +5,14 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { toast } from "sonner";
 
 const ProtectedRoute = () => {
-  const [isValid, setIsValid] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
-        setIsValid(false);
+        setIsInvalid(true);
         setIsLoading(false);
         return;
       }
@@ -27,13 +27,13 @@ const ProtectedRoute = () => {
           }
         );
 
-        setIsValid(
-          res.data.valid === true &&
-            res.data.payload.telegramId === localStorage.getItem("telegramId")
-        );
+        const valid = res.data.valid === true && res.data.payload.telegramId === localStorage.getItem("telegramId");
+
+        if (!valid) setIsInvalid(true); 
+
       } catch (err) {
         console.error("Token validation failed:", err);
-        setIsValid(false);
+        toast.error("Something went wrong. Please refresh your app.");
       } finally {
         setIsLoading(false);
       }
@@ -44,7 +44,7 @@ const ProtectedRoute = () => {
 
   if (isLoading) return <LoadingScreen />;
 
-  if (!isValid) {
+  if (isInvalid) {
     localStorage.removeItem("telegramId");
     localStorage.removeItem("token");
     toast.error("Please re-login.");
