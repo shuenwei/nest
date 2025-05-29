@@ -19,16 +19,25 @@ export default defineConfig({
         enabled: true
       },
 
-      pwaAssets: {
-      disabled: false,
-      config: true,
-      },
-
       manifest: {
         name: "nest",
         short_name: "nest",
         theme_color: "#ffffff",
-        display: "standalone"
+        display: "standalone",
+        icons: [
+      {
+        src: '/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any maskable'
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any maskable'
+      }
+    ]
       }
     })
   ],
