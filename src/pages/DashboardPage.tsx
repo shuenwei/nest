@@ -26,7 +26,9 @@ const DashboardPage = () => {
   const filteredFriends = user.friends.filter((f) => (f.balance ?? 0) !== 0);
 
   return (
-    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
+    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4 style={{
+    paddingTop: 'env(safe-area-inset-top)'
+  }}">
       <div className="w-full max-w-sm pt-10 pb-24">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">
