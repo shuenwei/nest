@@ -9,7 +9,7 @@ interface LoadingScreenProps {
 const LoadingScreen = ({ progress }: LoadingScreenProps) => {
     const showRing = progress === undefined;
   return (
-   <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F8F8F8] backdrop-blur-sm pt-safe-top">
+   <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F8F8F8] backdrop-blur-sm">
     {showRing ? (<Ring2
         size={80}
         stroke={10}
