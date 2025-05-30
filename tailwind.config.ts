@@ -19,3 +19,5 @@ const config: Config = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
 };
+
+export default config;
