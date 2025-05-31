@@ -19,7 +19,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
   if (!usernameFromLink || !telegramUser?.username) {
     bot.sendMessage(
       chatId,
-      "❌ Invalid request or Telegram username not found."
+      "❌ Invalid request."
     );
     return;
   }
@@ -111,7 +111,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     // Send OTP
     bot.sendMessage(
       chatId,
-      `✅ Your OTP code is: *\`${otpDoc.code}\`*\n\nIt expires in 5 minutes`,
+      `✅ Your OTP is: *\`${otpDoc.code}\`*\n\nYou can tap on the code to copy to clipboard. It expires in 5 minutes`,
       {
         parse_mode: "MarkdownV2",
       }
