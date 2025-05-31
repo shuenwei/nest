@@ -57,12 +57,17 @@ const OTPPage: FC<OTPPageProps> = ({
 }) => {
   const [showInput, setShowInput] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<OTPFormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: { code: otp },
   });
 
   const handleSubmit = async (data: OTPFormValues) => {
+
+    setIsSubmitting(true);
+
     try {
       const response = await axios.post(`${apiUrl}/auth/verifycode`, {
         username,
@@ -83,6 +88,8 @@ const OTPPage: FC<OTPPageProps> = ({
     } catch (err) {
       console.error("OTP verification failed:", err);
       toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -166,8 +173,9 @@ const OTPPage: FC<OTPPageProps> = ({
                 <Button type="button" variant="outline" onClick={onBack}>
                   Back
                 </Button>
-                <Button size="rightIcon" type="submit">
+                <Button size="rightIcon" type="submit" disabled={isSubmitting}>
                   Next
+                  {isSubmitting ? "Verifying" : "Next"}
                   <ChevronRight />
                 </Button>
               </CardFooter>
