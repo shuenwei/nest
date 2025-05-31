@@ -42,7 +42,7 @@ const ProtectedRoute = () => {
     validateToken();
   }, []);
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading) return <LoadingScreen progress={100} />;
 
   if (isInvalid) {
     localStorage.removeItem("telegramId");

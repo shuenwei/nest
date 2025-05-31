@@ -27,7 +27,7 @@ const LoadingScreen = ({ progress }: LoadingScreenProps) => {
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-20">
-        <span className="text-sm text-gray-600 mb-2">
+        <span className="text-muted-foreground text-sm mb-2">
           {isTakingTooLong ? "Check your internet connection" : "Getting your transactions"}
         </span>
 

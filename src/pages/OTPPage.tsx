@@ -174,7 +174,6 @@ const OTPPage: FC<OTPPageProps> = ({
                   Back
                 </Button>
                 <Button size="rightIcon" type="submit" disabled={isSubmitting}>
-                  Next
                   {isSubmitting ? "Verifying" : "Next"}
                   <ChevronRight />
                 </Button>
