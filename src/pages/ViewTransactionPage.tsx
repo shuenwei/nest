@@ -143,13 +143,13 @@ const ViewTransactionPage = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
+                  <Button
                     onClick={handleDelete}
                     className="bg-destructive hover:bg-destructive/50"
                     disabled={isDeleting}
                   >
                     {isDeleting ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
+                  </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
