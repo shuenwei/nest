@@ -47,17 +47,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
-  const delay = new Promise((resolve) => setTimeout(resolve, 500));
-
   const refreshUser = async () => {
     const storedTelegramId = localStorage.getItem("telegramId");
     const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
-      await delay;
       setLoading(false);
       return;
     }
     try {
+
+      setProgress(10);
+
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`,
         {
@@ -106,7 +106,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       setProgress(100);
       
-      await delay;
       setLoading(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -121,16 +120,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       toast.error("Please re-login.");
       } else {
         toast.error("Something went wrong. Please refresh your app.");
-      }
         }
+      }
     }
   };
 
   useEffect(() => {
     const init = async () => {
       await refreshUser();
-      await delay;
-      setLoading(false);
     };
     init();
   }, []);
