@@ -155,13 +155,13 @@ const ViewFriendPage = () => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
+                <Button
                   onClick={handleDelete}
                   className="bg-destructive hover:bg-destructive/50"
                   disabled={isRemoving}
                 >
                   {isRemoving ? "Removing..." : "Remove"}
-                </AlertDialogAction>
+                </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
