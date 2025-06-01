@@ -5,6 +5,7 @@ import updateDisplayName from "../controllers/user/update-display-name";
 import addFriend from "../controllers/user/add-friend";
 import removeFriend from "../controllers/user/remove-friend";
 import createUser from "../controllers/user/create-user";
+import updateProfilePhoto from "../controllers/user/update-profile-photo";
 
 // initialize router
 const router = express.Router();
@@ -12,6 +13,7 @@ const router = express.Router();
 router.get("/username/:username", getUserByUsername);
 router.get("/telegramid/:telegramId", getUserByTelegramId);
 router.patch("/displayname/:telegramId", updateDisplayName);
+router.patch("/profilephoto/:telegramId", updateProfilePhoto);
 router.post("/addfriend", addFriend);
 router.post("/create", createUser);
 router.delete("/removefriend", removeFriend);

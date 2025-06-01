@@ -27,6 +27,12 @@ import { useEffect } from "react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+declare global {
+  interface Window {
+    onTelegramAuth: (user: any) => void;
+  }
+}
+
 // Form schema
 const formSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
@@ -51,6 +57,49 @@ const AccountSettingsPage = () => {
       form.reset({ displayName: user.displayName });
     }
   }, [user?.displayName, form]);
+
+  useEffect(() => {
+  window.onTelegramAuth = async (user) => {
+    try {
+      const res = await fetch(user.photo_url);
+      const blob = await res.blob();
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+
+        if (!reader.result) {
+          console.error("FileReader result is null");
+          toast.error("Failed to fetch profile photo.");
+          return;
+        }
+
+        const base64 = reader.result.toString().split(",")[1];
+
+        const token = localStorage.getItem("token");
+
+        await axios.patch(
+          `${apiUrl}/user/profilephoto/${user.telegramId}`,
+          {
+            profilePhoto: base64,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        refreshUser();
+
+        toast.success("Profile photo updated!");
+      };
+
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error("Error uploading profile photo:", err);
+      toast.error("Failed to update profile photo.");
+    }
+  };
+}, []);
+
 
   const onSubmit = async (data: FormValues) => {
     if (!user?.telegramId) {
@@ -124,6 +173,9 @@ const AccountSettingsPage = () => {
                       on your Telegram account.
                     </p>
                   </div>
+                </div>
+                <div>
+                  <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="nestExpenseApp_bot" data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
                 </div>
               </CardContent>
             </Card>
