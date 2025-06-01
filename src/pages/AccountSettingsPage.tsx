@@ -59,9 +59,9 @@ const AccountSettingsPage = () => {
   }, [user?.displayName, form]);
 
   useEffect(() => {
-  window.onTelegramAuth = async (user) => {
+  window.onTelegramAuth = async (telegramUser) => {
     try {
-      const res = await fetch(user.photo_url);
+      const res = await fetch(telegramUser.photo_url);
       const blob = await res.blob();
 
       const reader = new FileReader();
@@ -78,7 +78,7 @@ const AccountSettingsPage = () => {
         const token = localStorage.getItem("token");
 
         await axios.patch(
-          `${apiUrl}/user/profilephoto/${user.telegramId}`,
+          `${apiUrl}/user/profilephoto/${telegramUser.id}`,
           {
             profilePhoto: base64,
           },
@@ -99,6 +99,26 @@ const AccountSettingsPage = () => {
     }
   };
 }, []);
+
+useEffect(() => {
+  const script = document.createElement("script");
+  script.src = "https://telegram.org/js/telegram-widget.js?22";
+  script.async = true;
+  script.setAttribute("data-telegram-login", "nestExpenseApp_bot"); // your bot username, no @
+  script.setAttribute("data-size", "large");
+  script.setAttribute("data-radius", "10");
+  script.setAttribute("data-onauth", "onTelegramAuth(user)");
+  script.setAttribute("data-request-access", "write");
+
+  const container = document.getElementById("telegram-login-button");
+  if (container) container.appendChild(script);
+
+  // Cleanup when component unmounts
+  return () => {
+    if (container) container.innerHTML = "";
+  };
+}, []);
+
 
 
   const onSubmit = async (data: FormValues) => {
@@ -174,9 +194,7 @@ const AccountSettingsPage = () => {
                     </p>
                   </div>
                 </div>
-                <div>
-                  <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="nestExpenseApp_bot" data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
-                </div>
+                <div id="telegram-login-button" className="mt-4" />
               </CardContent>
             </Card>
 
