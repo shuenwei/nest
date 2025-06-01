@@ -111,7 +111,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     // Send OTP
     bot.sendMessage(
       chatId,
-      `✅ Your OTP is: *\`${otpDoc.code}\`*\n\nYou can tap on the code to copy to clipboard. It expires in 5 minutes`,
+      `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
       {
         parse_mode: "MarkdownV2",
       }

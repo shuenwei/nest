@@ -79,9 +79,9 @@ const AccountSettingsPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
-        toast.success("Profile photo updated!");
-        refreshUser?.();
+        
+        refreshUser();
+        toast.success("Your profile photo has been updated!");
       } catch (err) {
         console.error("Error uploading profile photo:", err);
         toast.error("Failed to update profile photo.");
