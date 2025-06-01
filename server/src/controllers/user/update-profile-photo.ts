@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import { User } from '../../models/User';
+import axios from 'axios';
 
 const updateProfilePhoto = async (req: Request, res: Response): Promise<void> => {
-  const { telegramId, profilePhoto } = req.body;
+  const { telegramId } = req.params;
+  const { profilePhoto, photoUrl } = req.body;
 
-  if (!telegramId || !profilePhoto) {
-    res.status(400).json({ error: 'Missing telegramId or profilePhoto' });
+  if (!telegramId || (!profilePhoto && !photoUrl)) {
+    res.status(400).json({ error: 'Missing telegramId or photo data' });
     return;
   }
 
@@ -17,7 +19,23 @@ const updateProfilePhoto = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    user.profilePhoto = Buffer.from(profilePhoto, 'base64');
+    let photoBuffer: Buffer | null = null;
+
+    if (profilePhoto) {
+      // From bot (base64)
+      photoBuffer = Buffer.from(profilePhoto, 'base64');
+    } else if (photoUrl) {
+      // From Telegram login widget (URL)
+      const response = await axios.get(photoUrl, { responseType: 'arraybuffer' });
+      photoBuffer = Buffer.from(response.data);
+    }
+
+    if (!photoBuffer) {
+      res.status(400).json({ error: 'Failed to retrieve photo data' });
+      return;
+    }
+
+    user.profilePhoto = photoBuffer;
     const updatedUser = await user.save();
 
     res.status(200).json({

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/contexts/UserContext";
 import { useEffect } from "react";
@@ -59,67 +66,48 @@ const AccountSettingsPage = () => {
   }, [user?.displayName, form]);
 
   useEffect(() => {
-  window.onTelegramAuth = async (telegramUser) => {
-    try {
-      const res = await fetch(telegramUser.photo_url);
-      const blob = await res.blob();
-
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-
-        if (!reader.result) {
-          console.error("FileReader result is null");
-          toast.error("Failed to fetch profile photo.");
-          return;
-        }
-
-        const base64 = reader.result.toString().split(",")[1];
-
+    window.onTelegramAuth = async (telegramUser) => {
+      try {
         const token = localStorage.getItem("token");
 
         await axios.patch(
-          `${apiUrl}/user/profilephoto/${telegramUser.id}`,
+          `${apiUrl}/user/profilephoto/${telegramUser.id.toString()}`,
           {
-            profilePhoto: base64,
+            photoUrl: telegramUser.photo_url,
           },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        refreshUser();
-
         toast.success("Profile photo updated!");
-      };
+        refreshUser?.();
+      } catch (err) {
+        console.error("Error uploading profile photo:", err);
+        toast.error("Failed to update profile photo.");
+      }
+    };
+  }, []);
 
-      reader.readAsDataURL(blob);
-    } catch (err) {
-      console.error("Error uploading profile photo:", err);
-      toast.error("Failed to update profile photo.");
-    }
-  };
-}, []);
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.async = true;
+    script.setAttribute("data-telegram-login", "nestExpenseApp_bot");
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-userpic", "false");
+    script.setAttribute("data-radius", "10");
+    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    script.setAttribute("data-request-access", "write");
 
-useEffect(() => {
-  const script = document.createElement("script");
-  script.src = "https://telegram.org/js/telegram-widget.js?22";
-  script.async = true;
-  script.setAttribute("data-telegram-login", "nestExpenseApp_bot"); // your bot username, no @
-  script.setAttribute("data-size", "large");
-  script.setAttribute("data-radius", "10");
-  script.setAttribute("data-onauth", "onTelegramAuth(user)");
-  script.setAttribute("data-request-access", "write");
+    const container = document.getElementById("telegram-login-button");
+    if (container) container.appendChild(script);
 
-  const container = document.getElementById("telegram-login-button");
-  if (container) container.appendChild(script);
-
-  // Cleanup when component unmounts
-  return () => {
-    if (container) container.innerHTML = "";
-  };
-}, []);
-
-
+    // Cleanup when component unmounts
+    return () => {
+      if (container) container.innerHTML = "";
+    };
+  }, []);
 
   const onSubmit = async (data: FormValues) => {
     if (!user?.telegramId) {
@@ -194,7 +182,17 @@ useEffect(() => {
                     </p>
                   </div>
                 </div>
-                <div id="telegram-login-button" className="mt-4" />
+                <div
+                  id="telegram-login-button"
+                  className="mt-4 mb-4 w-full flex justify-center"
+                />
+                <Alert>
+                  <AlertCircleIcon />
+                  <AlertTitle>Don't see your profile photo above?</AlertTitle>
+                  <AlertDescription>
+                    It might be due to your telegram privacy settings. To sync your profile photo, click on the button to login with telegram.
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
 
