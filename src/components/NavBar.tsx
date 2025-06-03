@@ -87,12 +87,16 @@ const NavBar = () => {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium text-muted-foreground hover:text-muted-foreground h-10 px-3"
+                        className="justify-start text-lg font-medium h-10 px-3"
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          navigate("/recurring");
+                        }}
+                        
                       >
                         <CalendarSync className="size-5 mr-2" />
                         <span className="flex items-center gap-2">
-                          Recurring Subscription
-                          <Badge variant="secondary">Coming Soon</Badge>
+                          Recurring
                         </span>
                       </Button>
                       <Button

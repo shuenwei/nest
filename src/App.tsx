@@ -13,6 +13,8 @@ import NotificationPage from "./pages/NotificationPage";
 import SplitPurchasePage from "./pages/SplitPurchasePage";
 import SplitBillPage from "./pages/SplitBillPage";
 import SettleUpPage from "./pages/SettleUpPage";
+import AddRecurringPage from "./pages/AddRecurringPage";
+import ManageRecurringPage from "./pages/ManageRecurringPage";
 import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -73,6 +75,8 @@ function App() {
           <Route path="/splitpurchase" element={<SplitPurchasePage />} />
           <Route path="/splitbill" element={<SplitBillPage />} />
           <Route path="/settleup" element={<SettleUpPage />} />
+          <Route path="/recurring" element={<ManageRecurringPage />} />
+          <Route path="/recurring/add" element={<AddRecurringPage />} />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
         </Route>
       </Routes>

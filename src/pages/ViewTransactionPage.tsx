@@ -122,9 +122,12 @@ const ViewTransactionPage = () => {
           </Button>
 
           <div className="flex gap-3">
-            <Button variant="ghost" size="icon" onClick={handleEdit}>
-              <Pencil />
-            </Button>
+
+            {transaction.type !== "recurring" && (
+              <Button variant="ghost" size="icon" onClick={handleEdit}>
+                <Pencil />
+              </Button>
+            )}
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog>

@@ -2,7 +2,6 @@ import type React from "react";
 import type { PurchaseTransaction } from "@/lib/transaction";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/UserContext";
 
 interface PurchaseTransactionViewProps {
@@ -66,20 +65,13 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
       {/* Splits Section */}
       <div>
         <h3 className="text-sm font-semibold mb-2">Split Details</h3>
-        <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+        <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
           {transaction.splitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{getUserDisplayName(split.user)}</span>
               <span className="font-medium">${split.amount.toFixed(2)}</span>
             </div>
           ))}
-          <Separator className="my-2" />
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Total</span>
-            <span className="font-medium">
-              ${transaction.amountInSgd.toFixed(2)}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -87,7 +79,7 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
       {transaction.notes && (
         <div>
           <h3 className="text-sm font-semibold mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-lg">
+          <p className="text-sm text-muted-foreground bg-secondary/70 p-3 rounded-lg">
             {transaction.notes}
           </p>
         </div>

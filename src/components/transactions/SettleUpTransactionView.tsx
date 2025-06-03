@@ -75,7 +75,7 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
       {transaction.notes && (
         <div>
           <h3 className="text-sm font-semibold mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-lg">
+          <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
             {transaction.notes}
           </p>
         </div>

@@ -11,6 +11,7 @@ import exchangeRoutes from "./routes/exchange";
 import "./utils/telegram-bot";
 import checkBearerToken from "./middlewares/check-bearer-token";
 import errorHandler from "./middlewares/error-handler";
+import cronRecurring from "./controllers/transaction/cron-recurring";
 
 // Immediately connect to DB and attach routes before Cloud Run starts handling
 const setup = async () => {
@@ -23,6 +24,8 @@ const setup = async () => {
   app.get("/healthz", (_, res) => {
     res.sendStatus(204);
   });
+
+  app.post("/cron/recurring", cronRecurring);
 
   app.use("/auth", authRoutes, errorHandler);
   app.use("/user", checkBearerToken, userRoutes, errorHandler);
