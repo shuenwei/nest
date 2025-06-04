@@ -4,7 +4,6 @@
   padding: 2rem;
   text-align: center;
   min-height: 100dvh;
-  padding-top: env(safe-area-inset-top);
   background:#F8F8F8; 
 }
 
