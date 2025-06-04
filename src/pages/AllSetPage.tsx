@@ -31,7 +31,7 @@ const AllSetPage: FC<YouAreAllSetPageProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#F8F8F8] px-4">
+    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex items-center justify-center px-4">
       <Card className="w-full max-w-sm rounded-2xl border border-gray-200 text-center">
         <CardHeader>
           <CardTitle>You're all set, {displayName}!</CardTitle>
