@@ -26,7 +26,7 @@ const LoadingScreen = ({ progress }: LoadingScreenProps) => {
         <span className="text-3xl font-semibold text-black">nest</span>
       </div>
 
-      <div className="w-full flex flex-col items-center justify-center mb-20">
+      <div className="w-full flex flex-col items-center justify-center mb-20 pb-[env(safe-area-inset-bottom)]">
         <span className="text-muted-foreground text-sm mb-2">
           {isTakingTooLong ? "Check your internet connection" : "Getting your transactions"}
         </span>

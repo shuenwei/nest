@@ -15,7 +15,7 @@ interface WelcomePageProps {
 
 const WelcomePage: FC<WelcomePageProps> = ({ onNext }) => {
   return (
-    <div className="min-h-screen bg-[#F8F8F8] font-outfit flex items-center justify-center px-4">
+    <div className="min-h-[100dvh] h-[100dvh] bg-[#F8F8F8] font-outfit flex items-center justify-center px-4">
       <Card className="w-full max-w-sm text-center">
         <CardHeader>
           <CardTitle className="text-3xl">nest</CardTitle>
