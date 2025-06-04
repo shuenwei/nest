@@ -17,6 +17,7 @@ import AddRecurringPage from "./pages/AddRecurringPage";
 import ManageRecurringPage from "./pages/ManageRecurringPage";
 import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ViewTransactionPage from "./pages/ViewTransactionPage";
+import ViewRecurringPage from "./pages/ViewRecurringPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const ScrollToTop = () => {
@@ -77,6 +78,10 @@ function App() {
           <Route path="/settleup" element={<SettleUpPage />} />
           <Route path="/recurring" element={<ManageRecurringPage />} />
           <Route path="/recurring/add" element={<AddRecurringPage />} />
+          <Route
+            path="/recurring/:recurringId"
+            element={<ViewRecurringPage />}
+          />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
         </Route>
       </Routes>

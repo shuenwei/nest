@@ -14,27 +14,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/contexts/UserContext";
-
-interface RecurringTemplate {
-  _id: string;
-  transactionName: string;
-  amount: number;
-  frequency: "daily" | "weekly" | "monthly" | "yearly";
-  participants: string[];
-  paidBy: string;
-  splitsInSgd: Array<{ user: string; amount: number; _id: string }>;
-  notes?: string;
-  nextDate: string;
-  __v: number;
-}
+import { RecurringTemplate } from "@/lib/recurring";
 
 const ManageRecurringPage = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const [templates, setTemplates] = useState<RecurringTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+const { user, recurringTemplates, fetchRecurringTemplates } = useUser();
+const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
 
   const friends = user?.friends || [];
 
@@ -43,29 +29,18 @@ const ManageRecurringPage = () => {
     return friends.find((f) => f.id === userId)?.displayName ?? "???";
   };
 
-  const fetchTemplates = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/transaction/recurring/${user?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setTemplates(response.data.recurringTemplates || []);
-    } catch (error) {
-      console.error("Error fetching recurring transactions:", error);
-      toast.error("Failed to load recurring transactions");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (user?.id) {
-      fetchTemplates();
-    }
+    const load = async () => {
+      if (!recurringTemplates && user?.id) {
+        setLoading(true);
+        await fetchRecurringTemplates();
+      }
+      setLoading(false);
+    };
+
+    load();
   }, [user?.id]);
+
 
   const formatFrequency = (frequency: string) => {
     switch (frequency) {
@@ -97,7 +72,7 @@ const ManageRecurringPage = () => {
         <Button
           variant="ghost"
           className="flex items-center gap-2 px-0 has-[>svg]:pr-0 mb-8"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/dashboard")}
         >
           <ArrowLeft className="size-5" />
           <span className="text-base font-medium">Back</span>
@@ -133,14 +108,14 @@ const ManageRecurringPage = () => {
                 </Card>
               ))}
             </div>
-          ) : templates.length === 0 ? (
+          ) : recurringTemplates?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No transactions found.
             </div>
           ) : (
           <div className="space-y-4">
-            {templates.map((template) => (
-              <Card key={template._id} className="gap-y-2">
+            {recurringTemplates?.map((template) => (
+              <Card key={template._id} className="gap-y-2" onClick={() => navigate(`/recurring/${template._id}`)}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -151,16 +126,16 @@ const ManageRecurringPage = () => {
                         <Badge>
                           {formatFrequency(template.frequency)}
                         </Badge>
-                        <Badge variant="secondary">
+                        <Badge variant="outline">
                           Next Due: {formatNextDueDate(template.nextDate)}
                         </Badge>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-semibold">${template.amount.toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <Badge variant="secondary">
                         Paid by {getFriendNameById(template.paidBy)}
-                      </p>
+                      </Badge>
                     </div>
                   </div>
                 </CardHeader>

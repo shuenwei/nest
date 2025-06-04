@@ -206,7 +206,7 @@ const AddRecurringPage = () => {
 
   usePreserveScroll();
 
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, fetchRecurringTemplates } = useUser();
 
   const [friends, setFriends] = useState<
     Array<{
@@ -381,6 +381,7 @@ const AddRecurringPage = () => {
       );
 
       await refreshUser();
+      await fetchRecurringTemplates();
       console.log(response);
       toast.success("Success!", {
         description: "Recurring transaction added successfully!",
@@ -400,7 +401,7 @@ const AddRecurringPage = () => {
         <Button
           variant="ghost"
           className="flex items-center gap-2 px-0 has-[>svg]:pr-0 mb-8"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/recurring")}
         >
           <ArrowLeft className="size-5" />
           <span className="text-base font-medium">Back</span>
@@ -516,7 +517,9 @@ const AddRecurringPage = () => {
                           <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(date) => {
+                              if (date) field.onChange(date);
+                            }}
                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                             initialFocus
                           />

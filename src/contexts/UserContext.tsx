@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import LoadingScreen from "@/components/LoadingScreen";
 import { Transaction } from "@/lib/transaction";
+import { RecurringTemplate } from "@/lib/recurring";
 import { toast } from "sonner";
 
 interface Friend {
@@ -35,6 +36,9 @@ interface UserContextValue {
   setUser: (user: User | null) => void;
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  recurringTemplates: RecurringTemplate[] | null;
+  setRecurringTemplates: React.Dispatch<React.SetStateAction<RecurringTemplate[] | null>>;
+  fetchRecurringTemplates: () => Promise<void>;
   loading: boolean;
   refreshUser: () => Promise<void>;
 }
@@ -132,7 +136,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     init();
   }, []);
 
+  const [recurringTemplates, setRecurringTemplates] = useState<RecurringTemplate[] | null>(null);
+
+  const fetchRecurringTemplates = async () => {
+    if (!user) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/transaction/recurring/${user.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setRecurringTemplates(response.data.recurringTemplates || []);
+    } catch (err) {
+      console.error("Failed to fetch recurring templates:", err);
+      toast.error("Failed to load recurring transactions");
+    }
+  };
+
   if (loading) return <LoadingScreen progress={progress} />;
+
 
   return (
     <UserContext.Provider
@@ -143,6 +168,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         refreshUser,
         transactions,
         setTransactions,
+        recurringTemplates,
+        setRecurringTemplates,
+        fetchRecurringTemplates,
       }}
     >
       {children}

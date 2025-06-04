@@ -39,19 +39,7 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
             : "Split Manually"}
         </p>
       </div>
-
-      {/* Participants Section */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Participants</h3>
-        <div className="flex flex-wrap gap-2">
-          {transaction.participants.map((participantId) => (
-            <Badge key={participantId} variant="secondary">
-              {getUserDisplayName(participantId)}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
+      
       {/* Exchange Rate */}
       {transaction.currency !== "SGD" && (
       <div>
