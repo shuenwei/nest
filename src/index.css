@@ -121,3 +121,7 @@
     font-family: 'Outfit', sans-serif;
   }
 }
+
+.safe-area-padding {
+  padding-top: env(safe-area-inset-top);
+}
