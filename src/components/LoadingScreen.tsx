@@ -21,7 +21,7 @@ const LoadingScreen = ({ progress }: LoadingScreenProps) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#F8F8F8] backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#F8F8F8] backdrop-blur-sm safe-area-padding">
       <div className="flex-1 flex items-center justify-center w-full">
         <span className="text-3xl font-semibold text-black">nest</span>
       </div>
