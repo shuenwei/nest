@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface RecurringTransactionViewProps {
   transaction: RecurringTransaction;
@@ -14,6 +16,7 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
   transaction,
 }) => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const friends = user?.friends || [];
   const getUserDisplayName = (userId: string) => {
     if (userId === user?.id) return "You";
@@ -26,6 +29,14 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           This is an automatically generated recurring transaction.
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-fit mt-1"
+            onClick={() => navigate(`/recurring/${transaction.templateId}`)}
+          >
+            View Assoicated Transaction
+          </Button>
         </AlertDescription>
       </Alert>
 

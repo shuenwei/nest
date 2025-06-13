@@ -22,6 +22,8 @@ import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { startOfDay } from "date-fns";
+import { zonedTimeToUtc } from "date-fns-tz";
 import {
   Command,
   CommandEmpty,
@@ -178,7 +180,7 @@ const formSchema = z.object({
   amount: z.string().refine((val) => /^\d+(\.\d{1,2})?$/.test(val), {
     message: "Enter a valid amount",
   }),
-  frequency: z.enum(["daily","weekly", "monthly", "yearly"]),
+  frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
   startDate: z.date(),
   paidBy: z.string(),
   splitMethod: z.enum(["even", "manual"]),
@@ -362,7 +364,7 @@ const AddRecurringPage = () => {
       transactionName: values.templateName,
       amount: originalAmount,
       frequency: values.frequency,
-      nextDate: values.startDate,
+      nextDate: zonedTimeToUtc(startOfDay(values.startDate), "Asia/Singapore"),
       participants: participants,
       paidBy: values.paidBy,
       splitMethod: values.splitMethod,
@@ -520,7 +522,9 @@ const AddRecurringPage = () => {
                             onSelect={(date) => {
                               if (date) field.onChange(date);
                             }}
-                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            disabled={(date) =>
+                              date < new Date(new Date().setHours(0, 0, 0, 0))
+                            }
                             initialFocus
                           />
                         </PopoverContent>

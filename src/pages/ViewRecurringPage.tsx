@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useUser } from "@/contexts/UserContext"
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/contexts/UserContext";
 import { RecurringTemplate } from "@/lib/recurring";
-import axios from "axios"
-import { toast } from "sonner"
+import axios from "axios";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,82 +20,93 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 const ViewRecurringPage = () => {
-  const navigate = useNavigate()
-  const { recurringId } = useParams<{ recurringId: string }>()
-  const { user, recurringTemplates,fetchRecurringTemplates } = useUser()
+  const navigate = useNavigate();
+  const { recurringId } = useParams<{ recurringId: string }>();
+  const { user, recurringTemplates, fetchRecurringTemplates } = useUser();
   const [template, setTemplate] = useState<RecurringTemplate | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const friends = user?.friends || []
+  const friends = user?.friends || [];
 
   const getFriendNameById = (userId: string) => {
-    if (userId === user?.id) return "You"
-    return friends.find((f) => f.id === userId)?.displayName ?? "Unknown"
-  }
+    if (userId === user?.id) return "You";
+    return friends.find((f) => f.id === userId)?.displayName ?? "Unknown";
+  };
 
   const formatFrequency = (frequency: string) => {
     switch (frequency) {
       case "daily":
-        return "Daily"
+        return "Daily";
       case "weekly":
-        return "Weekly"
+        return "Weekly";
       case "monthly":
-        return "Monthly"
+        return "Monthly";
       case "yearly":
-        return "Yearly"
+        return "Yearly";
       default:
-        return frequency
+        return frequency;
     }
-  }
+  };
 
   const formatNextDueDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-SG", {
       day: "numeric",
       month: "long",
       year: "numeric",
-    })
-  }
+    });
+  };
 
   const handleDelete = async () => {
-    if (!recurringId) return
+    if (!recurringId) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      const token = localStorage.getItem("token")
-      await axios.delete(`${import.meta.env.VITE_API_URL}/transaction/recurring/${recurringId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/transaction/recurring/${recurringId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       await fetchRecurringTemplates();
-      navigate("/recurring")
-      toast.success("Recurring transaction deleted successfully")
+      navigate("/recurring");
+      toast.success("Recurring transaction deleted successfully");
       return;
     } catch (error) {
-      console.error("Error deleting recurring template:", error)
-      toast.error("Failed to delete recurring transaction")
+      console.error("Error deleting recurring template:", error);
+      toast.error("Failed to delete recurring transaction");
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleEdit = () => {
-    if (!template) return
+    if (!template) return;
 
-    toast.error("This feature is not ready yet!")
-    return
+    toast.error("This feature is not ready yet!");
+    return;
 
     // Navigate to the edit page when implemented
     // navigate(`/recurring/edit/${recurringId}`);
-  }
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      if (!recurringTemplates && user?.id) {
+        await fetchRecurringTemplates();
+      }
+    };
+
+    load();
+  }, [user?.id, recurringTemplates, fetchRecurringTemplates]);
 
   useEffect(() => {
     if (!recurringId || !recurringTemplates) {
-      toast.error("Recurring transaction not found");
-      navigate("/recurring");
       return;
     }
 
@@ -104,11 +115,10 @@ const ViewRecurringPage = () => {
     if (foundTemplate) {
       setTemplate(foundTemplate);
     } else {
-      toast.error("Failed to load transaction details");
+      toast.error("Failed to load recurring transaction");
       navigate("/recurring");
     }
-
-  }, [recurringId, navigate]);
+  }, [recurringId, recurringTemplates, navigate]);
 
   if (!template || !user) return null;
 
@@ -117,7 +127,11 @@ const ViewRecurringPage = () => {
       <div className="w-full max-w-sm pt-5 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" className="flex items-center gap-2 px-0 has-[>svg]:pr-0" onClick={() => navigate(-1)}>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 px-0 has-[>svg]:pr-0"
+            onClick={() => navigate(-1)}
+          >
             <ArrowLeft className="size-5" />
             <span className="text-base font-medium">Back</span>
           </Button>
@@ -138,8 +152,9 @@ const ViewRecurringPage = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Recurring Template</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this recurring transaction? This action cannot be undone and will stop
-                    all future associated transactions.
+                    Are you sure you want to delete this recurring transaction?
+                    This action cannot be undone and will stop all future
+                    associated transactions.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -201,20 +216,27 @@ const ViewRecurringPage = () => {
                 </Badge>
               </div>
             </div>
-      
+
             {/* Splits Section */}
             <div>
               <h3 className="text-sm font-semibold mb-2">Split Details</h3>
               <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
                 {template.splitsInSgd.map((split, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <span className="text-sm">{getFriendNameById(split.user)}</span>
-                    <span className="font-medium">${split.amount.toFixed(2)}</span>
+                  <div
+                    key={index}
+                    className="flex justify-between items-center"
+                  >
+                    <span className="text-sm">
+                      {getFriendNameById(split.user)}
+                    </span>
+                    <span className="font-medium">
+                      ${split.amount.toFixed(2)}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-      
+
             {/* Notes Section (if available) */}
             {template.notes && (
               <div>
@@ -224,11 +246,11 @@ const ViewRecurringPage = () => {
                 </p>
               </div>
             )}
-          </CardContent>    
+          </CardContent>
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ViewRecurringPage
+export default ViewRecurringPage;
