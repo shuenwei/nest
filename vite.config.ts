@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { VitePWA } from 'vite-plugin-pwa';
+import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
@@ -13,7 +13,7 @@ export default defineConfig({
 
     tailwindcss(),
 
-    VitePWA({
+    /*VitePWA({
       registerType: "autoUpdate",
        devOptions: {
         enabled: true
@@ -39,7 +39,7 @@ export default defineConfig({
       }
     ]
       }
-    })
+    })*/
   ],
 
   resolve: {
