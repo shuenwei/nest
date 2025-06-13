@@ -96,6 +96,16 @@ const ViewRecurringPage = () => {
   };
 
   useEffect(() => {
+    const load = async () => {
+      if (!recurringTemplates && user?.id) {
+        await fetchRecurringTemplates();
+      }
+    };
+
+    load();
+  }, [user?.id, recurringTemplates, fetchRecurringTemplates]);
+
+  useEffect(() => {
     if (!recurringId || !recurringTemplates) {
       return;
     }
