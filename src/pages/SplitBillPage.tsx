@@ -834,6 +834,7 @@ const SplitBillPage = () => {
                       <FormLabel>Paid by</FormLabel>
                       <FormControl>
                         <Select
+                          key={field.value}
                           value={field.value}
                           onValueChange={field.onChange}
                         >

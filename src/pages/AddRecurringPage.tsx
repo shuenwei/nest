@@ -629,6 +629,7 @@ const AddRecurringPage = () => {
                     <FormLabel>Paid by</FormLabel>
                     <FormControl className="w-full">
                       <Select
+                        key={field.value}
                         value={field.value}
                         onValueChange={field.onChange}
                       >

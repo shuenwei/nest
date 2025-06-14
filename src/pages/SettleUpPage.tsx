@@ -508,6 +508,7 @@ const SettleUpPage = () => {
                       <FormLabel>From</FormLabel>
                       <FormControl>
                         <Select
+                          key={field.value}
                           value={field.value}
                           onValueChange={field.onChange}
                         >
@@ -544,6 +545,7 @@ const SettleUpPage = () => {
                       <FormLabel>To</FormLabel>
                       <FormControl>
                         <Select
+                          key={field.value}
                           value={field.value}
                           onValueChange={field.onChange}
                         >
