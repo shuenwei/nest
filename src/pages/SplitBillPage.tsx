@@ -435,9 +435,8 @@ const SplitBillPage = () => {
 
   // Handle currency change
   useEffect(() => {
+    if (isEditMode) return;
     const fetchRate = async () => {
-      if (isEditMode) return;
-
       if (currency === "SGD") {
         setCurrentExchangeRate(1);
         return;
