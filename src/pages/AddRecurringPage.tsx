@@ -7,7 +7,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Minus, Plus, ArrowLeft, AlertCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 import { useUser } from "@/contexts/UserContext";
+import { RecurringTemplate } from "@/lib/recurring";
 
 // Split calculation component
 interface SplitCalculationProps {
@@ -203,12 +204,16 @@ type FormValues = z.infer<typeof formSchema>;
 const AddRecurringPage = () => {
   const [openPeopleSelect, setOpenPeopleSelect] = useState(false);
   const navigate = useNavigate();
+  const { recurringId } = useParams<{ recurringId?: string }>();
+  const isEditMode = !!recurringId;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");
+  const [initializing, setInitializing] = useState(true);
 
   usePreserveScroll();
 
-  const { user, refreshUser, fetchRecurringTemplates } = useUser();
+  const { user, refreshUser, fetchRecurringTemplates, recurringTemplates } =
+    useUser();
 
   const [friends, setFriends] = useState<
     Array<{
@@ -260,6 +265,58 @@ const AddRecurringPage = () => {
       name: "manualSplits",
     });
 
+  // Populate form when editing an existing template
+  useEffect(() => {
+    if (!isEditMode) {
+      setInitializing(false);
+      return;
+    }
+
+    if (!recurringId || !recurringTemplates) {
+      toast.error("Error loading recurring template to edit.");
+      navigate(`/recurring/${recurringId}`);
+      setInitializing(false);
+      return;
+    }
+
+    const existing = recurringTemplates.find((t) => t._id === recurringId);
+    if (!existing) {
+      toast.error("Error loading recurring template to edit.");
+      navigate(-1);
+      setInitializing(false);
+      return;
+    }
+
+    const manualSplitsData = existing.splitsInSgd.map((s) => ({
+      user: s.user,
+      amount: s.amount.toFixed(2),
+    }));
+
+    form.reset({
+      templateName: existing.transactionName,
+      amount: existing.amount.toFixed(2),
+      frequency: existing.frequency,
+      startDate: new Date(existing.nextDate),
+      paidBy: existing.paidBy,
+      splitMethod: "manual",
+      selectedPeople: existing.splitsInSgd.map((s) => s.user),
+      manualSplits: manualSplitsData,
+      notes: existing.notes ?? "",
+    });
+
+    console.log(existing.frequency);
+
+    replaceManualSplits(manualSplitsData);
+    setInitializing(false);
+  }, [
+    isEditMode,
+    recurringId,
+    recurringTemplates,
+    form,
+    replaceManualSplits,
+    navigate,
+  ]);
+
   // Watch for changes to update UI
   const amount = form.watch("amount");
   const selectedPeople = form.watch("selectedPeople");
@@ -268,6 +325,8 @@ const AddRecurringPage = () => {
 
   // Update manual splits when selected people change
   useEffect(() => {
+    if (initializing) return;
+
     const currentPeople = new Set(manualSplits.map((split) => split.user));
     const newSplits = [...manualSplits];
 
@@ -374,24 +433,44 @@ const AddRecurringPage = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/transaction/recurring/create`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      if (!isEditMode) {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/transaction/recurring/create`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      await refreshUser();
-      await fetchRecurringTemplates();
-      console.log(response);
-      toast.success("Success!", {
-        description: "Recurring transaction added successfully!",
-      });
-      navigate("/recurring");
+        await refreshUser();
+        await fetchRecurringTemplates();
+        console.log(response);
+        toast.success("Success!", {
+          description: "Recurring transaction added successfully!",
+        });
+        navigate("/recurring");
+      } else {
+        const response = await axios.put(
+          `${
+            import.meta.env.VITE_API_URL
+          }/transaction/recurring/update/${recurringId}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        await refreshUser();
+        await fetchRecurringTemplates();
+        console.log(response);
+        toast.success("Success!", {
+          description: "Recurring transaction updated successfully!",
+        });
+        navigate(-1);
+      }
     } catch (err) {
-      console.error("Error creating recurring template:", err);
-      toast.error("Failed to add recurring transaction.");
+      console.error("Error saving recurring template:", err);
+      toast.error("Failed to save recurring transaction.");
     } finally {
       setIsSubmitting(false);
     }
@@ -410,9 +489,13 @@ const AddRecurringPage = () => {
         </Button>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Add Recurring Transaction</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode
+              ? "Edit Recurring Transaction"
+              : "Add Recurring Transaction"}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Add a new recurring transaction
+            {isEditMode ? "" : "Add a new recurring transaction"}
           </p>
         </div>
 
@@ -476,6 +559,7 @@ const AddRecurringPage = () => {
                       <FormLabel>Frequency</FormLabel>
                       <FormControl className="w-full">
                         <Select
+                          key={field.value}
                           value={field.value}
                           onValueChange={field.onChange}
                         >
@@ -578,7 +662,7 @@ const AddRecurringPage = () => {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="flex flex-col space-y-1"
                         >
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -807,7 +891,7 @@ const AddRecurringPage = () => {
             </Card>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Recurring Transaction"}
+              {isSubmitting ? "Saving..." : "Save Recurring Transaction"}
             </Button>
           </form>
         </Form>

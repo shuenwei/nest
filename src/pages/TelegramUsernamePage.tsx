@@ -64,8 +64,7 @@ const TelegramUsernamePage: FC<TelegramUsernamePageProps> = ({
         <CardHeader className="px-6 pb-2">
           <CardTitle>Firstly, what’s your Telegram username?</CardTitle>
           <CardDescription>
-            Your Telegram username will be used to let friends find you on
-            Splity
+            Your Telegram username will be used to let friends find you on Nest
           </CardDescription>
         </CardHeader>
 

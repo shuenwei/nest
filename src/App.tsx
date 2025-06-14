@@ -94,6 +94,10 @@ function App() {
             path="/recurring/:recurringId"
             element={<ViewRecurringPage />}
           />
+          <Route
+            path="/recurring/edit/:recurringId"
+            element={<AddRecurringPage />}
+          />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
         </Route>
       </Routes>

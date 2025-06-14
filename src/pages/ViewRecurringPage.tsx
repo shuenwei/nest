@@ -88,11 +88,7 @@ const ViewRecurringPage = () => {
   const handleEdit = () => {
     if (!template) return;
 
-    toast.error("This feature is not ready yet!");
-    return;
-
-    // Navigate to the edit page when implemented
-    // navigate(`/recurring/edit/${recurringId}`);
+    navigate(`/recurring/edit/${recurringId}`);
   };
 
   useEffect(() => {
