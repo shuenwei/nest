@@ -16,6 +16,7 @@ import {
   Receipt,
   RefreshCw,
   ChevronDown,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import axios from "axios";
@@ -721,6 +723,15 @@ const SplitBillPage = () => {
             {/* Restaurant Details Card */}
             <Card className="p-6">
               <CardContent className="p-0 space-y-6">
+                <Alert>
+                  <Lightbulb />
+                  <AlertTitle>Quick Tip!</AlertTitle>
+                  <AlertDescription>
+                    Don't want to enter receipt details manually? You can send a
+                    picture of your receipt to the 'nest' telegram bot to be
+                    scanned!
+                  </AlertDescription>
+                </Alert>
                 {/* Restaurant Name */}
                 <FormField
                   control={form.control}

@@ -35,7 +35,7 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
             className="w-fit mt-1"
             onClick={() => navigate(`/recurring/${transaction.templateId}`)}
           >
-            View Assoicated Transaction
+            View Associated Transaction
           </Button>
         </AlertDescription>
       </Alert>

@@ -22,11 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/contexts/UserContext";
@@ -79,7 +75,7 @@ const AccountSettingsPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        
+
         refreshUser();
         toast.success("Your profile photo has been updated!");
       } catch (err) {
@@ -190,7 +186,11 @@ const AccountSettingsPage = () => {
                   <AlertCircleIcon />
                   <AlertTitle>Don't see your profile photo above?</AlertTitle>
                   <AlertDescription>
-                    It might be due to your telegram privacy settings. To sync your profile photo, click on the button to login with telegram.
+                    It might be due to your telegram privacy settings. To sync
+                    your profile photo, set your telegram display picture to
+                    'Everyone'. Then, click on the button to login with
+                    telegram. You can change you privacy settings back to
+                    'Friends Only' after.
                   </AlertDescription>
                 </Alert>
               </CardContent>
