@@ -666,7 +666,7 @@ const SplitBillPage = () => {
     const totalInSGD = calculateTotalInSGD();
 
     const participants = Array.from(
-      new Set([...values.participants, values.paidBy])
+      new Set([...values.participants, values.paidBy, currentUserId])
     );
 
     const items = values.items.map((i) => ({

@@ -416,7 +416,7 @@ const AddRecurringPage = () => {
     }
 
     const participants = Array.from(
-      new Set([...values.selectedPeople, values.paidBy])
+      new Set([...values.selectedPeople, values.paidBy, currentUserId])
     );
 
     const payload = {
