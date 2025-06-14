@@ -74,6 +74,10 @@ function App() {
           <Route path="/friends/:friendId" element={<ViewFriendPage />} />
           <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/splitpurchase" element={<SplitPurchasePage />} />
+          <Route
+            path="/splitpurchase/edit/:transactionId"
+            element={<SplitPurchasePage />}
+          />
           <Route path="/splitbill" element={<SplitBillPage />} />
           <Route path="/settleup" element={<SettleUpPage />} />
           <Route path="/recurring" element={<ManageRecurringPage />} />

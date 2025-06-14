@@ -13,7 +13,7 @@ import {
   RefreshCw,
   ChevronDown,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -66,6 +66,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import { PurchaseTransaction } from "@/lib/transaction";
 import axios from "axios";
 
 interface ExchangeRateDialogProps {
@@ -412,10 +413,13 @@ const SplitPurchasePage = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");
+  const { transactionId } = useParams<{ transactionId?: string }>();
+  const isEditMode = !!transactionId;
+  const [initializing, setInitializing] = useState(true);
 
   usePreserveScroll();
 
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, transactions } = useUser();
 
   const [friends, setFriends] = useState<
     Array<{
@@ -464,6 +468,48 @@ const SplitPurchasePage = () => {
       notes: "",
     },
   });
+
+  // Populate form when editing an existing transaction
+  useEffect(() => {
+    if (!isEditMode || !transactionId) {
+      setInitializing(false);
+      return;
+    }
+
+    const existing = transactions.find((t) => t._id === transactionId);
+    if (!existing || existing.type !== "purchase") {
+      toast.error("Error loading transaction to edit.");
+      navigate(-1);
+      setInitializing(false);
+      return;
+    }
+
+    const data = existing as PurchaseTransaction;
+
+    const manualSplitsData = data.manualSplits.map((s) => ({
+      user: s.user,
+      amount: s.amount.toFixed(2),
+    }));
+
+    form.reset({
+      transactionname: data.transactionName,
+      amount: data.amount.toFixed(2),
+      currency: data.currency,
+      date: new Date(data.date),
+      paidBy: data.paidBy,
+      splitMethod: data.splitMethod,
+      selectedPeople: data.splitsInSgd.map((split) => split.user),
+      manualSplits: data.manualSplits.map((s) => ({
+        user: s.user,
+        amount: s.amount.toFixed(2),
+      })),
+      notes: data.notes ?? "",
+    });
+
+    setCurrentExchangeRate(data.exchangeRate);
+    replaceManualSplits(manualSplitsData);
+    setInitializing(false);
+  }, [isEditMode, transactionId, transactions, form]);
 
   const { fields: manualSplitFields, replace: replaceManualSplits } =
     useFieldArray({
@@ -516,6 +562,8 @@ const SplitPurchasePage = () => {
 
   // Update manual splits when selected people change
   useEffect(() => {
+    if (initializing) return;
+
     const currentPeople = new Set(manualSplits.map((split) => split.user));
     const newSplits = [...manualSplits];
 
@@ -644,23 +692,42 @@ const SplitPurchasePage = () => {
     };
     setIsSubmitting(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/transaction/purchase/create`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      if (!isEditMode) {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/transaction/purchase/create`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      await refreshUser();
-      console.log(response);
-      toast.success("Success!", {
-        description: "Expense split added successfully!",
-      });
-      navigate("/history");
+        await refreshUser();
+        console.log(response);
+        toast.success("Success!", {
+          description: "Expense split added successfully!",
+        });
+        navigate("/history");
+      } else {
+        const response = await axios.put(
+          `${
+            import.meta.env.VITE_API_URL
+          }/transaction/purchase/update/${transactionId}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        await refreshUser();
+        console.log(response);
+        toast.success("Success!", {
+          description: "Expense split updated successfully!",
+        });
+        navigate(-1);
+      }
     } catch (err) {
-      console.error("Error submitting purchase:", err);
-      toast.error("Failed to save expense.");
+      console.error("Error updating purchase:", err);
+      toast.error("Failed to update expense.");
     } finally {
       setIsSubmitting(false);
     }
@@ -679,9 +746,11 @@ const SplitPurchasePage = () => {
         </Button>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Split Purchase</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode ? "Edit Purchase" : "Split Purchase"}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Add a new purchase split
+            {isEditMode ? "" : "Add a new purchase split"}
           </p>
         </div>
 
@@ -855,7 +924,7 @@ const SplitPurchasePage = () => {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="flex flex-col space-y-1"
                         >
                           <FormItem className="flex items-center space-x-3 space-y-0">
