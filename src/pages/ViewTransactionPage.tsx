@@ -80,11 +80,7 @@ const ViewTransactionPage = () => {
   const handleEdit = () => {
     if (!transaction) return;
 
-    toast.error("This feature is not ready yet!");
-    return;
-
     // Navigate to the appropriate edit page based on transaction type
-    /*
     switch (transaction.type) {
       case "purchase":
         navigate(`/splitpurchase/edit/${transactionId}`);
@@ -95,13 +91,9 @@ const ViewTransactionPage = () => {
       case "settleup":
         navigate(`/settleup/edit/${transactionId}`);
         break;
-      case "recurring":
-        navigate(`/recurring/edit/${transactionId}`);
-        break;
       default:
         break;
     }
-    */
   };
 
   if (isLoading) return <LoadingScreen />;
@@ -122,7 +114,6 @@ const ViewTransactionPage = () => {
           </Button>
 
           <div className="flex gap-3">
-
             {transaction.type !== "recurring" && (
               <Button variant="ghost" size="icon" onClick={handleEdit}>
                 <Pencil />

@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +16,8 @@ import {
   Receipt,
   RefreshCw,
   ChevronDown,
-  Lightbulb,
+  ScanText,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import { BillTransaction } from "@/lib/transaction";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -274,6 +276,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 const SplitBillPage = () => {
   const navigate = useNavigate();
+  const { transactionId } = useParams<{ transactionId?: string }>();
+  const isEditMode = !!transactionId;
+  const [isPrefilled, setIsPrefilled] = useState(false);
   const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -281,7 +286,7 @@ const SplitBillPage = () => {
 
   const token = localStorage.getItem("token");
 
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, transactions } = useUser();
 
   const [friends, setFriends] = useState<
     Array<{
@@ -341,6 +346,45 @@ const SplitBillPage = () => {
     name: "items",
   });
 
+  // Populate form when editing an existing transaction
+  useEffect(() => {
+    if (!isEditMode || !transactionId) {
+      return;
+    }
+
+    const existing = transactions.find((t) => t._id === transactionId);
+    if (!existing || existing.type !== "bill") {
+      toast.error("Error loading transaction to edit.");
+      navigate(-1);
+      return;
+    }
+
+    const data = existing as BillTransaction;
+
+    form.reset({
+      restaurantName: data.transactionName,
+      transactiontype: "bill",
+      date: new Date(data.date),
+      paidBy: data.paidBy,
+      currency: data.currency,
+      participants: data.splitsInSgd.map((split) => split.user),
+      items: data.items.map((i) => ({
+        name: i.name,
+        price: i.price.toFixed(2),
+        sharedBy: i.sharedBy,
+      })),
+      discountType: data.discountType as "none" | "amount" | "percentage",
+      discountValue: data.discountValue.toString(),
+      serviceCharge: data.serviceCharge,
+      serviceChargePercentage: data.serviceChargePercentage.toString(),
+      gst: data.gst,
+      gstPercentage: data.gstPercentage.toString(),
+      notes: data.notes ?? "",
+    });
+
+    setCurrentExchangeRate(data.exchangeRate);
+  }, [isEditMode, transactionId, transactions, form]);
+
   useEffect(() => {
     const restaurantName = searchParams.get("rName") ?? "";
     const itemNames = searchParams.getAll("n");
@@ -364,6 +408,7 @@ const SplitBillPage = () => {
 
       form.setValue("items", items);
       toast.success("Your receipt has been pre-filled!");
+      setIsPrefilled(true);
     }
   }, [searchParams]);
 
@@ -391,6 +436,8 @@ const SplitBillPage = () => {
   // Handle currency change
   useEffect(() => {
     const fetchRate = async () => {
+      if (isEditMode) return;
+
       if (currency === "SGD") {
         setCurrentExchangeRate(1);
         return;
@@ -674,17 +721,35 @@ const SplitBillPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/transaction/bill/create`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      await refreshUser();
-      console.log(response);
-      toast.success("Success!", { description: "Bill saved successfully!" });
-      navigate("/history");
+      if (!isEditMode) {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/transaction/bill/create`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        await refreshUser();
+        console.log(response);
+        toast.success("Success!", { description: "Bill saved successfully!" });
+        navigate("/history");
+      } else {
+        const response = await axios.put(
+          `${
+            import.meta.env.VITE_API_URL
+          }/transaction/bill/update/${transactionId}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        await refreshUser();
+        console.log(response);
+        toast.success("Success!", {
+          description: "Bill updated successfully!",
+        });
+        navigate(-1);
+      }
     } catch (err) {
       console.error("Error submitting bill:", err);
       toast.error("Failed to save bill.");
@@ -712,9 +777,11 @@ const SplitBillPage = () => {
         </Button>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Split Restaurant Bill</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode ? "Edit Bill" : "Split Restaurant Bill"}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Split a restaurant bill among friends
+            {isEditMode ? "" : "Split a restaurant bill among friends"}
           </p>
         </div>
 
@@ -723,15 +790,27 @@ const SplitBillPage = () => {
             {/* Restaurant Details Card */}
             <Card className="p-6">
               <CardContent className="p-0 space-y-6">
-                <Alert>
-                  <Lightbulb />
-                  <AlertTitle>Quick Tip!</AlertTitle>
-                  <AlertDescription>
-                    Don't want to enter receipt details manually? You can send a
+                {!isEditMode && (
+                  <Alert>
+                    {isPrefilled ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <ScanText className="h-4 w-4" />
+                    )}
+                    <AlertTitle>
+                      {isPrefilled
+                        ? "Your receipt has been pre-filled!"
+                        : "Scan your receipts!"}
+                    </AlertTitle>
+                    <AlertDescription>
+                      {isPrefilled
+                        ? "The resturant name, item names and item prices have been pre-filled. Select the currency, friends for each item, and enter additional charges. Be sure to check for mistakes made by the AI."
+                        : `Don't want to enter receipt details manually? You can send a
                     picture of your receipt to the 'nest' telegram bot to be
-                    scanned!
-                  </AlertDescription>
-                </Alert>
+                    scanned!`}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 {/* Restaurant Name */}
                 <FormField
                   control={form.control}

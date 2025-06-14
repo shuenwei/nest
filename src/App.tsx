@@ -79,7 +79,15 @@ function App() {
             element={<SplitPurchasePage />}
           />
           <Route path="/splitbill" element={<SplitBillPage />} />
+          <Route
+            path="/splitbill/edit/:transactionId"
+            element={<SplitBillPage />}
+          />
           <Route path="/settleup" element={<SettleUpPage />} />
+          <Route
+            path="/settleup/edit/:transactionId"
+            element={<SettleUpPage />}
+          />
           <Route path="/recurring" element={<ManageRecurringPage />} />
           <Route path="/recurring/add" element={<AddRecurringPage />} />
           <Route

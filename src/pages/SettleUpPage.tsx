@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,6 +53,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import { SettleUpTransaction } from "@/lib/transaction";
 import axios from "axios";
 
 // Exchange Rate Dialog Component
@@ -241,9 +242,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 const SettleUpPage = () => {
   const navigate = useNavigate();
+  const { transactionId } = useParams<{ transactionId?: string }>();
+  const isEditMode = !!transactionId;
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
 
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, transactions } = useUser();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -298,6 +301,32 @@ const SettleUpPage = () => {
       notes: "",
     },
   });
+
+  // Populate form when editing an existing transaction
+  useEffect(() => {
+    if (!isEditMode || !transactionId) {
+      return;
+    }
+
+    const existing = transactions.find((t) => t._id === transactionId);
+    if (!existing || existing.type !== "settleup") {
+      toast.error("Error loading transaction to edit.");
+      navigate(-1);
+      return;
+    }
+
+    const data = existing as SettleUpTransaction;
+
+    form.reset({
+      payer: data.payer,
+      payee: data.payee,
+      amount: data.amount.toFixed(2),
+      currency: data.currency,
+      notes: data.notes ?? "",
+    });
+
+    setCurrentExchangeRate(data.exchangeRate);
+  }, [isEditMode, transactionId, transactions, friends, form]);
 
   // Watch for changes to update UI
   const amount = form.watch("amount");
@@ -398,21 +427,41 @@ const SettleUpPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      if (!isEditMode) {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/transaction/settleup/create`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      await refreshUser();
+        await refreshUser();
 
-      toast.success("Success!", {
-        description: "Transfer recorded!",
-      });
-      console.log(response);
-      navigate("/history");
+        toast.success("Success!", {
+          description: "Transfer recorded!",
+        });
+        console.log(response);
+        navigate("/history");
+      } else {
+        const response = await axios.put(
+          `${
+            import.meta.env.VITE_API_URL
+          }/transaction/settleup/update/${transactionId}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        await refreshUser();
+
+        toast.success("Success!", {
+          description: "Transfer updated!",
+        });
+        console.log(response);
+        navigate(-1);
+      }
     } catch (error) {
       console.error("Error submitting settle up:", error);
       toast.error("Failed to submit", {
@@ -436,9 +485,11 @@ const SettleUpPage = () => {
         </Button>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Settle Up</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode ? "Edit Transfer" : "Settle Up"}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Record transfers among friends
+            {isEditMode ? "" : "Record transfers among friends"}
           </p>
         </div>
 
@@ -704,7 +755,7 @@ const SettleUpPage = () => {
             )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Record Payment"}
+              {isSubmitting ? "Saving..." : "Save Transfer"}
             </Button>
           </form>
         </Form>
