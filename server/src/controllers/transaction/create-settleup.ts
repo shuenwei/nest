@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { SettleUp } from "../../models/SettleUpTransaction";
+import { notifyTransfer } from "../../utils/telegram-notifications";
 
 const createSettleUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -40,6 +41,13 @@ const createSettleUp = async (req: Request, res: Response): Promise<void> => {
       payer: payerId,
       payee: payeeId,
     });
+
+    await notifyTransfer(
+      newSettleUp._id.toString(),
+      payerId,
+      payeeId,
+      amountInSgd
+    );
 
     res.status(201).json(newSettleUp);
   } catch (err) {

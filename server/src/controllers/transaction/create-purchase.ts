@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
-import { Types } from 'mongoose';
-import { Purchase } from '../../models/PurchaseTransaction';
+import { Request, Response } from "express";
+import { Types } from "mongoose";
+import { Purchase } from "../../models/PurchaseTransaction";
+import { notifySplits } from "../../utils/telegram-notifications";
 
 const createPurchase = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -30,20 +31,20 @@ const createPurchase = async (req: Request, res: Response): Promise<void> => {
       ({ user, amount }: { user: string; amount: number }) => ({
         user: toObjectId(user),
         amount,
-      }),
+      })
     );
 
     const splitsInSgdObj = (splitsInSgd ?? []).map(
       ({ user, amount }: { user: string; amount: number }) => ({
         user: toObjectId(user),
         amount,
-      }),
+      })
     );
 
     const newPurchase = await Purchase.create({
       /* ---------- fields from BaseTransaction ---------- */
       transactionName,
-      type: 'purchase',
+      type: "purchase",
       participants: participantsObjIds,
       currency,
       exchangeRate,
@@ -58,10 +59,19 @@ const createPurchase = async (req: Request, res: Response): Promise<void> => {
       splitsInSgd: splitsInSgdObj,
     });
 
+    if (splitsInSgdObj.length > 0) {
+      await notifySplits(
+        newPurchase._id.toString(),
+        transactionName,
+        paidByObjId,
+        splitsInSgdObj
+      );
+    }
+
     res.status(201).json(newPurchase);
   } catch (err) {
-    console.error('Error creating purchase:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error creating purchase:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

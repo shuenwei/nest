@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { RecurringTemplate } from "../../models/RecurringTemplate";
 import { Recurring } from "../../models/RecurringTransaction";
 import { addDays, addWeeks, addMonths, addYears, isBefore } from "date-fns";
+import { notifySplits } from "../../utils/telegram-notifications";
 
 /** Advance helper */
 function advance(date: Date, freq: "daily" | "weekly" | "monthly" | "yearly") {
@@ -24,8 +25,10 @@ const generateIfDue = async (
   const now = new Date();
   if (!template.nextDate || template.nextDate > now) return; // nothing due
 
+  let newRecurringId: string | undefined;
+
   await mongoose.connection.transaction(async (session) => {
-    await Recurring.create(
+    const [newRecurring] = await Recurring.create(
       [
         {
           /* -------- base fields -------- */
@@ -47,9 +50,20 @@ const generateIfDue = async (
       { session }
     );
 
+    newRecurringId = newRecurring._id.toString();
+
     template.nextDate = advance(template.nextDate, template.frequency);
     await template.save({ session });
   });
+
+  if (newRecurringId && template.splitsInSgd.length > 0) {
+    await notifySplits(
+      newRecurringId,
+      template.transactionName,
+      template.paidBy,
+      template.splitsInSgd
+    );
+  }
 };
 
 export default generateIfDue;

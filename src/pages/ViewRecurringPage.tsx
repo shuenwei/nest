@@ -73,8 +73,8 @@ const ViewRecurringPage = () => {
         }
       );
 
-      await fetchRecurringTemplates();
       navigate("/recurring");
+      await fetchRecurringTemplates();
       toast.success("Recurring transaction deleted successfully");
       return;
     } catch (error) {

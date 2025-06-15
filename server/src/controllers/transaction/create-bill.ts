@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import { Types } from 'mongoose';
-import { Bill } from '../../models/BillTransaction';
-
+import { Request, Response } from "express";
+import { Types } from "mongoose";
+import { Bill } from "../../models/BillTransaction";
+import { notifySplits } from "../../utils/telegram-notifications";
 
 const createBill = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -43,24 +43,32 @@ const createBill = async (req: Request, res: Response): Promise<void> => {
     const paidByObjId = toObjectId(paidBy);
 
     const itemsObj = (items ?? []).map(
-      ({ name, price, sharedBy }: { name: string; price: number; sharedBy: string[] }) => ({
+      ({
+        name,
+        price,
+        sharedBy,
+      }: {
+        name: string;
+        price: number;
+        sharedBy: string[];
+      }) => ({
         name,
         price,
         sharedBy: sharedBy.map(toObjectId),
-      }),
+      })
     );
 
     const splitsInSgdObj = (splitsInSgd ?? []).map(
       ({ user, amount }: { user: string; amount: number }) => ({
         user: toObjectId(user),
         amount,
-      }),
+      })
     );
 
     const newBill = await Bill.create({
       /* ---------- BaseTransaction ---------- */
       transactionName,
-      type: 'bill',
+      type: "bill",
       participants: participantsObjIds,
       currency,
       exchangeRate,
@@ -94,10 +102,19 @@ const createBill = async (req: Request, res: Response): Promise<void> => {
       splitsInSgd: splitsInSgdObj,
     });
 
+    if (splitsInSgdObj.length > 0) {
+      await notifySplits(
+        newBill._id.toString(),
+        transactionName,
+        paidByObjId,
+        splitsInSgdObj
+      );
+    }
+
     res.status(201).json(newBill);
   } catch (err) {
-    console.error('Error creating bill:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error creating bill:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

@@ -107,7 +107,13 @@ const ViewTransactionPage = () => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 px-0 has-[>svg]:pr-0"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              if (window.history.length <= 2) {
+                navigate("/history", { replace: true });
+              } else {
+                navigate(-1);
+              }
+            }}
           >
             <ArrowLeft className="size-5" />
             <span className="text-base font-medium">Back</span>

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const RecurringTemplateSchema = new mongoose.Schema({
-  transactionName: String,
+  transactionName: { type: String, required: true },
   participants: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
   paidBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   amount: { type: Number, required: true },
