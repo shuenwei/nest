@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from "react";
 import axios from "axios";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -37,7 +38,9 @@ interface UserContextValue {
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   recurringTemplates: RecurringTemplate[] | null;
-  setRecurringTemplates: React.Dispatch<React.SetStateAction<RecurringTemplate[] | null>>;
+  setRecurringTemplates: React.Dispatch<
+    React.SetStateAction<RecurringTemplate[] | null>
+  >;
   fetchRecurringTemplates: () => Promise<void>;
   loading: boolean;
   refreshUser: () => Promise<void>;
@@ -59,7 +62,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     try {
-
       setProgress(10);
 
       const res = await axios.get(
@@ -109,21 +111,20 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setProgress(100);
-      
+
       setLoading(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-      const message = err.response?.data?.message;
+        const message = err.response?.data?.message;
 
-
-      if (message === "Token not provided" || message === "Invalid token")  {
-      console.error("Failed to fetch user:", err);
-      setUser(null);
-      localStorage.removeItem("token");
-      localStorage.removeItem("telegramId");
-      toast.error("Please re-login.");
-      } else {
-        toast.error("Something went wrong. Please refresh your app.");
+        if (message === "Token not provided" || message === "Invalid token") {
+          console.error("Failed to fetch user:", err);
+          setUser(null);
+          localStorage.removeItem("token");
+          localStorage.removeItem("telegramId");
+          toast.error("Please re-login.");
+        } else {
+          toast.error("Something went wrong. Please refresh your app.");
         }
       }
     }
@@ -136,7 +137,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     init();
   }, []);
 
-  const [recurringTemplates, setRecurringTemplates] = useState<RecurringTemplate[] | null>(null);
+  const [recurringTemplates, setRecurringTemplates] = useState<
+    RecurringTemplate[] | null
+  >(null);
 
   const fetchRecurringTemplates = async () => {
     if (!user) return;
@@ -156,8 +159,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  if (loading) return <LoadingScreen progress={progress} />;
+  const lastHiddenRef = useRef<number>(Date.now());
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        lastHiddenRef.current = Date.now();
+      } else if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastHiddenRef.current > 1 * 60 * 1000
+      ) {
+        refreshUser();
+        fetchRecurringTemplates();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  if (loading) return <LoadingScreen progress={progress} />;
 
   return (
     <UserContext.Provider
