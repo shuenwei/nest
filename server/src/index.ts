@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import userRoutes from "./routes/user";
 import transactionRoutes from "./routes/transaction";
 import exchangeRoutes from "./routes/exchange";
+import translationRoutes from "./routes/translation";
 import "./utils/telegram-bot";
 import checkBearerToken from "./middlewares/check-bearer-token";
 import errorHandler from "./middlewares/error-handler";
@@ -30,6 +31,7 @@ const setup = async () => {
   app.use("/auth", authRoutes, errorHandler);
   app.use("/user", checkBearerToken, userRoutes, errorHandler);
   app.use("/transaction", checkBearerToken, transactionRoutes, errorHandler);
+  app.use("/translate", checkBearerToken, translationRoutes, errorHandler);
   app.use("/exchange", checkBearerToken, exchangeRoutes, errorHandler);
 
   // Local dev server (optional)

@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ScanText,
   CheckCircle,
+  Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -282,6 +283,8 @@ const SplitBillPage = () => {
   const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isTranslated, setIsTranslated] = useState(false);
   const [searchParams] = useSearchParams();
 
   const token = localStorage.getItem("token");
@@ -320,6 +323,43 @@ const SplitBillPage = () => {
   // State for exchange rates
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
+
+  async function handleTranslate() {
+    const texts = [
+      form.getValues("restaurantName"),
+      ...form.getValues("items").map((i) => i.name),
+    ];
+
+    const token = localStorage.getItem("token");
+
+    setIsTranslating(true);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/translate`,
+        {
+          texts,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const translations: string[] = response.data.translations ?? [];
+      if (translations.length === texts.length) {
+        form.setValue("restaurantName", translations[0]);
+        const currentItems = form.getValues("items");
+        const updated = currentItems.map((item, idx) => ({
+          ...item,
+          name: translations[idx + 1] ?? item.name,
+        }));
+        form.setValue("items", updated);
+        toast.success("Translated to English");
+        setIsTranslated(true);
+      }
+    } catch (err) {
+      toast.error("Translation failed");
+    } finally {
+      setIsTranslating(false);
+    }
+  }
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -807,6 +847,28 @@ const SplitBillPage = () => {
                         : `Don't want to enter receipt details manually? You can send a
                     picture of your receipt to the 'nest' telegram bot to be
                     scanned!`}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {isPrefilled && (
+                  <Alert>
+                    <Languages className="h-4 w-4" />
+                    <AlertTitle>Receipt not in English?</AlertTitle>
+                    <AlertDescription>
+                      <Button
+                        className="mt-2"
+                        type="button"
+                        size="sm"
+                        variant="default"
+                        onClick={handleTranslate}
+                        disabled={isTranslating || isTranslated}
+                      >
+                        {isTranslating
+                          ? "Translating..."
+                          : isTranslated
+                          ? "Receipt Translated"
+                          : "Translate Receipt"}
+                      </Button>
                     </AlertDescription>
                   </Alert>
                 )}
