@@ -147,8 +147,9 @@ const ViewFriendPage = () => {
                   <Alert className="mt-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      You are only able to remove a friend if you have settled
-                      all balances with them.
+                      You are not able to remove a friend if you have existing
+                      transaction history or unsettled balances with that
+                      friend.
                     </AlertDescription>
                   </Alert>
                 </AlertDialogDescription>
