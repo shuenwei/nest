@@ -63,7 +63,6 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { PurchaseTransaction } from "@/lib/transaction";
@@ -416,8 +415,6 @@ const SplitPurchasePage = () => {
   const { transactionId } = useParams<{ transactionId?: string }>();
   const isEditMode = !!transactionId;
   const [initializing, setInitializing] = useState(true);
-
-  usePreserveScroll();
 
   const { user, refreshUser, transactions } = useUser();
 

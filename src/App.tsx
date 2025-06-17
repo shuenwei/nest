@@ -20,19 +20,6 @@ import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ViewRecurringPage from "./pages/ViewRecurringPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "instant",
-    });
-  }, [pathname]);
-
-  return null;
-};
-
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,7 +35,6 @@ function App() {
 
   return (
     <>
-      <ScrollToTop />
       <Routes>
         {/* Unprotected Routes */}
         <Route

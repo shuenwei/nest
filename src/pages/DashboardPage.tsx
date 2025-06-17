@@ -3,9 +3,28 @@ import Navbar from "@/components/NavBar";
 import FriendCard from "@/components/FriendCard";
 import { MoveDownLeft, MoveUpRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const greetings = [
+  "Hi",
+  "Hey",
+  "Hello",
+  "Heya",
+  "Yo",
+  "What's up",
+  "Looking fine",
+  "Ahoy",
+  "Howdy",
+  "Good to see ya",
+  "Bonjour",
+  "Hola amigo",
+  "Wassup",
+  "Nice to see you",
+  "Oh hey",
+  "Konnichiwa",
+];
+const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
 const emojis = ["😎", "👀", "👋🏼"];
 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
@@ -32,16 +51,28 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-10 pb-24">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">
-            Hello, {user?.displayName || "there"}! {randomEmoji}
-          </h1>
-          <Button
-            onClick={() => navigate("/notifications")}
-            variant="ghost"
-            size="icon"
-          >
-            <Bell className="size-6" />
-          </Button>
+          <div>
+            <h1 className="text-xl font-bold">
+              {randomGreeting}! {randomEmoji}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Welcome back, {user.displayName}
+            </p>
+          </div>
+          <Avatar className="h-11 w-11" onClick={() => navigate("/settings")}>
+            <AvatarImage
+              src={user.profilePhoto ? user.profilePhoto : ""}
+              alt={user.displayName}
+            />
+            <AvatarFallback>
+              {user.displayName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </div>
 
         <div className="mb-2 flex justify-between items-center">
@@ -91,8 +122,8 @@ const DashboardPage = () => {
             You are all settled up!
           </div>
         )}
+        <Navbar />
       </div>
-      <Navbar />
     </div>
   );
 };

@@ -52,7 +52,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { usePreserveScroll } from "@/hooks/use-preserve-scroll";
 import { useUser } from "@/contexts/UserContext";
 import { RecurringTemplate } from "@/lib/recurring";
 
@@ -209,8 +208,6 @@ const AddRecurringPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");
   const [initializing, setInitializing] = useState(true);
-
-  usePreserveScroll();
 
   const { user, refreshUser, fetchRecurringTemplates, recurringTemplates } =
     useUser();

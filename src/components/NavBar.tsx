@@ -15,6 +15,7 @@ import {
 import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 interface NavBarProps {
   type?: "active" | "disabled";
@@ -33,16 +34,20 @@ const NavBar = () => {
     { icon: Settings, path: "/settings", action: () => navigate("/settings") },
   ];
 
+  const activeIndex = navItems.findIndex(
+    (item) => item.path && location.pathname === item.path
+  );
+
   return (
     <Card
       className="fixed bottom-7 left-1/2 -translate-x-1/2 
              w-[90%] max-w-sm 
              rounded-full
-             bg-neutral-300/20 backdrop-blur-sm 
-             border border-white/0 
+             bg-neutral-100/20 backdrop-blur-md
              px-6 py-4 
              grid grid-cols-5 
              text-muted-foreground 
+             border border-neutral-200
              shadow-xl"
     >
       {navItems.map(({ icon: Icon, isTrigger, action, path }, index) => {
@@ -50,6 +55,13 @@ const NavBar = () => {
 
         return (
           <div key={index} className="flex items-center justify-center">
+            {index === activeIndex && (
+              <motion.div
+                layoutId="nav-indicator"
+                className="absolute w-18 h-12 z-0 bg-neutral-400/20 backdrop-blur-md rounded-full border border-neutral-300 shadow-md"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
             {isTrigger ? (
               <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
                 <DrawerTrigger asChild>
@@ -92,7 +104,6 @@ const NavBar = () => {
                           setDrawerOpen(false);
                           navigate("/recurring");
                         }}
-                        
                       >
                         <CalendarSync className="size-5 mr-2" />
                         <span className="flex items-center gap-2">
@@ -115,7 +126,10 @@ const NavBar = () => {
                 </DrawerContent>
               </Drawer>
             ) : (
-              <button onClick={action}>
+              <button
+                onClick={action}
+                className="transition hover:scale-105 active:scale-75 z-10"
+              >
                 <Icon
                   className={`w-7 h-7 ${
                     isActive ? "text-foreground" : "text-muted-foreground"
