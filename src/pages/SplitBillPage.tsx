@@ -463,6 +463,25 @@ const SplitBillPage = () => {
   const gstPercentage = form.watch("gstPercentage");
   const currency = form.watch("currency");
 
+  // Removes participants from items when removed from participants list
+  useEffect(() => {
+    const currentParticipants = form.getValues("participants");
+    const currentItems = form.getValues("items");
+    const updatedItems = currentItems.map((item) => ({
+      ...item,
+      sharedBy: item.sharedBy.filter((p) => currentParticipants.includes(p)),
+    }));
+
+    const changed = updatedItems.some(
+      (item, idx) =>
+        item.sharedBy.join("-") !== currentItems[idx].sharedBy.join("-")
+    );
+
+    if (changed) {
+      form.setValue("items", updatedItems);
+    }
+  }, [participants, form]);
+
   // Calculate total bill amount for currency conversion
   const calculateTotalBillAmount = () => {
     return items
@@ -705,8 +724,15 @@ const SplitBillPage = () => {
     const total = calculateTotal();
     const totalInSGD = calculateTotalInSGD();
 
+    const sharedUsers = values.items.flatMap((item) => item.sharedBy);
+
     const participants = Array.from(
-      new Set([...values.participants, values.paidBy, currentUserId])
+      new Set([
+        ...values.participants,
+        values.paidBy,
+        currentUserId,
+        ...sharedUsers,
+      ])
     );
 
     const items = values.items.map((i) => ({
