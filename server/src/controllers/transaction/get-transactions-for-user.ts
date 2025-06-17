@@ -3,7 +3,10 @@ import { Types } from "mongoose";
 import { Transaction } from "../../models/Transaction";
 import { User } from "../../models/User";
 
-const getUserTransactions = async (req: Request, res: Response): Promise<void> => {
+const getUserTransactions = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -20,11 +23,37 @@ const getUserTransactions = async (req: Request, res: Response): Promise<void> =
 
         /* ── 3. Fetch all related transactions ─────────────────────────── */
         const transactions = await Transaction.find({
-            participants: userObjId
-        })
-        .sort({ date: -1 }) // most recent first
+          participants: userObjId,
+        }).sort({ date: -1 }); // most recent first
 
-        /* ── 4. Send final response ────────────────────────────────────── */
+        /* ── 4. Auto add new participants as friends ──────────────────── */
+        const participantIds = new Set<string>();
+        transactions.forEach((t) =>
+          t.participants.forEach((p) => participantIds.add(p.toString()))
+        );
+
+        const existingFriendIds = new Set(
+          (user.friends ?? []).map((f) => f.toString())
+        );
+        const newFriendIds = Array.from(participantIds).filter(
+          (id) => id !== userId && !existingFriendIds.has(id)
+        );
+
+        if (newFriendIds.length > 0) {
+          const newFriendObjIds = newFriendIds.map(
+            (id) => new Types.ObjectId(id)
+          );
+          await User.updateOne(
+            { _id: userObjId },
+            { $addToSet: { friends: { $each: newFriendObjIds } } }
+          );
+          await User.updateMany(
+            { _id: { $in: newFriendObjIds } },
+            { $addToSet: { friends: userObjId } }
+          );
+        }
+
+        /* ── 5. Send final response ────────────────────────────────────── */
         res.status(200).json({ userId, transactions });
       }
     }
