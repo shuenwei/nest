@@ -26,6 +26,7 @@ export default defineConfig({
         name: "nest",
         short_name: "nest",
         theme_color: "#ffffff",
+        start_url: "/",
         display: "standalone",
         icons: [
           {

@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
 
+const emojis = ["😎", "👀", "👋🏼"];
+const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -30,7 +33,7 @@ const DashboardPage = () => {
       <div className="w-full max-w-sm pt-10 pb-24">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">
-            Hello, {user?.displayName || "there"}! 👋
+            Hello, {user?.displayName || "there"}! {randomEmoji}
           </h1>
           <Button
             onClick={() => navigate("/notifications")}

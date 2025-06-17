@@ -111,6 +111,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setProgress(100);
+      localStorage.setItem("displayname", userData.displayName);
 
       setLoading(false);
     } catch (err) {
