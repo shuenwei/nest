@@ -1,10 +1,20 @@
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/NavBar";
 import FriendCard from "@/components/FriendCard";
-import { MoveDownLeft, MoveUpRight, Bell } from "lucide-react";
+import { MoveDownLeft, MoveUpRight, CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Velustro } from "uvcanvas";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const greetings = [
   "Hi",
@@ -30,9 +40,29 @@ const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const {
+    user,
+    spending,
+    isLoadingSpending,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+  } = useUser();
 
   if (!user) return null;
+
+  const getDateRangeText = () => {
+    if (!startDate && !endDate) {
+      return "All time";
+    }
+    if (startDate && endDate && startDate.getDate() === endDate.getDate()) {
+      return `on ${format(startDate, "dd MMM yyyy")}`;
+    }
+    if (startDate && endDate) {
+      return `${format(startDate, "dd MMM")} - ${format(endDate, "dd MMM")}`;
+    }
+  };
 
   const friendsOwe = user.friends
     .reduce((sum, f) => sum + (f.balance && f.balance > 0 ? f.balance : 0), 0)
@@ -73,6 +103,84 @@ const DashboardPage = () => {
                 .toUpperCase()}
             </AvatarFallback>
           </Avatar>
+        </div>
+
+        <div className="my-6">
+          <Card className="relative overflow-hidden border-0 shadow-md">
+            <div className="absolute inset-0">
+              <Velustro />
+            </div>
+            <CardContent className="relative z-10 px-6">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-white/80">
+                    Total Spent
+                  </p>
+                  <div className="flex items-baseline gap-2">
+                    {isLoadingSpending ? (
+                      <Skeleton className="h-9 w-32 bg-white/30 backdrop-blur-md rounded-md" />
+                    ) : (
+                      <span className="text-3xl font-bold text-white">
+                        ${spending.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/70">
+                  {getDateRangeText()}
+                </span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-white/10 backdrop-blur-xs border-white/20 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="range"
+                      defaultMonth={new Date()}
+                      selected={{
+                        from: startDate,
+                        to: endDate,
+                      }}
+                      onSelect={(range) => {
+                        const from = range?.from;
+                        const to = range?.to;
+
+                        setStartDate(from);
+
+                        if (from) {
+                          localStorage.setItem("startDate", from.toISOString());
+                        } else {
+                          localStorage.removeItem("startDate");
+                        }
+
+                        if (to) {
+                          const endOfDay = new Date(to);
+                          endOfDay.setHours(23, 59, 59, 999);
+                          localStorage.setItem(
+                            "endDate",
+                            endOfDay.toISOString()
+                          );
+                          setEndDate(endOfDay);
+                        } else {
+                          localStorage.removeItem("endDate");
+                          setEndDate(to);
+                        }
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="mb-2 flex justify-between items-center">

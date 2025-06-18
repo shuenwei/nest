@@ -11,6 +11,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { Transaction } from "@/lib/transaction";
 import { RecurringTemplate } from "@/lib/recurring";
 import { toast } from "sonner";
+import { formatISO } from "date-fns";
 
 interface Friend {
   id: string;
@@ -44,6 +45,13 @@ interface UserContextValue {
   fetchRecurringTemplates: () => Promise<void>;
   loading: boolean;
   refreshUser: () => Promise<void>;
+  fetchSpending: () => Promise<void>;
+  isLoadingSpending: boolean;
+  spending: number;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
@@ -54,9 +62,61 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
+  const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    const saved = localStorage.getItem("startDate");
+    return saved ? new Date(saved) : undefined;
+  });
+  const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    const saved = localStorage.getItem("endDate");
+    return saved ? new Date(saved) : undefined;
+  });
+  const [spending, setSpending] = useState<number>(0);
+  const [isLoadingSpending, setIsLoadingSpending] = useState(false);
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (user) {
+      fetchSpending();
+    }
+  }, [startDate, endDate]);
+
+  const fetchSpending = async (userId?: string) => {
+    setIsLoadingSpending(true);
+    if (!user && !userId) {
+      return;
+    } else if (user && !userId) {
+      userId = user.id;
+    }
+
+    try {
+      const params = new URLSearchParams();
+      if (startDate)
+        params.append(
+          "startDate",
+          formatISO(startDate, { representation: "complete" })
+        );
+      if (endDate)
+        params.append(
+          "endDate",
+          formatISO(endDate, { representation: "complete" })
+        );
+
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_API_URL
+        }/transaction/spending/${userId}?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSpending(res.data.totalSpent);
+      setIsLoadingSpending(false);
+    } catch (err) {
+      console.error("Failed to fetch spending:", err);
+    }
+  };
+
   const refreshUser = async () => {
     const storedTelegramId = localStorage.getItem("telegramId");
-    const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
       setLoading(false);
       return;
@@ -111,6 +171,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setProgress(100);
+      fetchSpending(userData.id);
       localStorage.setItem("displayname", userData.displayName);
 
       setLoading(false);
@@ -145,7 +206,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const fetchRecurringTemplates = async () => {
     if (!user) return;
 
-    const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/transaction/recurring/${user.id}`,
@@ -195,6 +255,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         recurringTemplates,
         setRecurringTemplates,
         fetchRecurringTemplates,
+        fetchSpending,
+        spending,
+        isLoadingSpending,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
       }}
     >
       {children}

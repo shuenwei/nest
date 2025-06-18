@@ -13,6 +13,7 @@ import createRecurringTemplate from "../controllers/transaction/create-recurring
 import getUserRecurringTemplates from "../controllers/transaction/get-recurring-templates-for-user";
 import deleteTemplate from "../controllers/transaction/delete-recurring-template";
 import updateRecurringTemplate from "../controllers/transaction/update-recurring-template";
+import getUserSpending from "../controllers/transaction/get-user-spending";
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.get("/all/:userId1/:userId2", getTransactionsBetweenUsers);
 router.delete("/:transactionId", deleteTransaction);
 router.delete("/recurring/:templateId", deleteTemplate);
 router.put("/recurring/update/:templateId", updateRecurringTemplate);
+router.get("/spending/:userId", getUserSpending);
 
 export default router;
