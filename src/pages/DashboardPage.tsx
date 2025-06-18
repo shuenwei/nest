@@ -176,6 +176,127 @@ const DashboardPage = () => {
                         }
                       }}
                     />
+                    <div className="border-t px-4 py-3 space-y-2">
+                      <div className="flex gap-2">
+                        {[
+                          {
+                            label: "Today",
+                            from: new Date(new Date().setHours(0, 0, 0, 0)),
+                            to: new Date(new Date().setHours(23, 59, 59, 999)),
+                          },
+                          {
+                            label: "This Week",
+                            from: (() => {
+                              const now = new Date();
+                              const day = now.getDay();
+                              const mondayOffset = day === 0 ? -6 : 1 - day;
+                              const monday = new Date(now);
+                              monday.setDate(now.getDate() + mondayOffset);
+                              monday.setHours(0, 0, 0, 0);
+                              return monday;
+                            })(),
+                            to: (() => {
+                              const now = new Date();
+                              const day = now.getDay();
+                              const sundayOffset = day === 0 ? 0 : 7 - day;
+                              const sunday = new Date(now);
+                              sunday.setDate(now.getDate() + sundayOffset);
+                              sunday.setHours(23, 59, 59, 999);
+                              return sunday;
+                            })(),
+                          },
+                        ].map((preset) => (
+                          <Button
+                            key={preset.label}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              setStartDate(preset.from);
+                              setEndDate(preset.to);
+                              localStorage.setItem(
+                                "startDate",
+                                preset.from.toISOString()
+                              );
+                              localStorage.setItem(
+                                "endDate",
+                                preset.to.toISOString()
+                              );
+                            }}
+                          >
+                            {preset.label}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        {[
+                          {
+                            label: "This Month",
+                            from: new Date(
+                              new Date(new Date().setDate(1)).setHours(
+                                0,
+                                0,
+                                0,
+                                0
+                              )
+                            ),
+                            to: new Date(
+                              new Date(
+                                new Date().getFullYear(),
+                                new Date().getMonth() + 1,
+                                0,
+                                23,
+                                59,
+                                59,
+                                999
+                              )
+                            ),
+                          },
+                          {
+                            label: "This Year",
+                            from: new Date(
+                              new Date().getFullYear(),
+                              0,
+                              1,
+                              0,
+                              0,
+                              0,
+                              0
+                            ),
+                            to: new Date(
+                              new Date().getFullYear(),
+                              11,
+                              31,
+                              23,
+                              59,
+                              59,
+                              999
+                            ),
+                          },
+                        ].map((preset) => (
+                          <Button
+                            key={preset.label}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              setStartDate(preset.from);
+                              setEndDate(preset.to);
+                              localStorage.setItem(
+                                "startDate",
+                                preset.from.toISOString()
+                              );
+                              localStorage.setItem(
+                                "endDate",
+                                preset.to.toISOString()
+                              );
+                            }}
+                          >
+                            {preset.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>

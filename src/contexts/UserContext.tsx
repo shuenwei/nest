@@ -228,7 +228,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         lastHiddenRef.current = Date.now();
       } else if (
         document.visibilityState === "visible" &&
-        Date.now() - lastHiddenRef.current > 1 * 60 * 1000
+        Date.now() - lastHiddenRef.current > 5 * 60 * 1000
       ) {
         refreshUser();
         fetchRecurringTemplates();
