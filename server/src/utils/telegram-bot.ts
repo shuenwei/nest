@@ -21,10 +21,10 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     return;
   }
 
-  if (telegramUser.username.toLowerCase() !== usernameFromLink.toLowerCase()) {
+  if (telegramUser.username !== usernameFromLink) {
     bot.sendMessage(
       chatId,
-      `❌ Oops! Did you enter the wrong username on the app?\n\nYour username is @${telegramUser.username} but you entered @${usernameFromLink}.`,
+      `❌ Oops! Did you enter the wrong username on the app?\n\nYour username is @${telegramUser.username} but you entered @${usernameFromLink}. Your username is case-sensitive.`,
       {
         parse_mode: "Markdown",
       }
