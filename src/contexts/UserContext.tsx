@@ -73,8 +73,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [spending, setSpending] = useState<number>(0);
   const [isLoadingSpending, setIsLoadingSpending] = useState(false);
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
     if (user) {
       fetchSpending();
@@ -102,6 +100,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           formatISO(endDate, { representation: "complete" })
         );
 
+      const token = localStorage.getItem("token");
+
       const res = await axios.get(
         `${
           import.meta.env.VITE_API_URL
@@ -117,7 +117,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     const storedTelegramId = localStorage.getItem("telegramId");
+    const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
+      console.log("tele", storedTelegramId);
+      console.log("token", token);
       setLoading(false);
       return;
     }
@@ -205,6 +208,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchRecurringTemplates = async () => {
     if (!user) return;
+    const token = localStorage.getItem("token");
 
     try {
       const response = await axios.get(
