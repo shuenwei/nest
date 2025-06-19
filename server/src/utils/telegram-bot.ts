@@ -17,10 +17,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
   const telegramUser = msg.from;
 
   if (!usernameFromLink || !telegramUser?.username) {
-    bot.sendMessage(
-      chatId,
-      "❌ Invalid request."
-    );
+    bot.sendMessage(chatId, "❌ Invalid request.");
     return;
   }
 
@@ -51,10 +48,31 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       return;
     }
 
-    // Please wait message to fetch user details.
-    bot.sendMessage(chatId, `🕘 Please wait while we fetch your OTP code...`, {
-      parse_mode: "Markdown",
+    const existingUser = await User.findOne({
+      $or: [
+        { telegramId: telegramUser.id.toString() },
+        { username: telegramUser.username },
+      ],
     });
+
+    if (!existingUser?.hasSignedUp) {
+      bot.sendMessage(
+        chatId,
+        `🕘 Please wait while we fetch your OTP code...`,
+        {
+          parse_mode: "Markdown",
+        }
+      );
+    } else {
+      // Send OTP
+      bot.sendMessage(
+        chatId,
+        `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
+        {
+          parse_mode: "MarkdownV2",
+        }
+      );
+    }
 
     // Fetch profile photo and convert to buffer
     const photoData = await bot.getUserProfilePhotos(telegramUser.id, {
@@ -75,12 +93,6 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     }
 
     // Save user info to MongoDB
-    const existingUser = await User.findOne({
-      $or: [
-        { telegramId: telegramUser.id.toString() },
-        { username: telegramUser.username },
-      ],
-    });
 
     const updateData: any = {
       telegramId: telegramUser.id.toString(),
@@ -108,14 +120,16 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    // Send OTP
-    bot.sendMessage(
-      chatId,
-      `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
-      {
-        parse_mode: "MarkdownV2",
-      }
-    );
+    if (!existingUser?.hasSignedUp) {
+      // Send OTP
+      bot.sendMessage(
+        chatId,
+        `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
+        {
+          parse_mode: "MarkdownV2",
+        }
+      );
+    }
   } catch (error) {
     console.error("Telegram bot error:", error);
     bot.sendMessage(chatId, "⚠️ Something went wrong. Please try again later.");

@@ -119,8 +119,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const storedTelegramId = localStorage.getItem("telegramId");
     const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
-      console.log("tele", storedTelegramId);
-      console.log("token", token);
       setLoading(false);
       return;
     }
