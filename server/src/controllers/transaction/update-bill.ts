@@ -6,6 +6,22 @@ const updateBill = async (req: Request, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
 
+    const authUserId = req.auth?.id?.toString();
+    const existingBill = await Bill.findById(transactionId).select(
+      "participants"
+    );
+    if (!existingBill) {
+      res.status(404).json({ error: "Bill not found" });
+      return;
+    }
+    const isParticipant = existingBill.participants
+      .map((id: Types.ObjectId) => id.toString())
+      .includes(authUserId);
+    if (!isParticipant) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     const {
       /* ---------- BaseTransaction fields ---------- */
       transactionName,

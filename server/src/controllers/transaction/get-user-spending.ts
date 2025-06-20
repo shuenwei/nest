@@ -11,6 +11,12 @@ const getUserSpending = async (req: Request, res: Response): Promise<void> => {
       endDate?: string;
     };
 
+    const authUserId = req.auth?.id?.toString();
+    if (!authUserId || authUserId !== userId) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     let start: Date | undefined;
     let end: Date | undefined;
     if (startDate) {

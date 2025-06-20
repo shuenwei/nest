@@ -2,9 +2,18 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Transaction } from "../../models/Transaction";
 
-const getTransactionsBetweenUsers = async (req: Request, res: Response): Promise<void> => {
+const getTransactionsBetweenUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { userId1, userId2 } = req.params;
+
+    const authUserId = req.auth?.id?.toString();
+    if (!authUserId || (authUserId !== userId1 && authUserId !== userId2)) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
 
     // ── 1. Validate IDs ───────────────────────────────────────────────
     if (!Types.ObjectId.isValid(userId1) || !Types.ObjectId.isValid(userId2)) {
@@ -17,12 +26,13 @@ const getTransactionsBetweenUsers = async (req: Request, res: Response): Promise
 
     // ── 2. Build match condition ──────────────────────────────────────
     const matchCondition = {
-        participants: { $all: [userObjId1, userObjId2] } 
+      participants: { $all: [userObjId1, userObjId2] },
     };
 
     // ── 3. Fetch transactions ─────────────────────────────────────────
-    const transactions = await Transaction.find(matchCondition)
-      .sort({ date: -1 }) // most recent first
+    const transactions = await Transaction.find(matchCondition).sort({
+      date: -1,
+    }); // most recent first
 
     // ── 4. Return result ──────────────────────────────────────────────
     res.status(200).json(transactions);

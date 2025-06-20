@@ -7,6 +7,12 @@ const getBalances = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
+    const authUserId = req.auth?.id?.toString();
+    if (!authUserId || authUserId !== userId) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     /* ── 1. Validate ID ─────────────────────────────────────────────────── */
     if (!Types.ObjectId.isValid(userId)) {
       res.status(400).json({ error: "Invalid userId" });

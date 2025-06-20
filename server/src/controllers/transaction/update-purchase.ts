@@ -6,6 +6,22 @@ const updatePurchase = async (req: Request, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
 
+    const authUserId = req.auth?.id?.toString();
+    const existingPurchase = await Purchase.findById(transactionId).select(
+      "participants"
+    );
+    if (!existingPurchase) {
+      res.status(404).json({ error: "Purchase not found" });
+      return;
+    }
+    const isParticipant = existingPurchase.participants
+      .map((id: Types.ObjectId) => id.toString())
+      .includes(authUserId);
+    if (!isParticipant) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     const {
       transactionName,
       participants,

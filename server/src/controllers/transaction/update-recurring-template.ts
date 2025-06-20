@@ -9,6 +9,22 @@ const updateRecurringTemplate = async (
   try {
     const { templateId } = req.params;
 
+    const authUserId = req.auth?.id?.toString();
+    const existingTemplate = await RecurringTemplate.findById(
+      templateId
+    ).select("participants");
+    if (!existingTemplate) {
+      res.status(404).json({ error: "Recurring template not found" });
+      return;
+    }
+    const isParticipant = existingTemplate.participants
+      .map((id) => id.toString())
+      .includes(authUserId);
+    if (!isParticipant) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     const updatedTemplate = await RecurringTemplate.findByIdAndUpdate(
       templateId,
       req.body,

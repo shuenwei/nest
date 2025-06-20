@@ -15,6 +15,23 @@ const deleteTransaction = async (
       return;
     }
 
+    const authUserId = req.auth?.id?.toString();
+    const existingTransaction = await Transaction.findById(
+      transactionId
+    ).select("participants");
+    if (!existingTransaction) {
+      res.status(404).json({ error: "Transaction not found" });
+      return;
+    }
+
+    const isParticipant = existingTransaction.participants
+      .map((id) => id.toString())
+      .includes(authUserId);
+    if (!isParticipant) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     // Attempt to delete the transaction
     const deletedTransaction = await Transaction.findByIdAndDelete(
       transactionId

@@ -1,13 +1,19 @@
-import { Request, Response } from 'express';
-import { User } from '../../models/User';
-import mongoose from 'mongoose';
+import { Request, Response } from "express";
+import { User } from "../../models/User";
+import mongoose from "mongoose";
 
 const addFriend = async (req: Request, res: Response): Promise<void> => {
   const { userId, friendId } = req.body;
 
+  const authUserId = req.auth?.id?.toString();
+  if (!authUserId || authUserId !== userId) {
+    res.status(403).json({ error: "Unauthorised" });
+    return;
+  }
+
   // Basic validation
   if (!userId || !friendId) {
-    res.status(400).json({ error: 'Missing userId or friendId' });
+    res.status(400).json({ error: "Missing userId or friendId" });
     return;
   }
 
@@ -15,12 +21,12 @@ const addFriend = async (req: Request, res: Response): Promise<void> => {
     !mongoose.Types.ObjectId.isValid(userId) ||
     !mongoose.Types.ObjectId.isValid(friendId)
   ) {
-    res.status(400).json({ error: 'Invalid user ID(s)' });
+    res.status(400).json({ error: "Invalid user ID(s)" });
     return;
   }
 
   if (userId === friendId) {
-    res.status(400).json({ error: 'Cannot add yourself as a friend' });
+    res.status(400).json({ error: "Cannot add yourself as a friend" });
     return;
   }
 
@@ -29,12 +35,12 @@ const addFriend = async (req: Request, res: Response): Promise<void> => {
     const friend = await User.findById(friendId);
 
     if (!user || !friend) {
-      res.status(404).json({ error: 'User or friend not found' });
+      res.status(404).json({ error: "User or friend not found" });
       return;
     }
 
     if (user.friends.includes(friend._id)) {
-      res.status(400).json({ error: 'User is already your friend' });
+      res.status(400).json({ error: "User is already your friend" });
       return;
     }
 
@@ -48,10 +54,10 @@ const addFriend = async (req: Request, res: Response): Promise<void> => {
       $addToSet: { friends: user._id },
     });
 
-    res.status(200).json({ message: 'Friend added successfully' });
+    res.status(200).json({ message: "Friend added successfully" });
   } catch (err) {
-    console.error('Error adding friend:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error adding friend:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

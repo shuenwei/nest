@@ -7,6 +7,12 @@ const removeFriend = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId, friendId } = req.body;
 
+    const authUserId = req.auth?.id?.toString();
+    if (!authUserId || authUserId !== userId) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+
     if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(friendId)) {
       res.status(400).json({ error: "Invalid userId or friendId" });
       return;
