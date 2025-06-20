@@ -103,7 +103,9 @@ const ViewFriendPage = () => {
           error.response?.data?.error?.includes("outstanding balance")
         ) {
           toast.error(
-            `Oops! Failed to remove friend as you have an outstanding balance of $${friend.balance} with ${friendName}. You can only remove friends with no balances.`
+            `Oops! Failed to remove friend as you have an outstanding balance of $${Math.abs(
+              friend.balance
+            )} with ${friendName}. You can only remove friends with no balances.`
           );
         } else {
           toast.error(`Failed to remove ${friendName} as friend.`);
