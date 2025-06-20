@@ -1,6 +1,6 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, UserRoundX, AlertCircle } from "lucide-react";
+import { ArrowLeft, UserRoundMinus, AlertCircle } from "lucide-react";
 import TransactionCard from "@/components/TransactionCard";
 import FriendCard from "@/components/FriendCard";
 import { Transaction } from "@/lib/transaction";
@@ -135,7 +135,7 @@ const ViewFriendPage = () => {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="icon">
-                <UserRoundX />
+                <UserRoundMinus />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { User } from '../../models/User';
-import { Types } from 'mongoose';
+import { Request, Response } from "express";
+import { User } from "../../models/User";
+import { Types } from "mongoose";
 
 interface IFriend {
   _id: Types.ObjectId;
@@ -10,20 +10,26 @@ interface IFriend {
   hasSignedUp: boolean;
 }
 
-const getUserByUsername = async (req: Request, res: Response): Promise<void> => {
+const getUserByUsername = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { username } = req.params;
 
+  const lowercaseUsername = username.toLowerCase();
+
   try {
-    const user = await User.findOne({ username })
-    .populate<{ friends: IFriend[] }>('friends', 'username displayName profilePhoto hasSignedUp');
+    const user = await User.findOne({ username: lowercaseUsername }).populate<{
+      friends: IFriend[];
+    }>("friends", "username displayName profilePhoto hasSignedUp");
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: "User not found" });
       return;
     }
 
     const base64Photo = user.profilePhoto
-      ? `data:image/jpeg;base64,${user.profilePhoto.toString('base64')}`
+      ? `data:image/jpeg;base64,${user.profilePhoto.toString("base64")}`
       : null;
 
     const friends = Array.isArray(user.friends) ? user.friends : [];
@@ -36,19 +42,19 @@ const getUserByUsername = async (req: Request, res: Response): Promise<void> => 
       verifiedAt: user.verifiedAt,
       hasSignedUp: user.hasSignedUp,
       profilePhoto: base64Photo,
-      friends: friends.map(friend => ({
+      friends: friends.map((friend) => ({
         id: friend._id.toString(),
         username: friend.username,
         displayName: friend.displayName,
         hasSignedUp: friend.hasSignedUp,
         profilePhoto: friend.profilePhoto
-          ? `data:image/jpeg;base64,${friend.profilePhoto.toString('base64')}`
+          ? `data:image/jpeg;base64,${friend.profilePhoto.toString("base64")}`
           : null,
       })),
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

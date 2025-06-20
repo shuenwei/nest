@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/NavBar";
 import FriendCard from "@/components/FriendCard";
-import { UserPlus, Search, AlertCircle } from "lucide-react";
+import { UserRoundPlus, Search, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -285,7 +285,7 @@ const FriendsPage = () => {
             onClick={() => setIsAddDialogOpen(true)}
             disabled={!user}
           >
-            <UserPlus className="size-4" />
+            <UserRoundPlus className="size-4" />
             Add
           </Button>
         </div>

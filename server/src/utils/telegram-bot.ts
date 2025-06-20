@@ -21,10 +21,10 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     return;
   }
 
-  if (telegramUser.username !== usernameFromLink) {
+  if (telegramUser.username.toLowerCase() !== usernameFromLink?.toLowerCase()) {
     bot.sendMessage(
       chatId,
-      `❌ Oops! Did you enter the wrong username on the app?\n\nYour username is @${telegramUser.username} but you entered @${usernameFromLink}. Your username is case-sensitive.`,
+      `❌ Oops! Did you enter the wrong username on the app?\n\nYour username is @${telegramUser.username} but you entered @${usernameFromLink}.`,
       {
         parse_mode: "Markdown",
       }
@@ -33,8 +33,9 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
   }
 
   try {
+    const lowercaseUsername = usernameFromLink.toLowerCase();
     const otpDoc = await VerificationCode.findOne({
-      username: usernameFromLink,
+      username: lowercaseUsername,
     });
 
     if (!otpDoc) {
@@ -51,7 +52,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     const existingUser = await User.findOne({
       $or: [
         { telegramId: telegramUser.id.toString() },
-        { username: telegramUser.username },
+        { username: telegramUser.username.toLowerCase() },
       ],
     });
 
@@ -96,7 +97,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
 
     const updateData: any = {
       telegramId: telegramUser.id.toString(),
-      username: telegramUser.username,
+      username: telegramUser.username.toLowerCase(),
       profilePhoto: profilePhotoBuffer,
       verifiedAt: new Date(),
     };
@@ -113,7 +114,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       {
         $or: [
           { telegramId: telegramUser.id.toString() },
-          { username: telegramUser.username },
+          { username: telegramUser.username.toLowerCase() },
         ],
       },
       updateData,

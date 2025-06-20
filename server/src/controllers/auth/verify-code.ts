@@ -14,6 +14,8 @@ const verifyVerificationCode = async (
     return;
   }
 
+  const lowercaseUsername = username.toLowerCase();
+
   try {
     const otpRecord = await VerificationCode.findOne({ username });
 
@@ -23,7 +25,7 @@ const verifyVerificationCode = async (
     }
 
     await VerificationCode.deleteOne({ _id: otpRecord._id });
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: lowercaseUsername });
     if (!user) {
       res.status(500).json({ valid: false });
       return;

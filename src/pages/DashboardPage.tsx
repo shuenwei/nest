@@ -94,7 +94,7 @@ const DashboardPage = () => {
               src={user.profilePhoto ? user.profilePhoto : ""}
               alt={user.displayName}
             />
-            <AvatarFallback>
+            <AvatarFallback className="bg-muted-foreground/10">
               {user.displayName
                 .split(" ")
                 .map((n) => n[0])

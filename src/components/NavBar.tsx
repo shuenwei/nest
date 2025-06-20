@@ -12,7 +12,12 @@ import {
   CalendarSync,
   ArrowRightLeft,
 } from "lucide-react";
-import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -69,6 +74,7 @@ const NavBar = () => {
                     <Icon className="w-7 h-7" />
                   </button>
                 </DrawerTrigger>
+                <DrawerTitle></DrawerTitle>
                 <DrawerContent className="pb-10 px-0">
                   <div className="px-4 pt-7">
                     <div className="text-xl font-semibold mb-4 ml-3">
