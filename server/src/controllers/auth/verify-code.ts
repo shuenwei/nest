@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { VerificationCode } from "../../models/VerificationCode";
 import jwt from "../../utils/jwt";
 import { User } from "../../models/User";
+import otp from "../../utils/otp";
 
 const verifyVerificationCode = async (
   req: Request,
@@ -17,14 +17,11 @@ const verifyVerificationCode = async (
   const lowercaseUsername = username.toLowerCase();
 
   try {
-    const otpRecord = await VerificationCode.findOne({ username });
-
-    if (!otpRecord || otpRecord.code !== code) {
+    if (!otp.verify(username, code)) {
       res.status(200).json({ valid: false });
       return;
     }
 
-    await VerificationCode.deleteOne({ _id: otpRecord._id });
     const user = await User.findOne({ username: lowercaseUsername });
     if (!user) {
       res.status(500).json({ valid: false });

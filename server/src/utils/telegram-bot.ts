@@ -1,6 +1,6 @@
 import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
-import { VerificationCode } from "../models/VerificationCode";
+import otp from "./otp";
 import { User } from "../models/User";
 import { processReceipt } from "./azureDocumentIntelligence";
 import dotenv from "dotenv";
@@ -34,20 +34,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
 
   try {
     const lowercaseUsername = usernameFromLink.toLowerCase();
-    const otpDoc = await VerificationCode.findOne({
-      username: lowercaseUsername,
-    });
-
-    if (!otpDoc) {
-      bot.sendMessage(
-        chatId,
-        `❌ No verification code found.\n\nYour verification code might have expired.`,
-        {
-          parse_mode: "Markdown",
-        }
-      );
-      return;
-    }
+    const code = otp.generate(lowercaseUsername);
 
     const existingUser = await User.findOne({
       $or: [
@@ -68,7 +55,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       // Send OTP
       bot.sendMessage(
         chatId,
-        `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
+        `✅ Your OTP is: \`${code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 2 minutes\\.`,
         {
           parse_mode: "MarkdownV2",
         }
@@ -125,7 +112,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       // Send OTP
       bot.sendMessage(
         chatId,
-        `✅ Your OTP is: \`${otpDoc.code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 5 minutes\\.`,
+        `✅ Your OTP is: \`${code}\`\n\nYou can tap on the code to copy to clipboard\\. It expires in 2 minutes\\.`,
         {
           parse_mode: "MarkdownV2",
         }

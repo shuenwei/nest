@@ -1,9 +1,5 @@
 import { Request, Response } from "express";
-import { VerificationCode } from "../../models/VerificationCode";
-
-function generateSixDigitCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+import otp from "../../utils/otp";
 
 const sendVerificationCode = async (
   req: Request,
@@ -16,17 +12,8 @@ const sendVerificationCode = async (
     return;
   }
 
-  const lowercaseUsername = username.toLowerCase();
-
-  const code = generateSixDigitCode();
-
   try {
-    await VerificationCode.findOneAndUpdate(
-      { username: lowercaseUsername }, // Find by username
-      { code, createdAt: new Date() }, // Update code and timestamp
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-
+    otp.generate(username);
     res.status(200).json({ message: "Verification code generated" });
   } catch (err) {
     console.error("Error generating code:", err);
