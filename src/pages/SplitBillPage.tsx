@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,6 +73,8 @@ import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { BillTransaction } from "@/lib/transaction";
+import imageCompression from "browser-image-compression";
+import ScanningScreen from "@/components/ScanningScreen";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -287,6 +289,11 @@ const SplitBillPage = () => {
   const [isTranslated, setIsTranslated] = useState(false);
   const [searchParams] = useSearchParams();
 
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanComplete, setScanComplete] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const token = localStorage.getItem("token");
 
   const { user, refreshUser, transactions } = useUser();
@@ -359,6 +366,56 @@ const SplitBillPage = () => {
     } finally {
       setIsTranslating(false);
     }
+  }
+
+  async function handleScan(file: File) {
+    setPreviewSrc(URL.createObjectURL(file));
+    setScanComplete(false);
+
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 4,
+      useWebWorker: true,
+    });
+
+    setIsScanning(true);
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const result = reader.result as string | ArrayBuffer | null;
+      if (!result || typeof result !== "string") {
+        toast.error("Failed to read image");
+        setScanComplete(true);
+        return;
+      }
+      const base64 = result.split(",")[1] ?? result;
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/transaction/scan`,
+          { imageBase64: base64 },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { restaurantName, items } = response.data;
+        // Construct query params
+        const params = new URLSearchParams();
+        if (restaurantName) {
+          params.append("rName", restaurantName);
+        }
+        if (Array.isArray(items)) {
+          items.forEach((item: any) => {
+            params.append("n", item.name);
+            params.append("p", item.price);
+          });
+        }
+
+        navigate(`?${params.toString()}`, { replace: true });
+      } catch (err) {
+        console.error("Scan failed", err);
+        toast.error("Failed to scan receipt");
+      } finally {
+        setScanComplete(true);
+      }
+    };
+    reader.readAsDataURL(compressedFile);
   }
 
   const form = useForm<FormValues>({
@@ -849,30 +906,44 @@ const SplitBillPage = () => {
             {isEditMode ? "" : "Split a restaurant bill among friends"}
           </p>
         </div>
+        <div className="mb-6">
+          {!isEditMode && !isPrefilled && (
+            <Button
+              className="w-full"
+              disabled={previewSrc != null}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ScanText />
+              {previewSrc != null ? "Scanning Receipt" : "Scan Receipt"}
+            </Button>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleScan(f);
+              e.currentTarget.value = "";
+            }}
+          />
+        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Restaurant Details Card */}
             <Card className="p-6">
               <CardContent className="p-0 space-y-6">
-                {!isEditMode && (
+                {isPrefilled && (
                   <Alert>
-                    {isPrefilled ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <ScanText className="h-4 w-4" />
-                    )}
-                    <AlertTitle>
-                      {isPrefilled
-                        ? "Your receipt has been pre-filled!"
-                        : "Scan your receipts!"}
-                    </AlertTitle>
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertTitle>Your receipt has been pre-filled!</AlertTitle>
                     <AlertDescription>
-                      {isPrefilled
-                        ? "The resturant name, item names and item prices have been pre-filled. Select the currency, friends for each item, and enter additional charges. Be sure to check for mistakes made by the AI."
-                        : `Don't want to enter receipt details manually? You can send a
-                    picture of your receipt to the 'nest' telegram bot to be
-                    scanned!`}
+                      The resturant name, item names and item prices have been
+                      pre-filled. Select the currency, friends for each item,
+                      and enter additional charges. Be sure to check for
+                      mistakes made by the AI.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -1338,7 +1409,7 @@ const SplitBillPage = () => {
                   onClick={() => append({ name: "", price: "", sharedBy: [] })}
                 >
                   <Plus className="mr-1 h-4 w-4" />
-                  Add Item
+                  Add Additional Item
                 </Button>
               </CardFooter>
             </Card>
@@ -1730,6 +1801,20 @@ const SplitBillPage = () => {
         onRateConfirm={handleExchangeRateConfirm}
         defaultRate={currentExchangeRate}
         amount={calculateTotalBillAmount()}
+      />
+
+      <ScanningScreen
+        imageSrc={previewSrc ?? ""}
+        show={isScanning}
+        complete={scanComplete}
+        onFinish={() => {
+          setIsScanning(false);
+          setScanComplete(false);
+          if (previewSrc) {
+            URL.revokeObjectURL(previewSrc);
+          }
+          setPreviewSrc(null);
+        }}
       />
     </div>
   );

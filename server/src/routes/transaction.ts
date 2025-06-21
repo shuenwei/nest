@@ -14,6 +14,7 @@ import getUserRecurringTemplates from "../controllers/transaction/get-recurring-
 import deleteTemplate from "../controllers/transaction/delete-recurring-template";
 import updateRecurringTemplate from "../controllers/transaction/update-recurring-template";
 import getUserSpending from "../controllers/transaction/get-user-spending";
+import scanReceipt from "../controllers/transaction/scan";
 
 const router = Router();
 
@@ -32,5 +33,7 @@ router.delete("/:transactionId", deleteTransaction);
 router.delete("/recurring/:templateId", deleteTemplate);
 router.put("/recurring/update/:templateId", updateRecurringTemplate);
 router.get("/spending/:userId", getUserSpending);
+
+router.post("/scan", scanReceipt);
 
 export default router;

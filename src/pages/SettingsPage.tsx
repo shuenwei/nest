@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, CircleDollarSign, ChevronRight } from "lucide-react";
+import { Settings, UserRoundX, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
@@ -35,11 +35,16 @@ const SettingsPage = () => {
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
               <AvatarImage
-                src={user?.profilePhoto || ""}
+                src={user?.profilePhoto ? user?.profilePhoto : ""}
                 alt={user?.displayName}
               />
               <AvatarFallback>
-                {user?.displayName?.charAt(0).toUpperCase() || "U"}
+                {user?.displayName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div>
