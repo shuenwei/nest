@@ -4,7 +4,7 @@ import { OTP_SECRET } from "../constants";
 
 const STEP_SECONDS = 120;
 
-totp.options = { step: STEP_SECONDS, digits: 6 };
+totp.options = { step: STEP_SECONDS, digits: 6, window: 1 };
 
 class OTP {
   private baseSecret: string;
