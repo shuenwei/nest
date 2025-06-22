@@ -17,6 +17,18 @@ const UserSchema = new mongoose.Schema({
       default: [],
     },
   ],
+  monthlyUsage: {
+    month: {
+      type: String,
+      default: () => new Date().toISOString().slice(0, 7),
+    },
+    scans: { type: Number, default: 0 },
+    translations: { type: Number, default: 0 },
+  },
+  limits: {
+    scans: { type: Number },
+    translations: { type: Number },
+  },
 });
 
 export const User = mongoose.model("User", UserSchema);

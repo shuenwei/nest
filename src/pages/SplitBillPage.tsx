@@ -361,8 +361,12 @@ const SplitBillPage = () => {
         toast.success("Translated to English");
         setIsTranslated(true);
       }
-    } catch (err) {
-      toast.error("Translation failed");
+    } catch (err: any) {
+      if (err.response.status === 429) {
+        toast.error(`You have reached your monthly translation limit.`);
+      } else {
+        toast.error("Translation failed");
+      }
     } finally {
       setIsTranslating(false);
     }
@@ -408,9 +412,11 @@ const SplitBillPage = () => {
         }
 
         navigate(`?${params.toString()}`, { replace: true });
-      } catch (err) {
+      } catch (err: any) {
         console.error("Scan failed", err);
-        toast.error("Failed to scan receipt");
+        if (err.response.status === 429) {
+          toast.error(`You have reached your monthly scan limit.`);
+        } else toast.error("Failed to scan receipt");
       } finally {
         setScanComplete(true);
       }

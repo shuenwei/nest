@@ -18,6 +18,7 @@ import ManageRecurringPage from "./pages/ManageRecurringPage";
 import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ViewRecurringPage from "./pages/ViewRecurringPage";
+import UsageLimitsPage from "./pages/UsageLimitsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -85,6 +86,7 @@ function App() {
             element={<AddRecurringPage />}
           />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
+          <Route path="/settings/limits" element={<UsageLimitsPage />} />
         </Route>
       </Routes>
       <Toaster />

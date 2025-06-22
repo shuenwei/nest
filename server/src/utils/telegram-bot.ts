@@ -4,6 +4,7 @@ import otp from "./otp";
 import { User } from "../models/User";
 import { processReceipt } from "./azureDocumentIntelligence";
 import dotenv from "dotenv";
+import { MONTHLY_SCAN_LIMIT } from "../constants";
 dotenv.config();
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
@@ -148,6 +149,21 @@ bot.on("photo", async (msg) => {
     );
     return;
   }
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  let usage = checkUser.monthlyUsage;
+  if (!usage || usage.month !== currentMonth) {
+    usage = { month: currentMonth, scans: 0, translations: 0 };
+  }
+  const scanLimit = checkUser.limits?.scans ?? MONTHLY_SCAN_LIMIT;
+  if (usage.scans >= scanLimit) {
+    bot.sendMessage(chatId, "❌ You have reached your monthly scan limit.");
+    return;
+  }
+
+  usage.scans += 1;
+  checkUser.monthlyUsage = usage;
+  await checkUser.save();
 
   const processingMsg = await bot.sendMessage(
     chatId,

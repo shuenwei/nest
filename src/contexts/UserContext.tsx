@@ -31,6 +31,15 @@ interface User {
   verifiedAt?: string;
   hasSignedUp: boolean;
   friends: Friend[];
+  monthlyUsage?: {
+    month: string;
+    scans: number;
+    translations: number;
+  };
+  limits?: {
+    scans: number;
+    translations: number;
+  };
 }
 
 interface UserContextValue {

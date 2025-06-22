@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import { MONTHLY_TRANSLATE_LIMIT } from "../../constants";
+import { User } from "../../models/User";
 
 dotenv.config();
 
@@ -17,6 +19,27 @@ const translate = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
+    const authUserId = req.auth?.id?.toString();
+    const user = await User.findById(authUserId);
+    if (!user) {
+      res.status(403).json({ error: "Unauthorised" });
+      return;
+    }
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    let usage = user.monthlyUsage;
+    if (!usage || usage.month !== currentMonth) {
+      usage = { month: currentMonth, scans: 0, translations: 0 };
+    }
+    const translateLimit = user.limits?.translations ?? MONTHLY_TRANSLATE_LIMIT;
+    if (usage.translations >= translateLimit) {
+      res.status(429).json({ error: "Monthly translation limit reached" });
+      return;
+    }
+
+    usage.translations += 1;
+    user.monthlyUsage = usage;
+    await user.save();
+
     const response = await axios.post(
       `https://translation.googleapis.com/language/translate/v2?key=${API_KEY}`,
       {

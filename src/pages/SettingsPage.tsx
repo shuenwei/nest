@@ -2,13 +2,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, UserRoundX, ChevronRight } from "lucide-react";
+import { Settings, GaugeCircle, UserRoundX, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
+  { label: "Usage Limits", icon: GaugeCircle, path: "/settings/limits" },
 ];
 
 const SettingsPage = () => {

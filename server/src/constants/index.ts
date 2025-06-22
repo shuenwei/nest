@@ -18,4 +18,22 @@ if (!OTP_SECRET) {
   throw new Error("OTP_SECRET is not defined in the environment.");
 }
 
-export { ORIGIN, PORT, MONGO_URI, MONGO_OPTIONS, JWT_SECRET, OTP_SECRET };
+const MONTHLY_SCAN_LIMIT = parseInt(
+  process.env.MONTHLY_SCAN_LIMIT || "100",
+  10
+);
+const MONTHLY_TRANSLATE_LIMIT = parseInt(
+  process.env.MONTHLY_TRANSLATE_LIMIT || "100",
+  10
+);
+
+export {
+  ORIGIN,
+  PORT,
+  MONGO_URI,
+  MONGO_OPTIONS,
+  JWT_SECRET,
+  OTP_SECRET,
+  MONTHLY_SCAN_LIMIT,
+  MONTHLY_TRANSLATE_LIMIT,
+};
