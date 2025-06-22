@@ -100,12 +100,10 @@ const ViewFriendPage = () => {
       if (axios.isAxiosError(error)) {
         if (
           error.response?.status === 403 &&
-          error.response?.data?.error?.includes("outstanding balance")
+          error.response?.data?.error?.includes("transactions exists")
         ) {
           toast.error(
-            `Oops! Failed to remove friend as you have an outstanding balance of $${Math.abs(
-              friend.balance
-            )} with ${friendName}. You can only remove friends with no balances.`
+            `Oops! Failed to remove friend as you have existing transactions with ${friendName}. Delete all transactions with ${friendName} to remove as friend.`
           );
         } else {
           toast.error(`Failed to remove ${friendName} as friend.`);

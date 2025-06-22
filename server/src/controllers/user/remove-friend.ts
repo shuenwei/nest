@@ -21,91 +21,15 @@ const removeFriend = async (req: Request, res: Response): Promise<void> => {
     const userObjId = new Types.ObjectId(userId);
     const friendObjId = new Types.ObjectId(friendId);
 
-    // Step 1: Compute balance between user and friend
-    const pipeline = [
-      {
-        $match: {
-          $or: [{ participants: { $in: [userObjId, friendObjId] } }],
-        },
-      },
-      {
-        $facet: {
-          purchaseBill: [
-            {
-              $match: {
-                type: { $in: ["purchase", "bill", "recurring"] },
-              },
-            },
-            { $unwind: "$splitsInSgd" },
-            {
-              $project: {
-                from: "$paidBy",
-                to: "$splitsInSgd.user",
-                amount: "$splitsInSgd.amount",
-              },
-            },
-          ],
-          settleup: [
-            { $match: { type: "settleup" } },
-            {
-              $project: {
-                from: "$payer",
-                to: "$payee",
-                amount: "$amountInSgd",
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          rows: { $concatArrays: ["$purchaseBill", "$settleup"] },
-        },
-      },
-      { $unwind: "$rows" },
-      { $replaceRoot: { newRoot: "$rows" } },
-      {
-        $match: {
-          $or: [
-            { from: userObjId, to: friendObjId },
-            { from: friendObjId, to: userObjId },
-          ],
-        },
-      },
-      {
-        $project: {
-          debit: {
-            $cond: [{ $eq: ["$from", userObjId] }, "$amount", 0],
-          },
-          credit: {
-            $cond: [{ $eq: ["$to", userObjId] }, "$amount", 0],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalDebit: { $sum: "$debit" },
-          totalCredit: { $sum: "$credit" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          amount: {
-            $round: [{ $subtract: ["$totalDebit", "$totalCredit"] }, 2],
-          },
-        },
-      },
-    ];
+    // Step 1: Check for any transactions involving both users
+    const existingTx = await Transaction.exists({
+      participants: { $all: [userObjId, friendObjId] },
+    });
 
-    const [balanceResult] = await Transaction.aggregate(pipeline);
-    const balance = balanceResult?.amount ?? 0;
-
-    if (balance !== 0) {
+    if (existingTx) {
       res
         .status(403)
-        .json({ error: "Cannot remove friend: outstanding balance exists" });
+        .json({ error: "Cannot remove friend: transactions exists" });
       return;
     }
 
@@ -127,7 +51,12 @@ const removeFriend = async (req: Request, res: Response): Promise<void> => {
       updatedFriend.friends.length === 0 &&
       !updatedFriend.hasSignedUp
     ) {
-      await User.findByIdAndDelete(friendObjId);
+      const friendHasTx = await Transaction.exists({
+        participants: friendObjId,
+      });
+      if (!friendHasTx) {
+        await User.findByIdAndDelete(friendObjId);
+      }
     }
 
     res.status(200).json({ message: "Friend removed successfully" });

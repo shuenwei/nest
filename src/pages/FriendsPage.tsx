@@ -181,6 +181,15 @@ const FriendsPage = () => {
           message: `@${data.username} is already your friend.`,
         });
         toast.error(`@${data.username} is already your friend.`);
+      } else if (
+        error.response.status === 400 &&
+        error.response.data?.error === "Cannot add yourself as a friend"
+      ) {
+        addFriendForm.setError("username", {
+          type: "manual",
+          message: `You cannot add yourself as a friend.`,
+        });
+        toast.error(`You cannot add yourself as a friend.`);
       } else {
         toast.error("Failed to add friend");
         console.error("Error adding friend:", error);
