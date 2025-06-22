@@ -10,6 +10,7 @@ import { toast } from "sonner";
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
   { label: "Usage Limits", icon: GaugeCircle, path: "/settings/limits" },
+  { label: "Block Users", icon: UserRoundX, path: "/settings/block" },
 ];
 
 const SettingsPage = () => {

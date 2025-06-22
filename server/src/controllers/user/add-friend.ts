@@ -39,6 +39,16 @@ const addFriend = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (user.blockedUsers.includes(friend._id)) {
+      res.status(403).json({ error: "User is blocked" });
+      return;
+    }
+
+    if (friend.blockedUsers.includes(user._id)) {
+      res.status(403).json({ error: "Friend has blocked you" });
+      return;
+    }
+
     if (user.friends.includes(friend._id)) {
       res.status(400).json({ error: "User is already your friend" });
       return;

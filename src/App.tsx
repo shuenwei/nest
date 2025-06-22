@@ -19,6 +19,7 @@ import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ViewRecurringPage from "./pages/ViewRecurringPage";
 import UsageLimitsPage from "./pages/UsageLimitsPage";
+import BlockUsersPage from "./pages/BlockUsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
           />
           <Route path="/settings/account" element={<AccountSettingsPage />} />
           <Route path="/settings/limits" element={<UsageLimitsPage />} />
+          <Route path="/settings/block" element={<BlockUsersPage />} />
         </Route>
       </Routes>
       <Toaster />

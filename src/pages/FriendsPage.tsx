@@ -128,13 +128,7 @@ const FriendsPage = () => {
 
       if (response.data) {
         // User exists, add them as a friend using the addfriend endpoint
-        const friendResponse = await axios.get(
-          `${apiUrl}/user/username/${data.username}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const friend = friendResponse.data;
+        const friend = response.data;
 
         await axios.post(
           `${apiUrl}/user/addfriend`,
@@ -148,15 +142,6 @@ const FriendsPage = () => {
             },
           }
         );
-
-        // Add the new friend to the list frontend
-        const newFriend = {
-          id: friend.id,
-          name: friend.displayName,
-          username: friend.username,
-          profilePhoto: friend.profilePhoto,
-          amount: 0, // Placeholder
-        };
 
         await refreshUser();
 
@@ -190,6 +175,28 @@ const FriendsPage = () => {
           message: `You cannot add yourself as a friend.`,
         });
         toast.error(`You cannot add yourself as a friend.`);
+      } else if (
+        error.response.status === 403 &&
+        error.response.data?.error === "User is blocked"
+      ) {
+        addFriendForm.setError("username", {
+          type: "manual",
+          message: `You have blocked @${data.username}. Unblock @${data.username} in settings to add as friend.`,
+        });
+        toast.error(
+          `You have blocked @${data.username}. Unblock @${data.username} in settings to add as friend.`
+        );
+      } else if (
+        error.response.status === 403 &&
+        error.response.data?.error === "Friend has blocked you"
+      ) {
+        addFriendForm.setError("username", {
+          type: "manual",
+          message: `You cannot add @${data.username} as a friend, as @${data.username} has blocked you.`,
+        });
+        toast.error(
+          `You cannot add @${data.username} as a friend, as @${data.username} has blocked you.`
+        );
       } else {
         toast.error("Failed to add friend");
         console.error("Error adding friend:", error);

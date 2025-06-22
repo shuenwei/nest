@@ -22,6 +22,14 @@ interface Friend {
   hasSignedUp: boolean;
 }
 
+interface BlockedUser {
+  id: string;
+  username: string;
+  displayName: string;
+  profilePhoto?: string;
+  hasSignedUp: boolean;
+}
+
 interface User {
   id: string;
   telegramId?: string;
@@ -31,6 +39,7 @@ interface User {
   verifiedAt?: string;
   hasSignedUp: boolean;
   friends: Friend[];
+  blockedUsers: BlockedUser[];
   monthlyUsage?: {
     month: string;
     scans: number;

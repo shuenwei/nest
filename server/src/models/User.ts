@@ -17,6 +17,13 @@ const UserSchema = new mongoose.Schema({
       default: [],
     },
   ],
+  blockedUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
   monthlyUsage: {
     month: {
       type: String,

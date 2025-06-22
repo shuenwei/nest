@@ -18,9 +18,14 @@ const getUserByTelegramId = async (
   const { telegramId } = req.params;
 
   try {
-    const user = await User.findOne({ telegramId }).populate<{
-      friends: IFriend[];
-    }>("friends", "username displayName profilePhoto hasSignedUp");
+    const user = await User.findOne({ telegramId })
+      .populate<{
+        friends: IFriend[];
+      }>("friends", "username displayName profilePhoto hasSignedUp")
+      .populate<{ blockedUsers: IFriend[] }>(
+        "blockedUsers",
+        "username displayName profilePhoto hasSignedUp"
+      );
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
@@ -32,6 +37,9 @@ const getUserByTelegramId = async (
       : null;
 
     const friends = Array.isArray(user.friends) ? user.friends : [];
+    const blockedUsers = Array.isArray(user.blockedUsers)
+      ? user.blockedUsers
+      : [];
 
     res.status(200).json({
       id: user._id.toString(),
@@ -48,6 +56,15 @@ const getUserByTelegramId = async (
         hasSignedUp: friend.hasSignedUp,
         profilePhoto: friend.profilePhoto
           ? `data:image/jpeg;base64,${friend.profilePhoto.toString("base64")}`
+          : null,
+      })),
+      blockedUsers: blockedUsers.map((blocked) => ({
+        id: blocked._id.toString(),
+        username: blocked.username,
+        displayName: blocked.displayName,
+        hasSignedUp: blocked.hasSignedUp,
+        profilePhoto: blocked.profilePhoto
+          ? `data:image/jpeg;base64,${blocked.profilePhoto.toString("base64")}`
           : null,
       })),
       monthlyUsage: user.monthlyUsage,
