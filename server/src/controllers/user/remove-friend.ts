@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { User } from "../../models/User";
 import { Transaction } from "../../models/Transaction";
+import { RecurringTemplate } from "../../models/RecurringTemplate";
 
 const removeFriend = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -21,12 +22,16 @@ const removeFriend = async (req: Request, res: Response): Promise<void> => {
     const userObjId = new Types.ObjectId(userId);
     const friendObjId = new Types.ObjectId(friendId);
 
-    // Step 1: Check for any transactions involving both users
+    // Step 1: Check for any transactions or recurring templates involving both users
     const existingTx = await Transaction.exists({
       participants: { $all: [userObjId, friendObjId] },
     });
 
-    if (existingTx) {
+    const existingTpl = await RecurringTemplate.exists({
+      participants: { $all: [userObjId, friendObjId] },
+    });
+
+    if (existingTx || existingTpl) {
       res
         .status(403)
         .json({ error: "Cannot remove friend: transactions exists" });
@@ -54,7 +59,10 @@ const removeFriend = async (req: Request, res: Response): Promise<void> => {
       const friendHasTx = await Transaction.exists({
         participants: friendObjId,
       });
-      if (!friendHasTx) {
+      const friendHasTpl = await RecurringTemplate.exists({
+        participants: friendObjId,
+      });
+      if (!friendHasTx && !friendHasTpl) {
         await User.findByIdAndDelete(friendObjId);
       }
     }

@@ -68,7 +68,11 @@ const NavBar = () => {
               />
             )}
             {isTrigger ? (
-              <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <Drawer
+                open={drawerOpen}
+                onOpenChange={setDrawerOpen}
+                repositionInputs={false}
+              >
                 <DrawerTrigger asChild>
                   <button>
                     <Icon className="w-7 h-7" />

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -321,13 +320,13 @@ const BlockedUsersPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               className="bg-destructive hover:bg-destructive/50"
               onClick={handleConfirmBlock}
               disabled={isBlocking}
             >
               {isBlocking ? "Blocking..." : "Block"}
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

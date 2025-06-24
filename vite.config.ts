@@ -17,13 +17,17 @@ export default defineConfig({
       registerType: "autoUpdate",
       workbox: {
         cleanupOutdatedCaches: true,
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+      },
+      devOptions: {
+        enabled: true,
       },
 
       manifest: {
         name: "nest",
         short_name: "nest",
         theme_color: "#ffffff",
-        start_url: "/",
+        start_url: "/dashboard",
         display: "standalone",
         icons: [
           {

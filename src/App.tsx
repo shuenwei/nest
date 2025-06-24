@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
+import InstallPwaGuide from "./components/InstallPwaGuide";
 
 import WelcomePage from "./pages/WelcomePage";
 import DashboardPage from "./pages/DashboardPage";
@@ -35,8 +36,13 @@ function App() {
     }
   }, [location.pathname, navigate]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [location.pathname]);
+
   return (
     <>
+      <InstallPwaGuide />
       <Routes>
         {/* Unprotected Routes */}
         <Route

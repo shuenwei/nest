@@ -88,6 +88,7 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
       username: telegramUser.username.toLowerCase(),
       profilePhoto: profilePhotoBuffer,
       verifiedAt: new Date(),
+      hasSignedUp: true,
     };
 
     // Only set displayName if not already defined
