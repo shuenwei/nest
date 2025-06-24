@@ -6,7 +6,7 @@ import { Download, ArrowDown, ArrowUp } from "lucide-react";
 export default function InstallPwaGuide() {
   const [show, setShow] = useState(false);
   const location = useLocation();
-  const excludedPaths = ["/splitbill"];
+  const excludedPaths = ["/splitbill", "/onboarding"];
   const [platform, setPlatform] = useState<"safari" | "ios-chrome" | "other">(
     "other"
   );
