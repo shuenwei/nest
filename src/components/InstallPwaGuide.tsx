@@ -13,7 +13,6 @@ export default function InstallPwaGuide() {
 
   useEffect(() => {
     if (excludedPaths.includes(location.pathname)) return;
-    localStorage.setItem("pwa-guide-dismissed", "false");
 
     const dismissed = localStorage.getItem("pwa-guide-dismissed");
     if (dismissed === "true") return;
