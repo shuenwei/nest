@@ -121,6 +121,17 @@
     font-family: 'Outfit', sans-serif;
   }
 
+  body, html, #root {
+    scrollbar-width: none;
+    overflow-y: scroll;
+  }
+
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  #root::-webkit-scrollbar {
+    display: none;
+  }
+
   #root {
     min-height: 100dvh;
     padding-top: env(safe-area-inset-top);
