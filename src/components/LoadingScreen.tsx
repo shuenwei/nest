@@ -35,6 +35,20 @@ const LoadingScreen = ({ progress }: LoadingScreenProps) => {
   const displayName = localStorage.getItem("displayname");
 
   useEffect(() => {
+    const preventTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("touchmove", preventTouchMove, {
+      passive: false,
+    });
+
+    return () => {
+      document.removeEventListener("touchmove", preventTouchMove);
+    };
+  }, []);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       setIsTakingTooLong(true);
     }, 10000); // 10 seconds
