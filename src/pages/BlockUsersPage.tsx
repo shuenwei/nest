@@ -286,7 +286,11 @@ const BlockedUsersPage = () => {
               </Alert>
 
               <DialogFooter>
-                <Button type="submit" disabled={isBlocking} className="w-full">
+                <Button
+                  type="submit"
+                  disabled={isSearchingUser}
+                  className="w-full"
+                >
                   {isSearchingUser ? "Loading..." : "Block"}
                 </Button>
               </DialogFooter>

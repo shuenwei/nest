@@ -65,7 +65,6 @@ const OTPPage: FC<OTPPageProps> = ({
   });
 
   const handleSubmit = async (data: OTPFormValues) => {
-
     setIsSubmitting(true);
 
     try {
@@ -118,19 +117,7 @@ const OTPPage: FC<OTPPageProps> = ({
               <Button
                 className="w-full"
                 onClick={async () => {
-                  try {
-                    const res = await axios.post(
-                      `${apiUrl}/auth/sendcode/${username}`
-                    );
-                    if (res.status === 200) {
-                      setShowInput(true);
-                    } else {
-                      toast.error("Failed to send OTP. Please try again.");
-                    }
-                  } catch (err) {
-                    console.error("Failed to send OTP:", err);
-                    toast.error("Failed to send OTP. Please try again later.");
-                  }
+                  setShowInput(true);
                 }}
               >
                 Click here to message @nestExpenseApp_bot
