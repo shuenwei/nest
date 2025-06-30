@@ -75,8 +75,14 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? (JSON.parse(stored) as User) : null;
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const stored = localStorage.getItem("transactions");
+    return stored ? (JSON.parse(stored) as Transaction[]) : [];
+  });
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
@@ -88,7 +94,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem("endDate");
     return saved ? new Date(saved) : undefined;
   });
-  const [spending, setSpending] = useState<number>(0);
+  const [spending, setSpending] = useState<number>(() => {
+    const stored = localStorage.getItem("spending");
+    return stored ? Number(stored) : 0;
+  });
   const [isLoadingSpending, setIsLoadingSpending] = useState(false);
 
   useEffect(() => {
@@ -96,6 +105,38 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchSpending();
     }
   }, [startDate, endDate]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    if (startDate) {
+      localStorage.setItem("startDate", startDate.toISOString());
+    } else {
+      localStorage.removeItem("startDate");
+    }
+  }, [startDate]);
+
+  useEffect(() => {
+    if (endDate) {
+      localStorage.setItem("endDate", endDate.toISOString());
+    } else {
+      localStorage.removeItem("endDate");
+    }
+  }, [endDate]);
+
+  useEffect(() => {
+    localStorage.setItem("spending", spending.toString());
+  }, [spending]);
 
   const fetchSpending = async (userId?: string) => {
     setIsLoadingSpending(true);
@@ -150,7 +191,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
       );
       const userData = res.data;
-      setUser(userData);
       setProgress(40);
 
       try {
@@ -174,6 +214,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to fetch balances:", err);
       }
 
+      setUser(userData);
       setProgress(70);
 
       try {
@@ -208,6 +249,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           toast.error("Something went wrong. Please refresh your app.");
         }
       }
+      setLoading(false);
+      setIsLoadingSpending(false);
     }
   };
 
@@ -220,7 +263,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const [recurringTemplates, setRecurringTemplates] = useState<
     RecurringTemplate[] | null
-  >(null);
+  >(() => {
+    const stored = localStorage.getItem("recurringTemplates");
+    return stored ? (JSON.parse(stored) as RecurringTemplate[]) : null;
+  });
+
+  useEffect(() => {
+    if (recurringTemplates) {
+      localStorage.setItem(
+        "recurringTemplates",
+        JSON.stringify(recurringTemplates)
+      );
+    } else {
+      localStorage.removeItem("recurringTemplates");
+    }
+  }, [recurringTemplates]);
 
   const fetchRecurringTemplates = async () => {
     if (!user) return;
