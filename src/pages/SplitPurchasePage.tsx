@@ -656,11 +656,11 @@ const SplitPurchasePage = () => {
 
     // Validate that manual splits add up to the total if using manual split
     if (values.splitMethod === "manual") {
-      const totalSgdAmount = sgdManualSplits.reduce((sum, item) => {
+      const totalOriginalAmount = manualSplits.reduce((sum, item) => {
         return sum + (Number.parseFloat(item.amount) || 0);
       }, 0);
 
-      const difference = Math.abs(sgdAmount - totalSgdAmount);
+      const difference = Math.abs(originalAmount - totalOriginalAmount);
       if (difference > 0.01) {
         // Allow for small floating point errors
         toast.error("Error", {
