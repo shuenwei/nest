@@ -378,9 +378,9 @@ const FriendsPage = () => {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  You are able to add your friends even if they aren't on Nest
-                  yet. They will be able to view their transaction history upon
-                  account creation.
+                  You are able to add your friends even if they aren't a Nest
+                  user yet. They will be able to view their transaction history
+                  upon account creation.
                 </AlertDescription>
               </Alert>
 

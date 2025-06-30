@@ -17,7 +17,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       workbox: {
         cleanupOutdatedCaches: true,
-        cacheId: "nest-v1.0",
+        cacheId: "nest-v1.0.1",
       },
       devOptions: {
         enabled: true,
