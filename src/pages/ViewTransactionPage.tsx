@@ -47,12 +47,14 @@ const ViewTransactionPage = () => {
     if (foundTransaction) {
       setTransaction(foundTransaction);
       setIsLoading(false);
-    } else {
-      setIsLoading(false);
-      navigate("/history");
-      toast.error("Failed to load transaction details");
     }
-  }, [loading, transactionId, navigate]);
+
+    if (!loading && !foundTransaction) {
+      toast.error("Failed to load transaction details");
+      navigate("/history");
+      setIsLoading(false);
+    }
+  }, [loading, transactionId, transactions, navigate]);
 
   const handleDelete = async () => {
     if (!transactionId) return;
@@ -96,7 +98,7 @@ const ViewTransactionPage = () => {
     }
   };
 
-  if (isLoading || loading) return <LoadingScreen />;
+  if (isLoading) return <LoadingScreen />;
   if (!transaction || !user) return null;
 
   return (

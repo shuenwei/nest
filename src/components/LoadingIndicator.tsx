@@ -6,14 +6,14 @@ import { useEffect, useState } from "react";
 import { CircleCheck } from "lucide-react";
 
 export default function LoadingIndicator() {
-  const { loading } = useUser();
+  const { updating } = useUser();
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
-    if (loading) {
+    if (updating) {
       setVisible(true);
       setDone(false);
     } else if (visible) {
@@ -25,7 +25,7 @@ export default function LoadingIndicator() {
     }
 
     return () => clearTimeout(timeout);
-  }, [loading]);
+  }, [updating]);
 
   return (
     <AnimatePresence>

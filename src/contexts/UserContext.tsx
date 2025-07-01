@@ -61,6 +61,7 @@ interface UserContextValue {
   >;
   fetchRecurringTemplates: () => Promise<void>;
   loading: boolean;
+  updating: boolean;
   refreshUser: () => Promise<void>;
   fetchSpending: () => Promise<void>;
   isLoadingSpending: boolean;
@@ -82,7 +83,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const stored = localStorage.getItem("transactions");
     return stored ? (JSON.parse(stored) as Transaction[]) : [];
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const saved = localStorage.getItem("startDate");
@@ -156,7 +158,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    setLoading(true);
+    setUpdating(true);
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`,
@@ -220,6 +222,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchSpending(userData.id);
       localStorage.setItem("displayname", userData.displayName);
 
+      setUpdating(false);
       setLoading(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -308,6 +311,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         user,
         setUser,
         loading,
+        updating,
         refreshUser,
         transactions,
         setTransactions,
