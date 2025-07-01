@@ -31,12 +31,14 @@ import TransactionHeader from "@/components/transactions/TransactionHeader";
 const ViewTransactionPage = () => {
   const navigate = useNavigate();
   const { transactionId } = useParams<{ transactionId: string }>();
-  const { user, transactions, refreshUser } = useUser();
+  const { user, transactions, refreshUser, loading } = useUser();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
+
     if (!transactionId) {
       navigate("/history");
       return;
