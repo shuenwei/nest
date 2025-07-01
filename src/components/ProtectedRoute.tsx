@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import axios from "axios";
-import LoadingScreen from "@/components/LoadingScreen";
 import { toast } from "sonner";
 
 const ProtectedRoute = () => {
   const [isInvalid, setIsInvalid] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
         setIsInvalid(true);
-        setIsLoading(false);
         return;
       }
 
@@ -27,22 +24,19 @@ const ProtectedRoute = () => {
           }
         );
 
-        const valid = res.data.valid === true && res.data.payload.telegramId === localStorage.getItem("telegramId");
+        const valid =
+          res.data.valid === true &&
+          res.data.payload.telegramId === localStorage.getItem("telegramId");
 
-        if (!valid) setIsInvalid(true); 
-
+        if (!valid) setIsInvalid(true);
       } catch (err) {
         console.error("Token validation failed:", err);
         toast.error("Something went wrong. Please refresh your app.");
-      } finally {
-        setIsLoading(false);
       }
     };
 
     validateToken();
   }, []);
-
-  if (isLoading) return <LoadingScreen progress={100} />;
 
   if (isInvalid) {
     localStorage.removeItem("telegramId");

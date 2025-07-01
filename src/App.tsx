@@ -22,6 +22,7 @@ import ViewRecurringPage from "./pages/ViewRecurringPage";
 import UsageLimitsPage from "./pages/UsageLimitsPage";
 import BlockUsersPage from "./pages/BlockUsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import LoadingIndicator from "./components/LoadingIndicator";
 
 function App() {
   const location = useLocation();
@@ -43,6 +44,7 @@ function App() {
   return (
     <>
       <InstallPwaGuide />
+      <LoadingIndicator />
       <Routes>
         {/* Unprotected Routes */}
         <Route

@@ -7,7 +7,6 @@ import {
   useRef,
 } from "react";
 import axios from "axios";
-import LoadingScreen from "@/components/LoadingScreen";
 import { Transaction } from "@/lib/transaction";
 import { RecurringTemplate } from "@/lib/recurring";
 import { toast } from "sonner";
@@ -75,10 +74,15 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? (JSON.parse(stored) as User) : null;
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const stored = localStorage.getItem("transactions");
+    return stored ? (JSON.parse(stored) as Transaction[]) : [];
+  });
+  const [loading, setLoading] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const saved = localStorage.getItem("startDate");
@@ -96,6 +100,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchSpending();
     }
   }, [startDate, endDate]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
 
   const fetchSpending = async (userId?: string) => {
     setIsLoadingSpending(true);
@@ -137,12 +153,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const storedTelegramId = localStorage.getItem("telegramId");
     const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
-      setLoading(false);
       return;
     }
-    try {
-      setProgress(10);
 
+    setLoading(true);
+    try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`,
         {
@@ -150,8 +165,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
       );
       const userData = res.data;
-      setUser(userData);
-      setProgress(40);
 
       try {
         const balanceRes = await axios.get(
@@ -174,7 +187,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to fetch balances:", err);
       }
 
-      setProgress(70);
+      setUser(userData);
 
       try {
         const transRes = await axios.get(
@@ -189,7 +202,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setTransactions([]);
       }
 
-      setProgress(100);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/transaction/recurring/${
+            userData.id
+          }`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setRecurringTemplates(response.data.recurringTemplates || []);
+      } catch (err) {
+        console.error("Failed to fetch recurring templates:", err);
+        toast.error("Failed to load recurring transactions");
+      }
+
       fetchSpending(userData.id);
       localStorage.setItem("displayname", userData.displayName);
 
@@ -220,7 +247,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const [recurringTemplates, setRecurringTemplates] = useState<
     RecurringTemplate[] | null
-  >(null);
+  >(() => {
+    const stored = localStorage.getItem("recurringTemplates");
+    return stored ? (JSON.parse(stored) as RecurringTemplate[]) : null;
+  });
+
+  useEffect(() => {
+    if (recurringTemplates) {
+      localStorage.setItem(
+        "recurringTemplates",
+        JSON.stringify(recurringTemplates)
+      );
+    } else {
+      localStorage.removeItem("recurringTemplates");
+    }
+  }, [recurringTemplates]);
 
   const fetchRecurringTemplates = async () => {
     if (!user) return;
@@ -260,8 +301,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
-
-  if (loading) return <LoadingScreen progress={progress} />;
 
   return (
     <UserContext.Provider

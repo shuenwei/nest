@@ -17,8 +17,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       workbox: {
         cleanupOutdatedCaches: true,
-        cacheId: "nest-v1.0.1",
+        cacheId: "nest-v1.1.1",
       },
+      includeAssets: ["fonts/*"],
       devOptions: {
         enabled: true,
       },

@@ -4,7 +4,6 @@ import { ArrowLeft, UserRoundMinus, AlertCircle } from "lucide-react";
 import TransactionCard from "@/components/TransactionCard";
 import FriendCard from "@/components/FriendCard";
 import { Transaction } from "@/lib/transaction";
-import LoadingScreen from "@/components/LoadingScreen";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -43,8 +42,6 @@ const ViewFriendPage = () => {
     const friendExists = user.friends.some((f) => f.id === friendId);
     if (!friendExists) navigate("/friends");
   }, [loading, friendId, user, navigate]);
-
-  if (loading) return <LoadingScreen />;
 
   if (!friendId || !user) return null;
 
