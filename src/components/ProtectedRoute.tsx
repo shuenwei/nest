@@ -31,7 +31,6 @@ const ProtectedRoute = () => {
         if (!valid) setIsInvalid(true);
       } catch (err) {
         console.error("Token validation failed:", err);
-        toast.error("Something went wrong. Please refresh your app.");
       }
     };
 

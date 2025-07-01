@@ -32,11 +32,27 @@ const NavBar = () => {
   const location = useLocation();
 
   const navItems = [
-    { icon: Home, path: "/dashboard", action: () => navigate("/dashboard") },
-    { icon: UsersRound, path: "/friends", action: () => navigate("/friends") },
+    {
+      icon: Home,
+      path: "/dashboard",
+      action: () => navigate("/dashboard", { replace: true }),
+    },
+    {
+      icon: UsersRound,
+      path: "/friends",
+      action: () => navigate("/friends", { replace: true }),
+    },
     { icon: SquarePlus, isTrigger: true },
-    { icon: History, path: "/history", action: () => navigate("/history") },
-    { icon: Settings, path: "/settings", action: () => navigate("/settings") },
+    {
+      icon: History,
+      path: "/history",
+      action: () => navigate("/history", { replace: true }),
+    },
+    {
+      icon: Settings,
+      path: "/settings",
+      action: () => navigate("/settings", { replace: true }),
+    },
   ];
 
   const activeIndex = navItems.findIndex(
