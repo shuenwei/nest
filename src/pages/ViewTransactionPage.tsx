@@ -37,8 +37,6 @@ const ViewTransactionPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
-
     if (!transactionId) {
       navigate("/history");
       return;
@@ -50,11 +48,11 @@ const ViewTransactionPage = () => {
       setTransaction(foundTransaction);
       setIsLoading(false);
     } else {
-      toast.error("Failed to load transaction details");
-      navigate("/history");
       setIsLoading(false);
+      navigate("/history");
+      toast.error("Failed to load transaction details");
     }
-  }, [transactionId, navigate]);
+  }, [loading, transactionId, navigate]);
 
   const handleDelete = async () => {
     if (!transactionId) return;
@@ -68,9 +66,9 @@ const ViewTransactionPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      navigate("/history");
       await refreshUser();
       toast.success("Transaction deleted successfully");
-      navigate("/history");
     } catch (error) {
       console.error("Error deleting transaction:", error);
       toast.error("Failed to delete transaction");
@@ -98,7 +96,7 @@ const ViewTransactionPage = () => {
     }
   };
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading || loading) return <LoadingScreen />;
   if (!transaction || !user) return null;
 
   return (
