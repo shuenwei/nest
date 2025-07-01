@@ -57,7 +57,7 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
           {transaction.splitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{getUserDisplayName(split.user)}</span>
-              <span className="font-medium">${split.amount.toFixed(2)}</span>
+              <span>${split.amount.toFixed(2)}</span>
             </div>
           ))}
         </div>

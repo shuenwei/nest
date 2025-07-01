@@ -46,7 +46,7 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
         <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm">Amount</span>
-            <span className="font-medium">
+            <span>
               {transaction.currency} {transaction.amount.toFixed(2)}
             </span>
           </div>
@@ -64,7 +64,8 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
             <div className="flex justify-between items-center">
               <span className="text-sm">Exchange Rate</span>
               <span className="font-medium">
-                1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency} 
+                1 SGD = {transaction.exchangeRate.toFixed(5)}{" "}
+                {transaction.currency}
               </span>
             </div>
           )}

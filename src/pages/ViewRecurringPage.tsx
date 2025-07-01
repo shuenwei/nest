@@ -225,9 +225,7 @@ const ViewRecurringPage = () => {
                     <span className="text-sm">
                       {getFriendNameById(split.user)}
                     </span>
-                    <span className="font-medium">
-                      ${split.amount.toFixed(2)}
-                    </span>
+                    <span>${split.amount.toFixed(2)}</span>
                   </div>
                 ))}
               </div>

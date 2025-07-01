@@ -70,7 +70,7 @@ const SettingsPage = () => {
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{label}</span>
+                  <span className="text-sm font-normal">{label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>

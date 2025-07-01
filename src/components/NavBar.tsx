@@ -87,7 +87,7 @@ const NavBar = () => {
                     <div className="flex flex-col gap-2">
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium h-10 px-3"
+                        className="justify-start text-lg font-normal h-10 px-3"
                         onClick={() => {
                           setDrawerOpen(false);
                           navigate("/splitpurchase");
@@ -98,7 +98,7 @@ const NavBar = () => {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium h-10 px-3"
+                        className="justify-start text-lg font-normal h-10 px-3"
                         onClick={() => {
                           setDrawerOpen(false);
                           navigate("/splitbill");
@@ -109,7 +109,7 @@ const NavBar = () => {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium h-10 px-3"
+                        className="justify-start text-lg font-normal h-10 px-3"
                         onClick={() => {
                           setDrawerOpen(false);
                           navigate("/recurring");
@@ -122,7 +122,7 @@ const NavBar = () => {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-lg font-medium h-10 px-3"
+                        className="justify-start text-lg font-normal h-10 px-3"
                         onClick={() => {
                           setDrawerOpen(false);
                           navigate("/settleup");

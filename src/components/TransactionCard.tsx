@@ -109,7 +109,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
                   <span className="font-semibold">
                     {getUserDisplayName(p.user)}
                   </span>{" "}
-                  ${p.amount.toFixed(2)}
+                  <span className="font-normal">${p.amount.toFixed(2)}</span>
                 </Badge>
               ))
             )}

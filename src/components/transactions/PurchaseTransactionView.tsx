@@ -39,15 +39,15 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
             : "Split Manually"}
         </p>
       </div>
-      
+
       {/* Exchange Rate */}
       {transaction.currency !== "SGD" && (
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Exchange Rate</h3>
-        <p className="text-sm">
-          1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency} 
-        </p>
-      </div>
+        <div>
+          <h3 className="text-sm font-semibold mb-2">Exchange Rate</h3>
+          <p className="text-sm">
+            1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency}
+          </p>
+        </div>
       )}
 
       {/* Splits Section */}
@@ -57,7 +57,7 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
           {transaction.splitsInSgd.map((split, index) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{getUserDisplayName(split.user)}</span>
-              <span className="font-medium">${split.amount.toFixed(2)}</span>
+              <span>${split.amount.toFixed(2)}</span>
             </div>
           ))}
         </div>
