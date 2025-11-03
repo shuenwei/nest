@@ -82,7 +82,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       asChild = false,
-      hapticFeedback = true,
+      hapticFeedback = "heavy",
       onClick,
       ...props
     },
