@@ -38,6 +38,26 @@ function App() {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
+  const element = document.documentElement;
+  const requestFullscreen =
+    element.requestFullscreen ||
+    // @ts-expect-error - webkit vendor prefix for Safari
+    element.webkitRequestFullscreen ||
+    // @ts-expect-error - ms vendor prefix for legacy Edge
+    element.msRequestFullscreen;
+
+  if (!document.fullscreenElement && typeof requestFullscreen === "function") {
+    const result = requestFullscreen.call(element);
+
+    if (result instanceof Promise) {
+      result.catch(() => {
+        // Ignore errors caused by user gesture requirements or platform constraints
+      });
+    }
+  }
+}, []);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, [location.pathname]);
 
