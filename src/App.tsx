@@ -41,25 +41,17 @@ function App() {
     const tg = window.Telegram?.WebApp;
 
     if (tg) {
-      tg.ready?.();   // tell Telegram the app is ready
-      tg.expand?.();  // expand to full height
-    } else {
-      // fallback for normal browsers (optional)
-      const element = document.documentElement;
-      const requestFullscreen =
-        element.requestFullscreen ||
-        // @ts-expect-error Safari prefix
-        element.webkitRequestFullscreen ||
-        // @ts-expect-error legacy Edge prefix
-        element.msRequestFullscreen;
+      tg.ready?.(); // Always call this first
+      tg.expand?.(); // Optional: ensure expanded view before fullscreen
 
-      if (!document.fullscreenElement && typeof requestFullscreen === "function") {
-        const result = requestFullscreen.call(element);
-        if (result instanceof Promise) result.catch(() => {});
+      // Try the new Telegram fullscreen API
+      if (tg.requestFullscreen) {
+        tg.requestFullscreen();
+      } else {
+        console.log("requestFullscreen() not supported in this Telegram version");
       }
     }
   }, []);
-
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
