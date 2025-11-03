@@ -38,24 +38,28 @@ function App() {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-  const element = document.documentElement;
-  const requestFullscreen =
-    element.requestFullscreen ||
-    // @ts-expect-error - webkit vendor prefix for Safari
-    element.webkitRequestFullscreen ||
-    // @ts-expect-error - ms vendor prefix for legacy Edge
-    element.msRequestFullscreen;
+    const tg = window.Telegram?.WebApp;
 
-  if (!document.fullscreenElement && typeof requestFullscreen === "function") {
-    const result = requestFullscreen.call(element);
+    if (tg) {
+      tg.ready?.();   // tell Telegram the app is ready
+      tg.expand?.();  // expand to full height
+    } else {
+      // fallback for normal browsers (optional)
+      const element = document.documentElement;
+      const requestFullscreen =
+        element.requestFullscreen ||
+        // @ts-expect-error Safari prefix
+        element.webkitRequestFullscreen ||
+        // @ts-expect-error legacy Edge prefix
+        element.msRequestFullscreen;
 
-    if (result instanceof Promise) {
-      result.catch(() => {
-        // Ignore errors caused by user gesture requirements or platform constraints
-      });
+      if (!document.fullscreenElement && typeof requestFullscreen === "function") {
+        const result = requestFullscreen.call(element);
+        if (result instanceof Promise) result.catch(() => {});
+      }
     }
-  }
-}, []);
+  }, []);
+
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
