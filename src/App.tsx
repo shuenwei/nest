@@ -103,7 +103,15 @@ function App() {
           path="/"
           element={
             <WelcomePage
-              onNext={() => (window.location.href = "/onboarding")}
+              onNext={() => {
+                const isTelegramApp = Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user);
+
+                if (isTelegramApp) {
+                  navigate("/dashboard");
+                } else {
+                  navigate("/onboarding");
+                }
+              }}
             />
           }
         />
