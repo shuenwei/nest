@@ -41,16 +41,35 @@ function App() {
     const tg = window.Telegram?.WebApp;
 
     if (tg) {
-      tg.ready?.(); // Always call this first
-      tg.expand?.(); // Optional: ensure expanded view before fullscreen
+      tg.ready?.();
+      tg.expand?.();
 
-      // Try the new Telegram fullscreen API
       if (tg.requestFullscreen) {
         tg.requestFullscreen();
       } else {
         console.log("requestFullscreen() not supported in this Telegram version");
       }
+
+      if (tg.disableVerticalSwipes) {
+        tg.disableVerticalSwipes();
+      } else {
+        console.log("disableVerticalSwipes() not supported in this Telegram version");
+      }
+      
     }
+  }, []);
+
+  useEffect(() => {
+    const isTelegramWebApp = Boolean(window.Telegram?.WebApp);
+
+    if (isTelegramWebApp) {
+      document.body.classList.add("telegram-webapp");
+      return () => {
+        document.body.classList.remove("telegram-webapp");
+      };
+    }
+
+    document.body.classList.remove("telegram-webapp");
   }, []);
 
   useEffect(() => {

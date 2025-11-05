@@ -9,6 +9,8 @@ declare global {
         close?: () => void;
         requestFullscreen?: () => void; // ✅ new method
         isExpanded?: boolean;
+        disableVerticalSwipes?: () => void;
+        enableVerticalSwipes?: () => void;
         initData?: string;
         initDataUnsafe?: {
           user?: {
