@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const ProtectedRoute = () => {
   const [isInvalid, setIsInvalid] = useState(false);

@@ -9,7 +9,7 @@ import type { Transaction } from "@/lib/transaction";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useUser } from "@/contexts/UserContext";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
   AlertDialog,
   AlertDialogAction,

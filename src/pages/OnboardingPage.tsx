@@ -6,7 +6,7 @@ import DisplayNamePage from "./DisplayNamePage";
 import AllSetPage from "./AllSetPage";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 

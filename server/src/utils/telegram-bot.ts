@@ -205,7 +205,7 @@ bot.on("photo", async (msg) => {
         parse_mode: "Markdown",
         reply_markup: {
           inline_keyboard: [
-            [{ text: "Split this bill on the app", url: fullUrl }],
+            [{ text: "Split this bill on the app", web_app: { url: fullUrl } }],
           ],
         },
       }

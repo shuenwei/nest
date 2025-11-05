@@ -29,7 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 interface OTPPageProps {

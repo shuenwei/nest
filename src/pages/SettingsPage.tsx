@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, GaugeCircle, UserRoundX, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },

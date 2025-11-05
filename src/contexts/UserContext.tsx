@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 import { Transaction } from "@/lib/transaction";
 import { RecurringTemplate } from "@/lib/recurring";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { formatISO } from "date-fns";
 
 interface Friend {
