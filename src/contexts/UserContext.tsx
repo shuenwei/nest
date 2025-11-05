@@ -247,6 +247,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const tgUser = tg?.initDataUnsafe?.user;
       const initData = tg?.initData;
 
+      toast.error(`Telegram object: ${!!window.Telegram}`);
+      toast.error(`WebApp: ${!!window.Telegram?.WebApp}`);
+      toast.error(`initData: ${window.Telegram?.WebApp?.initData ? "present" : "missing"}`);
+      toast.error(`initDataUnsafe.user: ${JSON.stringify(window.Telegram?.WebApp?.initDataUnsafe?.user)}`);
+
+
       if (tgUser && initData) {
         if (!tgUser.username) {
           toast.error(
