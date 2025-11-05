@@ -243,6 +243,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const init = async () => {
+      const tg = window.Telegram?.WebApp;
+      const tgUser = tg?.initDataUnsafe?.user;
+      const initData = tg?.initData;
+
+      if (tgUser && initData) {
+        if (!tgUser.username) {
+          toast.error(
+            "Please set a Telegram username before using the mini app."
+          );
+        } else {
+          try {
+            const response = await axios.post<{
+              token: string;
+              telegramId: string;
+            }>(
+              `${import.meta.env.VITE_API_URL}/auth/telegram-login`,
+              { initData }
+            );
+            const { token, telegramId } = response.data || {};
+            if (token && telegramId) {
+              localStorage.setItem("token", token);
+              localStorage.setItem("telegramId", telegramId);
+            }
+          } catch (error) {
+            console.error("Telegram mini app login failed:", error);
+            toast.error("Unable to sign you in with Telegram. Please try again.");
+          }
+        }
+      }
       await refreshUser();
     };
     init();
