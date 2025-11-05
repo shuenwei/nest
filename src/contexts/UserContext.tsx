@@ -61,6 +61,7 @@ interface UserContextValue {
   >;
   fetchRecurringTemplates: () => Promise<void>;
   loading: boolean;
+  loadingTelegram: boolean;
   updating: boolean;
   refreshUser: () => Promise<void>;
   fetchSpending: () => Promise<void>;
@@ -84,6 +85,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return stored ? (JSON.parse(stored) as Transaction[]) : [];
   });
   const [loading, setLoading] = useState(true);
+  const [loadingTelegram, setLoadingTelegram] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
@@ -248,6 +250,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const initData = tg?.initData;
 
       if (tgUser && initData) {
+        setLoadingTelegram(true);
         if (!tgUser.username) {
           toast.error(
             "Please set a Telegram username before using the mini app."
@@ -273,6 +276,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       await refreshUser();
+      setLoadingTelegram(false);
     };
     init();
   }, []);
@@ -340,6 +344,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         user,
         setUser,
         loading,
+        loadingTelegram,
         updating,
         refreshUser,
         transactions,

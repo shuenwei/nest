@@ -29,7 +29,7 @@ import { useUser } from "./contexts/UserContext";
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loading } = useUser();
+  const { loadingTelegram } = useUser();
   const [isTelegramApp, setIsTelegramApp] = useState(
     () => Boolean(window.Telegram?.WebApp)
   );
@@ -83,13 +83,15 @@ function App() {
 
   const telegramId = localStorage.getItem("telegramId");
 
-  if (isTelegramApp && loading && !telegramId) {
-    return (
-      <>
-        <LoadingScreen />
-        <Toaster />
-      </>
-    );
+  if (isTelegramApp && !telegramId) {
+    if (loadingTelegram) {
+      return (
+        <>
+          <LoadingScreen />
+          <Toaster />
+        </>
+      );
+    }
   }
 
   return (
