@@ -49,7 +49,11 @@ const NavBar = () => {
         navigate("/friends", { replace: true });
       },
     },
-    { icon: SquarePlus, isTrigger: true },
+    { icon: SquarePlus, isTrigger: true,
+      action: () => {
+        triggerHapticImpact("medium");
+      },
+    },
     {
       icon: History,
       path: "/history",
