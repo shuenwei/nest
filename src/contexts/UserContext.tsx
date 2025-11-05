@@ -248,8 +248,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const tg = window.Telegram?.WebApp;
       const tgUser = tg?.initDataUnsafe?.user;
       const initData = tg?.initData;
+      const token = localStorage.getItem("token");
 
-      if (tgUser && initData) {
+      if (tgUser && initData && !token) {
         setLoadingTelegram(true);
         if (!tgUser.username) {
           toast.error(
