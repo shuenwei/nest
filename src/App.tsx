@@ -107,9 +107,9 @@ function App() {
                 const isTelegramApp = Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user);
 
                 if (isTelegramApp) {
-                  navigate("/dashboard");
+                  window.location.href = "/dashboard";
                 } else {
-                  navigate("/onboarding");
+                  window.location.href = "/onboarding";
                 }
               }}
             />
