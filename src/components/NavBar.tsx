@@ -49,11 +49,7 @@ const NavBar = () => {
         navigate("/friends", { replace: true });
       },
     },
-    { icon: SquarePlus, isTrigger: true,
-      action: () => {
-        triggerHapticImpact("medium");
-      },
-    },
+    { icon: SquarePlus, isTrigger: true },
     {
       icon: History,
       path: "/history",
@@ -107,7 +103,11 @@ const NavBar = () => {
                 repositionInputs={false}
               >
                 <DrawerTrigger asChild>
-                  <button>
+                  <button
+                    onClick={() => {
+                      triggerHapticImpact("medium");
+                    }}
+                  >
                     <Icon className="w-7 h-7" />
                   </button>
                 </DrawerTrigger>
