@@ -39,37 +39,36 @@ function App() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (!tg) return; // not inside Telegram
 
-    tg.ready?.();
-    tg.expand?.();
+    const isInTelegram = Boolean(tg?.initDataUnsafe?.user);
+
+    if (!isInTelegram) {
+      document.body.classList.remove("telegram-webapp");
+      return;
+    }
+
+    tg?.ready?.();
+    tg?.expand?.();
 
     try {
-      tg.requestFullscreen?.();
+      tg?.requestFullscreen?.();
     } catch (err) {
-      console.warn("requestFullscreen not supported in this Telegram version:", err);
+      console.warn("requestFullscreen not supported:", err);
     }
 
     try {
-      tg.disableVerticalSwipes?.();
+      tg?.disableVerticalSwipes?.();
     } catch (err) {
       console.warn("disableVerticalSwipes not supported:", err);
     }
+
+    document.body.classList.add("telegram-webapp");
+
+    return () => {
+      document.body.classList.remove("telegram-webapp");
+    };
   }, []);
 
-
-  useEffect(() => {
-    const isTelegramWebApp = Boolean(window.Telegram?.WebApp);
-
-    if (isTelegramWebApp) {
-      document.body.classList.add("telegram-webapp");
-      return () => {
-        document.body.classList.remove("telegram-webapp");
-      };
-    }
-
-    document.body.classList.remove("telegram-webapp");
-  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
@@ -77,7 +76,6 @@ function App() {
 
   return (
     <>
-      <InstallPwaGuide />
       <LoadingIndicator />
       <Routes>
         {/* Unprotected Routes */}

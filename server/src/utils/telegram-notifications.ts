@@ -53,7 +53,9 @@ export async function notifySplits(
               [
                 {
                   text: "🔍 View Transaction",
-                  url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+                  web_app: {
+                    url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+                  },
                 },
               ],
             ],
