@@ -81,7 +81,9 @@ function App() {
     window.scrollTo({ top: 0, left: 0 });
   }, [location.pathname]);
 
-  if (isTelegramApp && loading) {
+  const telegramId = localStorage.getItem("telegramId");
+
+  if (isTelegramApp && loading && !telegramId) {
     return (
       <>
         <LoadingScreen />
