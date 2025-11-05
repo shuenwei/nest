@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { triggerHapticImpact } from "@/lib/haptics";
 
 interface NavBarProps {
   type?: "active" | "disabled";
@@ -35,23 +36,35 @@ const NavBar = () => {
     {
       icon: Home,
       path: "/dashboard",
-      action: () => navigate("/dashboard", { replace: true }),
+      action: () => {
+        triggerHapticImpact("medium");
+        navigate("/dashboard", { replace: true });
+      },
     },
     {
       icon: UsersRound,
       path: "/friends",
-      action: () => navigate("/friends", { replace: true }),
+      action: () => {
+        triggerHapticImpact("medium");
+        navigate("/friends", { replace: true });
+      },
     },
     { icon: SquarePlus, isTrigger: true },
     {
       icon: History,
       path: "/history",
-      action: () => navigate("/history", { replace: true }),
+      action: () => {
+        triggerHapticImpact("medium");
+        navigate("/history", { replace: true });
+      },
     },
     {
       icon: Settings,
       path: "/settings",
-      action: () => navigate("/settings", { replace: true }),
+      action: () => {
+        triggerHapticImpact("medium");
+        navigate("/settings", { replace: true });
+      },
     },
   ];
 
