@@ -39,25 +39,24 @@ function App() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
+    if (!tg) return; // not inside Telegram
 
-    if (tg) {
-      tg.ready?.();
-      tg.expand?.();
+    tg.ready?.();
+    tg.expand?.();
 
-      if (tg.requestFullscreen) {
-        tg.requestFullscreen();
-      } else {
-        console.log("requestFullscreen() not supported in this Telegram version");
-      }
+    try {
+      tg.requestFullscreen?.();
+    } catch (err) {
+      console.warn("requestFullscreen not supported in this Telegram version:", err);
+    }
 
-      if (tg.disableVerticalSwipes) {
-        tg.disableVerticalSwipes();
-      } else {
-        console.log("disableVerticalSwipes() not supported in this Telegram version");
-      }
-      
+    try {
+      tg.disableVerticalSwipes?.();
+    } catch (err) {
+      console.warn("disableVerticalSwipes not supported:", err);
     }
   }, []);
+
 
   useEffect(() => {
     const isTelegramWebApp = Boolean(window.Telegram?.WebApp);

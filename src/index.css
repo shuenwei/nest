@@ -173,5 +173,5 @@
 }
 
 body.telegram-webapp #root {
-  padding-top: calc(env(safe-area-inset-top) + 16px);
+  padding-top: calc(env(safe-area-inset-top) + 24px);
 }
