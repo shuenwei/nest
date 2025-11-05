@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import InstallPwaGuide from "./components/InstallPwaGuide";
@@ -23,10 +23,16 @@ import UsageLimitsPage from "./pages/UsageLimitsPage";
 import BlockUsersPage from "./pages/BlockUsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
+import LoadingScreen from "./components/LoadingScreen";
+import { useUser } from "./contexts/UserContext";
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { loading } = useUser();
+  const [isTelegramApp, setIsTelegramApp] = useState(
+    () => Boolean(window.Telegram?.WebApp)
+  );
 
   useEffect(() => {
     const telegramId = localStorage.getItem("telegramId");
@@ -41,6 +47,7 @@ function App() {
     const tg = window.Telegram?.WebApp;
 
     const isInTelegram = Boolean(tg?.initDataUnsafe?.user);
+    setIsTelegramApp(isInTelegram);
 
     if (!isInTelegram) {
       document.body.classList.remove("telegram-webapp");
@@ -73,6 +80,15 @@ function App() {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, [location.pathname]);
+
+  if (isTelegramApp && loading) {
+    return (
+      <>
+        <LoadingScreen />
+        <Toaster />
+      </>
+    );
+  }
 
   return (
     <>

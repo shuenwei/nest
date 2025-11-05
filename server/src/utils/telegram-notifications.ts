@@ -114,7 +114,9 @@ export async function notifyTransfer(
               [
                 {
                   text: "🔍 View Transfer",
-                  url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+                  web_app: {
+                    url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+                  },
                 },
               ],
             ],
