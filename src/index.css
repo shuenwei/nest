@@ -171,3 +171,7 @@
 .safe-area-padding {
   padding-top: env(safe-area-inset-top);
 }
+
+body.telegram-webapp #root {
+  padding-top: calc(env(safe-area-inset-top) + 16px);
+}
