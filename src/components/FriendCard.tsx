@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
 
 import { useUser } from "@/contexts/UserContext";
+import { triggerHapticImpact } from "@/lib/haptics";
 
 interface FriendCardProps {
   userId: string;
@@ -30,7 +31,10 @@ export function FriendCard({
       onClick={
         disableClick
           ? undefined
-          : () => navigate(`/friends/${encodeURIComponent(id)}`)
+          : () => {
+              triggerHapticImpact("light");
+              navigate(`/friends/${encodeURIComponent(id)}`);
+            }
       }
     >
       <CardContent className="px-4 flex items-center justify-between">

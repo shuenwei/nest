@@ -4,6 +4,7 @@ import React from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Transaction } from "@/lib/transaction";
 import { useNavigate } from "react-router-dom";
+import { triggerHapticImpact } from "@/lib/haptics";
 
 interface TransactionCardProps {
   transactionId: string;
@@ -59,7 +60,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   return (
     <Card
       className={`mb-3 py-3 shadow-xs ${className}`}
-      onClick={() => navigate(`/history/${transaction._id}`)}
+      onClick={() => {
+        triggerHapticImpact("light");
+        navigate(`/history/${transaction._id}`);
+      }}
     >
       <CardContent className="px-0 divide-y">
         <div className="px-4 pb-3 flex justify-between items-start">
