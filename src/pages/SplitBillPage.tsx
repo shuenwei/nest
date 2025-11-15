@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useSearchParams } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,6 +75,7 @@ import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { BillTransaction } from "@/lib/transaction";
 import imageCompression from "browser-image-compression";
 import ScanningScreen from "@/components/ScanningScreen";
+import { PersonSelectDrawer, PersonOption } from "@/components/PersonSelectDrawer";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -282,7 +283,11 @@ const SplitBillPage = () => {
   const { transactionId } = useParams<{ transactionId?: string }>();
   const isEditMode = !!transactionId;
   const [isPrefilled, setIsPrefilled] = useState(false);
-  const [openParticipantsSelect, setOpenParticipantsSelect] = useState(false);
+  const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
+  const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
+  const [activeSharedByIndex, setActiveSharedByIndex] = useState<number | null>(
+    null
+  );
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -309,6 +314,25 @@ const SplitBillPage = () => {
 
   const currentUserId = user?.id ?? "missing user";
 
+  const participantOptions: PersonOption[] = useMemo(
+    () => [
+      {
+        id: currentUserId,
+        name: user?.displayName ?? "You",
+        username: user?.username ?? "",
+        profilePhoto: user?.profilePhoto,
+        isYou: true,
+      },
+      ...friends.map((friend) => ({
+        id: friend.id,
+        name: friend.name,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      })),
+    ],
+    [currentUserId, friends, user?.displayName, user?.profilePhoto, user?.username]
+  );
+
   useEffect(() => {
     if (user?.friends && Array.isArray(user.friends)) {
       const formattedFriends = user.friends.map((friend) => ({
@@ -322,10 +346,11 @@ const SplitBillPage = () => {
     }
   }, [user]);
 
-  const getParticipantName = (id: string) =>
-    id === currentUserId
-      ? "You"
-      : friends.find((f) => f.id === id)?.name ?? "Unknown";
+  const getParticipantName = (id: string) => {
+    const person = participantOptions.find((option) => option.id === id);
+    if (!person) return "Unknown";
+    return person.isYou ? `${person.name} (You)` : person.name;
+  };
 
   // State for exchange rates
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
@@ -525,6 +550,12 @@ const SplitBillPage = () => {
   const gst = form.watch("gst");
   const gstPercentage = form.watch("gstPercentage");
   const currency = form.watch("currency");
+
+  const selectedParticipantOptions = useMemo(
+    () =>
+      participantOptions.filter((person) => participants.includes(person.id)),
+    [participantOptions, participants]
+  );
 
   // Removes participants from items when removed from participants list
   useEffect(() => {
@@ -998,25 +1029,32 @@ const SplitBillPage = () => {
                     <FormItem>
                       <FormLabel>Paid by</FormLabel>
                       <FormControl>
-                        <Select
-                          key={field.value}
-                          value={field.value}
-                          onValueChange={field.onChange}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setPaidByDrawerOpen(true)}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select who paid" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={currentUserId}>You</SelectItem>
-                            {friends.map((friend) => (
-                              <SelectItem key={friend.id} value={friend.id}>
-                                {friend.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          {field.value
+                            ? getParticipantName(field.value)
+                            : "Select who paid"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
                       </FormControl>
                       <FormMessage />
+                      <PersonSelectDrawer
+                        open={paidByDrawerOpen}
+                        onOpenChange={setPaidByDrawerOpen}
+                        title="Select payer"
+                        description="Choose who paid for this bill."
+                        people={participantOptions}
+                        selection={field.value ? [field.value] : []}
+                        onSelectionChange={(selection) => {
+                          const nextValue = selection[0] ?? "";
+                          field.onChange(nextValue);
+                        }}
+                        mode="single"
+                      />
                     </FormItem>
                   )}
                 />
@@ -1106,86 +1144,28 @@ const SplitBillPage = () => {
                     <FormItem>
                       <FormLabel>Participants</FormLabel>
                       <FormControl>
-                        <Popover
-                          open={openParticipantsSelect}
-                          onOpenChange={setOpenParticipantsSelect}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setParticipantsDrawerOpen(true)}
                         >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openParticipantsSelect}
-                              className="w-full justify-between text-left font-normal px-3"
-                            >
-                              {field.value.length > 0
-                                ? `${field.value.length} people selected`
-                                : "Select participants"}
-                              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            side="bottom"
-                            align="center"
-                            avoidCollisions={false}
-                            className="w-full p-0"
-                          >
-                            <Command>
-                              <CommandInput placeholder="Search people..." />
-                              <CommandList>
-                                <CommandEmpty>No person found.</CommandEmpty>
-                                <CommandGroup className="max-h-70 overflow-y-auto">
-                                  <CommandItem
-                                    value={currentUserId}
-                                    onSelect={() => {
-                                      const newValue = field.value.includes(
-                                        currentUserId
-                                      )
-                                        ? field.value.filter(
-                                            (v) => v !== currentUserId
-                                          )
-                                        : [...field.value, currentUserId];
-                                      field.onChange(newValue);
-                                    }}
-                                  >
-                                    <Checkbox
-                                      checked={field.value.includes(
-                                        currentUserId
-                                      )}
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    You
-                                  </CommandItem>
-                                  {friends.map((friend) => (
-                                    <CommandItem
-                                      key={friend.id}
-                                      value={friend.name}
-                                      onSelect={() => {
-                                        const newValue = field.value.includes(
-                                          friend.id
-                                        )
-                                          ? field.value.filter(
-                                              (v) => v !== friend.id
-                                            )
-                                          : [...field.value, friend.id];
-                                        field.onChange(newValue);
-                                      }}
-                                    >
-                                      <Checkbox
-                                        checked={field.value.includes(
-                                          friend.id
-                                        )}
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      {friend.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                          {field.value.length > 0
+                            ? `${field.value.length} people selected`
+                            : "Select participants"}
+                          <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                        </Button>
                       </FormControl>
                       <FormMessage />
+                      <PersonSelectDrawer
+                        open={participantsDrawerOpen}
+                        onOpenChange={setParticipantsDrawerOpen}
+                        title="Choose participants"
+                        description="Select the people included in this bill."
+                        people={participantOptions}
+                        selection={field.value}
+                        onSelectionChange={(selection) => field.onChange(selection)}
+                      />
                       {field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {field.value.map((participant) => (
@@ -1318,64 +1298,33 @@ const SplitBillPage = () => {
                         <FormItem>
                           <FormLabel>Shared By</FormLabel>
                           <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className="w-full justify-between text-left font-normal px-3"
-                                >
-                                  {field.value.length > 0
-                                    ? `${field.value.length} people selected`
-                                    : "Select people"}
-                                  <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                side="bottom"
-                                align="center"
-                                avoidCollisions={false}
-                                className="w-full p-0"
-                              >
-                                <Command>
-                                  <CommandInput placeholder="Search people..." />
-                                  <CommandList>
-                                    <CommandEmpty>
-                                      No person found.
-                                    </CommandEmpty>
-                                    <CommandGroup className="max-h-70 overflow-y-auto">
-                                      {participants.map((participant) => (
-                                        <CommandItem
-                                          key={participant}
-                                          value={getParticipantName(
-                                            participant
-                                          )}
-                                          onSelect={() => {
-                                            const newValue =
-                                              field.value.includes(participant)
-                                                ? field.value.filter(
-                                                    (v) => v !== participant
-                                                  )
-                                                : [...field.value, participant];
-                                            field.onChange(newValue);
-                                          }}
-                                        >
-                                          <Checkbox
-                                            checked={field.value.includes(
-                                              participant
-                                            )}
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          {getParticipantName(participant)}
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full justify-between text-left font-normal px-3 h-11"
+                              onClick={() => setActiveSharedByIndex(index)}
+                            >
+                              {field.value.length > 0
+                                ? `${field.value.length} people selected`
+                                : "Select people"}
+                              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                            </Button>
                           </FormControl>
                           <FormMessage />
+                          <PersonSelectDrawer
+                            open={activeSharedByIndex === index}
+                            onOpenChange={(open) =>
+                              setActiveSharedByIndex(open ? index : null)
+                            }
+                            title="Shared by"
+                            description="Choose the participants sharing this item."
+                            people={selectedParticipantOptions}
+                            selection={field.value}
+                            onSelectionChange={(selection) =>
+                              field.onChange(selection)
+                            }
+                            emptyStateText="Woops! Add bill participants first!"
+                          />
                           {field.value.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {field.value.map((person) => (
