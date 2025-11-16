@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { triggerHapticSelection } from "@/lib/haptics";
+import { triggerHapticImpact } from "@/lib/haptics";
 
 export type PersonOption = {
   id: string;
@@ -49,6 +49,7 @@ export const PersonSelectDrawer = ({
   const handleSelect = (id: string) => {
     if (mode === "single") {
       onSelectionChange([id]);
+      triggerHapticImpact("medium");
       onOpenChange(false);
       return;
     }
@@ -59,7 +60,7 @@ export const PersonSelectDrawer = ({
     } else {
       onSelectionChange([...selection, id]);
     }
-    triggerHapticSelection();
+    triggerHapticImpact("light");
   };
 
   return (
