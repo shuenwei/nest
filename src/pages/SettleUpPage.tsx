@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,6 +55,7 @@ import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { SettleUpTransaction } from "@/lib/transaction";
 import axios from "axios";
+import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -245,8 +246,12 @@ const SettleUpPage = () => {
   const { transactionId } = useParams<{ transactionId?: string }>();
   const isEditMode = !!transactionId;
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
+  const [payerDrawerOpen, setPayerDrawerOpen] = useState(false);
+  const [payeeDrawerOpen, setPayeeDrawerOpen] = useState(false);
 
   const { user, refreshUser, transactions } = useUser();
+  const location = useLocation();
+  const friendId = location.state?.friendId as string | undefined;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -263,6 +268,38 @@ const SettleUpPage = () => {
 
   const currentUserId = user?.id ?? "missing user";
 
+  const filteredFriends = useMemo(() => {
+    if (!friendId) return friends;
+
+    const match = friends.find((friend) => friend.id === friendId);
+    return match ? [match] : [];
+  }, [friends, friendId]);
+
+  const participantOptions: PersonOption[] = useMemo(
+    () => [
+      {
+        id: currentUserId,
+        name: user?.displayName ?? "You",
+        username: user?.username ?? "",
+        profilePhoto: user?.profilePhoto,
+        isYou: true,
+      },
+      ...filteredFriends.map((friend) => ({
+        id: friend.id,
+        name: friend.name,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      })),
+    ],
+    [
+      currentUserId,
+      filteredFriends,
+      user?.displayName,
+      user?.profilePhoto,
+      user?.username,
+    ]
+  );
+
   useEffect(() => {
     if (user?.friends && Array.isArray(user.friends)) {
       const formattedFriends = user.friends.map((friend) => ({
@@ -276,20 +313,20 @@ const SettleUpPage = () => {
     }
   }, [user]);
 
-  const getFriendNameById = (id: string) =>
-    id === currentUserId
-      ? "You"
-      : friends.find((f) => f.id === id)?.name ?? "???";
+  const getFriendNameById = (id: string) => {
+    const person = participantOptions.find((option) => option.id === id);
+    if (!person) return "???";
+    return person.isYou ? `${person.name} (You)` : person.name;
+  };
 
   // State for exchange rates
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
   const [sgdEquivalent, setSgdEquivalent] = useState<number | null>(null);
 
-  const location = useLocation();
+
   const rawAmount = location.state?.amount ?? null;
   const passedAmount =
     rawAmount !== null ? Math.abs(rawAmount).toFixed(2) : null;
-  const friendId = location.state?.friendId ?? null;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -507,31 +544,32 @@ const SettleUpPage = () => {
                     <FormItem>
                       <FormLabel>From</FormLabel>
                       <FormControl>
-                        <Select
-                          key={field.value}
-                          value={field.value}
-                          onValueChange={field.onChange}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setPayerDrawerOpen(true)}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Who is paying?" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={currentUserId}>You</SelectItem>
-                            {friendId ? (
-                              <SelectItem value={friendId}>
-                                {getFriendNameById(friendId)}
-                              </SelectItem>
-                            ) : (
-                              friends.map((friend) => (
-                                <SelectItem key={friend.id} value={friend.id}>
-                                  {friend.name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          {field.value
+                            ? getFriendNameById(field.value)
+                            : "Who is paying?"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
                       </FormControl>
                       <FormMessage />
+                      <PersonSelectDrawer
+                        open={payerDrawerOpen}
+                        onOpenChange={setPayerDrawerOpen}
+                        title="Select payer"
+                        description="Choose who is paying for this transfer."
+                        people={participantOptions}
+                        selection={field.value ? [field.value] : []}
+                        onSelectionChange={(selection) => {
+                          const nextValue = selection[0] ?? "";
+                          field.onChange(nextValue);
+                        }}
+                        mode="single"
+                      />
                     </FormItem>
                   )}
                 />
@@ -544,31 +582,32 @@ const SettleUpPage = () => {
                     <FormItem>
                       <FormLabel>To</FormLabel>
                       <FormControl>
-                        <Select
-                          key={field.value}
-                          value={field.value}
-                          onValueChange={field.onChange}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setPayeeDrawerOpen(true)}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Who is receiving?" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={currentUserId}>You</SelectItem>
-                            {friendId ? (
-                              <SelectItem value={friendId}>
-                                {getFriendNameById(friendId)}
-                              </SelectItem>
-                            ) : (
-                              friends.map((friend) => (
-                                <SelectItem key={friend.id} value={friend.id}>
-                                  {friend.name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          {field.value
+                            ? getFriendNameById(field.value)
+                            : "Who is receiving?"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
                       </FormControl>
                       <FormMessage />
+                      <PersonSelectDrawer
+                        open={payeeDrawerOpen}
+                        onOpenChange={setPayeeDrawerOpen}
+                        title="Select payee"
+                        description="Choose who receives this transfer."
+                        people={participantOptions}
+                        selection={field.value ? [field.value] : []}
+                        onSelectionChange={(selection) => {
+                          const nextValue = selection[0] ?? "";
+                          field.onChange(nextValue);
+                        }}
+                        mode="single"
+                      />
                     </FormItem>
                   )}
                 />

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -67,6 +67,7 @@ import { useUser } from "@/contexts/UserContext";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { PurchaseTransaction } from "@/lib/transaction";
 import axios from "axios";
+import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -407,7 +408,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const SplitPurchasePage = () => {
-  const [openPeopleSelect, setOpenPeopleSelect] = useState(false);
+  const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
+  const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -429,6 +431,25 @@ const SplitPurchasePage = () => {
 
   const currentUserId = user?.id ?? "missing user";
 
+  const participantOptions: PersonOption[] = useMemo(
+    () => [
+      {
+        id: currentUserId,
+        name: user?.displayName ?? "You",
+        username: user?.username ?? "",
+        profilePhoto: user?.profilePhoto,
+        isYou: true,
+      },
+      ...friends.map((friend) => ({
+        id: friend.id,
+        name: friend.name,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      })),
+    ],
+    [currentUserId, friends, user?.displayName, user?.profilePhoto, user?.username]
+  );
+
   useEffect(() => {
     if (user?.friends && Array.isArray(user.friends)) {
       const formattedFriends = user.friends.map((friend) => ({
@@ -442,10 +463,11 @@ const SplitPurchasePage = () => {
     }
   }, [user]);
 
-  const getFriendNameById = (id: string) =>
-    id === currentUserId
-      ? "You"
-      : friends.find((f) => f.id === id)?.name ?? "Unknown";
+  const getFriendNameById = (id: string) => {
+    const person = participantOptions.find((option) => option.id === id);
+    if (!person) return "Unknown";
+    return person.isYou ? `${person.name} (You)` : person.name;
+  };
 
   // State for exchange rates
   const [currentExchangeRate, setCurrentExchangeRate] = useState<number>(1);
@@ -889,25 +911,32 @@ const SplitPurchasePage = () => {
                   <FormItem className="w-full">
                     <FormLabel>Paid by</FormLabel>
                     <FormControl className="w-full">
-                      <Select
-                        key={field.value}
-                        value={field.value}
-                        onValueChange={field.onChange}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full justify-between text-left font-normal px-3 h-11"
+                        onClick={() => setPaidByDrawerOpen(true)}
                       >
-                        <SelectTrigger className="w-full px-4">
-                          <SelectValue placeholder="Select who paid" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={currentUserId}>You</SelectItem>
-                          {friends.map((friend) => (
-                            <SelectItem key={friend.id} value={friend.id}>
-                              {friend.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        {field.value
+                          ? getFriendNameById(field.value)
+                          : "Select who paid"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
                     </FormControl>
                     <FormMessage />
+                    <PersonSelectDrawer
+                      open={paidByDrawerOpen}
+                      onOpenChange={setPaidByDrawerOpen}
+                      title="Select payer"
+                      description="Choose who paid for this purchase."
+                      people={participantOptions}
+                      selection={field.value ? [field.value] : []}
+                      onSelectionChange={(selection) => {
+                        const nextValue = selection[0] ?? "";
+                        field.onChange(nextValue);
+                      }}
+                      mode="single"
+                    />
                   </FormItem>
                 )}
               />
@@ -957,86 +986,28 @@ const SplitPurchasePage = () => {
                     <FormItem>
                       <FormLabel>Split Between</FormLabel>
                       <FormControl>
-                        <Popover
-                          open={openPeopleSelect}
-                          onOpenChange={setOpenPeopleSelect}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setParticipantsDrawerOpen(true)}
                         >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openPeopleSelect}
-                              className="w-full justify-between text-left font-normal px-3"
-                            >
-                              {field.value.length > 0
-                                ? `${field.value.length} people selected`
-                                : "Select people"}
-                              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            side="bottom"
-                            align="center"
-                            avoidCollisions={false}
-                            className="w-full p-0"
-                          >
-                            <Command>
-                              <CommandInput placeholder="Search people..." />
-                              <CommandList>
-                                <CommandEmpty>No user found.</CommandEmpty>
-                                <CommandGroup className="max-h-70 overflow-y-auto">
-                                  <CommandItem
-                                    value={currentUserId}
-                                    onSelect={() => {
-                                      const newValue = field.value.includes(
-                                        currentUserId
-                                      )
-                                        ? field.value.filter(
-                                            (v) => v !== currentUserId
-                                          )
-                                        : [...field.value, currentUserId];
-                                      field.onChange(newValue);
-                                    }}
-                                  >
-                                    <Checkbox
-                                      checked={field.value.includes(
-                                        currentUserId
-                                      )}
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    You
-                                  </CommandItem>
-                                  {friends.map((friend) => (
-                                    <CommandItem
-                                      key={friend.id}
-                                      value={friend.name}
-                                      onSelect={() => {
-                                        const newValue = field.value.includes(
-                                          friend.id
-                                        )
-                                          ? field.value.filter(
-                                              (v) => v !== friend.id
-                                            )
-                                          : [...field.value, friend.id];
-                                        field.onChange(newValue);
-                                      }}
-                                    >
-                                      <Checkbox
-                                        checked={field.value.includes(
-                                          friend.id
-                                        )}
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      {friend.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                          {field.value.length > 0
+                            ? `${field.value.length} people selected`
+                            : "Select people"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
                       </FormControl>
                       <FormMessage />
+                      <PersonSelectDrawer
+                        open={participantsDrawerOpen}
+                        onOpenChange={setParticipantsDrawerOpen}
+                        title="Select participants"
+                        description="Choose who is included in this purchase split."
+                        people={participantOptions}
+                        selection={field.value}
+                        onSelectionChange={field.onChange}
+                      />
                       {field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {field.value.map((userId) => (
