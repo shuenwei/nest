@@ -278,8 +278,8 @@ export const PersonSelectDrawer = ({
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button type="button" className="mb-5 ml-3 mr-3">
-              Done
+            <Button type="button" className="mb-7">
+              Confirm Selection
             </Button>
           </DrawerClose>
         </DrawerFooter>
