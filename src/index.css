@@ -145,6 +145,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+  input,
+  textarea,
+  select,
+  [contenteditable] {
+    caret-color: #000;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Outfit', sans-serif;

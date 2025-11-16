@@ -569,6 +569,7 @@ const SettleUpPage = () => {
                           field.onChange(nextValue);
                         }}
                         mode="single"
+                        showFavouritesSection={!friendId}
                       />
                     </FormItem>
                   )}
@@ -607,6 +608,7 @@ const SettleUpPage = () => {
                           field.onChange(nextValue);
                         }}
                         mode="single"
+                        showFavouritesSection={!friendId}
                       />
                     </FormItem>
                   )}
