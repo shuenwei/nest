@@ -531,6 +531,26 @@ const SettleUpPage = () => {
           </p>
         </div>
 
+        <Card className="p-4 mb-4">
+          <CardContent className="p-0 space-y-4">
+            <div className="space-y-1">
+              <p className="text-base font-semibold">Group smart settle</p>
+              <p className="text-sm text-muted-foreground">
+                Let Nest recommend the smallest set of transfers for your group.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full"
+              onClick={() => navigate("/settleup/group")}
+            >
+              Open group settle up
+            </Button>
+          </CardContent>
+        </Card>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {/* Transaction Details Card */}
