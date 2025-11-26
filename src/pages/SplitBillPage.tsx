@@ -888,7 +888,7 @@ const SplitBillPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        await refreshUser();
+        refreshUser();
         console.log(response);
         toast.success("Success!", { description: "Bill saved successfully!" });
         navigate("/history");
@@ -902,7 +902,7 @@ const SplitBillPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        await refreshUser();
+        refreshUser();
         console.log(response);
         toast.success("Success!", {
           description: "Bill updated successfully!",

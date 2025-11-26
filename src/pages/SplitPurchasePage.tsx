@@ -722,7 +722,7 @@ const SplitPurchasePage = () => {
           }
         );
 
-        await refreshUser();
+        refreshUser();
         console.log(response);
         toast.success("Success!", {
           description: "Expense split added successfully!",
@@ -739,7 +739,7 @@ const SplitPurchasePage = () => {
           }
         );
 
-        await refreshUser();
+        refreshUser();
         console.log(response);
         toast.success("Success!", {
           description: "Expense split updated successfully!",
