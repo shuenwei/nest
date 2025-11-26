@@ -10,7 +10,7 @@ import { toast } from "@/lib/toast";
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
   { label: "Usage Limits", icon: GaugeCircle, path: "/settings/limits" },
-  { label: "Block Users", icon: UserRoundX, path: "/settings/block" },
+  //{ label: "Block Users", icon: UserRoundX, path: "/settings/block" },
 ];
 
 const SettingsPage = () => {
