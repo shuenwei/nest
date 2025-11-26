@@ -18,6 +18,8 @@ const getUserByTelegramId = async (
   const { telegramId } = req.params;
 
   try {
+    const includePhotos = req.query.includePhotos !== "false";
+
     const user = await User.findOne({ telegramId })
       .populate<{
         friends: IFriend[];
@@ -32,9 +34,10 @@ const getUserByTelegramId = async (
       return;
     }
 
-    const base64Photo = user.profilePhoto
-      ? `data:image/jpeg;base64,${user.profilePhoto.toString("base64")}`
-      : null;
+    const base64Photo =
+      includePhotos && user.profilePhoto
+        ? `data:image/jpeg;base64,${user.profilePhoto.toString("base64")}`
+        : undefined;
 
     const friends = Array.isArray(user.friends) ? user.friends : [];
     const blockedUsers = Array.isArray(user.blockedUsers)
@@ -54,18 +57,20 @@ const getUserByTelegramId = async (
         username: friend.username,
         displayName: friend.displayName,
         hasSignedUp: friend.hasSignedUp,
-        profilePhoto: friend.profilePhoto
-          ? `data:image/jpeg;base64,${friend.profilePhoto.toString("base64")}`
-          : null,
+        profilePhoto:
+          includePhotos && friend.profilePhoto
+            ? `data:image/jpeg;base64,${friend.profilePhoto.toString("base64")}`
+            : undefined,
       })),
       blockedUsers: blockedUsers.map((blocked) => ({
         id: blocked._id.toString(),
         username: blocked.username,
         displayName: blocked.displayName,
         hasSignedUp: blocked.hasSignedUp,
-        profilePhoto: blocked.profilePhoto
-          ? `data:image/jpeg;base64,${blocked.profilePhoto.toString("base64")}`
-          : null,
+        profilePhoto:
+          includePhotos && blocked.profilePhoto
+            ? `data:image/jpeg;base64,${blocked.profilePhoto.toString("base64")}`
+            : undefined,
       })),
       monthlyUsage: user.monthlyUsage,
       limits: {

@@ -58,7 +58,7 @@ const OnboardingPage = () => {
 
             if (hasSignedUp) {
               toast.success("You are now logged in!");
-              refreshUser();
+              refreshUser(true);
               navigate("/dashboard");
             } else {
               setDisplayName(fetchedName);

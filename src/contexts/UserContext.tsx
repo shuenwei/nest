@@ -63,7 +63,7 @@ interface UserContextValue {
   loading: boolean;
   loadingTelegram: boolean;
   updating: boolean;
-  refreshUser: () => Promise<void>;
+  refreshUser: (includePhotos?: boolean) => Promise<void>;
   fetchSpending: () => Promise<void>;
   isLoadingSpending: boolean;
   spending: number;
@@ -153,7 +153,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const refreshUser = async () => {
+  const refreshUser = async (includePhotos = false) => {
     const storedTelegramId = localStorage.getItem("telegramId");
     const token = localStorage.getItem("token");
     if (!storedTelegramId || !token) {
@@ -166,9 +166,29 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         `${import.meta.env.VITE_API_URL}/user/telegramid/${storedTelegramId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
+          params: { includePhotos },
         }
       );
       const userData = res.data;
+
+      if (!includePhotos && user) {
+        userData.profilePhoto = user.profilePhoto;
+        userData.friends = userData.friends.map((friend: Friend) => {
+          const existingFriend = user.friends.find((f) => f.id === friend.id);
+          return { ...friend, profilePhoto: existingFriend?.profilePhoto };
+        });
+        userData.blockedUsers = userData.blockedUsers.map(
+          (blockedUser: BlockedUser) => {
+            const existingBlockedUser = user.blockedUsers.find(
+              (b) => b.id === blockedUser.id
+            );
+            return {
+              ...blockedUser,
+              profilePhoto: existingBlockedUser?.profilePhoto,
+            };
+          }
+        );
+      }
 
       try {
         const balanceRes = await axios.get(
@@ -276,7 +296,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       }
-      await refreshUser();
+      await refreshUser(true);
       setLoadingTelegram(false);
     };
     init();

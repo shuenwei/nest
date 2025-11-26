@@ -67,7 +67,7 @@ const DisplayNamePage: FC<DisplayNamePageProps> = ({
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      refreshUser();
+      refreshUser(true);
       onNext();
     } catch (err) {
       console.error("Failed to update display name:", err);
