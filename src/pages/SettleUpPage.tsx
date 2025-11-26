@@ -474,7 +474,7 @@ const SettleUpPage = () => {
           }
         );
 
-        await refreshUser();
+        refreshUser();
 
         toast.success("Success!", {
           description: "Transfer recorded!",
@@ -492,7 +492,7 @@ const SettleUpPage = () => {
           }
         );
 
-        await refreshUser();
+        refreshUser();
 
         toast.success("Success!", {
           description: "Transfer updated!",
