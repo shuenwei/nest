@@ -17,6 +17,7 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
     purchase: "🛒",
     bill: "🍔",
     recurring: "🔁",
+    groupSmartSettle: "🤝",
   };
 
   const formatDateTime = (isoString: string) => {
@@ -58,16 +59,19 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
             </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-sm font-semibold">
-              ${transaction.amountInSgd.toFixed(2)}
-            </p>
-            {transaction.currency !== "SGD" && (
-              <p className="text-xs text-muted-foreground ml-2">
-                {transaction.currency} {transaction.amount.toFixed(2)}
+          {transaction.type !== "groupSmartSettle" && (
+            <div className="text-right">
+              <p className="text-sm font-semibold">
+                ${transaction.amountInSgd.toFixed(2)}
               </p>
-            )}
-          </div>
+
+              {transaction.currency !== "SGD" && (
+                <p className="text-xs text-muted-foreground ml-2">
+                  {transaction.currency} {transaction.amount.toFixed(2)}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

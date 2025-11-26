@@ -164,6 +164,17 @@ const NavBar = () => {
                         <ArrowRightLeft className="size-5 mr-2" />
                         Settle Up
                       </Button>
+                      <Button
+                        variant="ghost"
+                        className="justify-start text-lg font-normal h-10 px-3"
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          navigate("/smartsettle");
+                        }}
+                      >
+                        <UsersRound className="size-5 mr-2" />
+                        Smart Settle
+                      </Button>
                     </div>
                   </div>
                 </DrawerContent>

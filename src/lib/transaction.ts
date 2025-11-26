@@ -1,7 +1,7 @@
 interface BaseTransaction {
   _id: string;
   transactionName: string;
-  type: "purchase" | "bill" | "settleup" | "recurring";
+  type: "purchase" | "bill" | "settleup" | "recurring"| "groupSmartSettle";
   participants: string[];
   currency: string;
   exchangeRate: number;
@@ -62,6 +62,17 @@ export interface SettleUpTransaction extends BaseTransaction {
   payee: string;
 }
 
+export interface SmartSettleTransfer {
+  payer: string;
+  payee: string;
+  amount: number;
+  category: "adjustment" | "settlement";
+}
+
+export interface GroupSmartSettleTransaction extends BaseTransaction {
+  type: "groupSmartSettle";
+  transfers: SmartSettleTransfer[];
+}
 export interface RecurringTransaction extends BaseTransaction {
   type: "recurring";
   paidBy: string;
@@ -73,4 +84,5 @@ export type Transaction =
   | PurchaseTransaction
   | BillTransaction
   | SettleUpTransaction
+  | GroupSmartSettleTransaction
   | RecurringTransaction;

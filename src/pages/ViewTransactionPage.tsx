@@ -27,6 +27,7 @@ import BillTransactionView from "@/components/transactions/BillTransactionView";
 import SettleUpTransactionView from "@/components/transactions/SettleUpTransactionView";
 import RecurringTransactionView from "@/components/transactions/RecurringTransactionView";
 import TransactionHeader from "@/components/transactions/TransactionHeader";
+import GroupSmartSettleTransactionView from "@/components/transactions/GroupSmartSettleTransactionView";
 
 const ViewTransactionPage = () => {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ const ViewTransactionPage = () => {
           </Button>
 
           <div className="flex gap-3">
-            {transaction.type !== "recurring" && (
+            {["purchase", "bill", "settleup"].includes(transaction.type) && (
               <Button variant="ghost" size="icon" onClick={handleEdit}>
                 <Pencil />
               </Button>
@@ -171,6 +172,9 @@ const ViewTransactionPage = () => {
           )}
           {transaction.type === "settleup" && (
             <SettleUpTransactionView transaction={transaction} />
+          )}
+          {transaction.type === "groupSmartSettle" && (
+            <GroupSmartSettleTransactionView transaction={transaction} />
           )}
           {transaction.type === "recurring" && (
             <RecurringTransactionView transaction={transaction} />

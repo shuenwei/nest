@@ -24,7 +24,7 @@ import BlockUsersPage from "./pages/BlockUsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
-import GroupSettleUpPage from "./pages/GroupSettleUpPage";
+import SmartSettlePage from "./pages/SmartSettlePage";
 import { useUser } from "./contexts/UserContext";
 
 function App() {
@@ -140,7 +140,7 @@ function App() {
             path="/splitbill/edit/:transactionId"
             element={<SplitBillPage />}
           />
-          <Route path="/settleup/group" element={<GroupSettleUpPage />} />
+          <Route path="/smartsettle" element={<SmartSettlePage />} />
           <Route path="/settleup" element={<SettleUpPage />} />
           <Route
             path="/settleup/edit/:transactionId"

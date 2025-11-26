@@ -61,11 +61,28 @@ const getBalances = async (req: Request, res: Response): Promise<void> => {
                   },
                 },
               ],
+              groupSmartSettle: [
+                { $match: { type: "groupSmartSettle" } },
+                { $unwind: "$transfers" },
+                {
+                  $project: {
+                    from: "$transfers.payer",
+                    to: "$transfers.payee",
+                    amount: "$transfers.amount",
+                  },
+                },
+              ],
             },
           },
           {
             $project: {
-              rows: { $concatArrays: ["$purchaseBill", "$settleup"] },
+              rows: {
+                $concatArrays: [
+                  "$purchaseBill",
+                  "$settleup",
+                  "$groupSmartSettle",
+                ],
+              },
             },
           },
           { $unwind: "$rows" },

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Transaction } from "../../models/Transaction";
-import { SettleUp } from "../../models/SettleUpTransaction";
+import { GroupSmartSettle } from "../../models/GroupSmartSettleTransaction";
 
 interface FlowRow {
   from: Types.ObjectId;
@@ -78,9 +78,26 @@ const createSmartSettle = async (req: Request, res: Response): Promise<void> => 
               },
             },
           ],
+          groupSmartSettle: [
+            { $match: { type: "groupSmartSettle" } },
+            { $unwind: "$transfers" },
+            {
+              $project: {
+                from: "$transfers.payer",
+                to: "$transfers.payee",
+                amount: "$transfers.amount",
+              },
+            },
+          ],
         },
       },
-      { $project: { rows: { $concatArrays: ["$purchaseBill", "$settleup"] } } },
+      {
+        $project: {
+          rows: {
+            $concatArrays: ["$purchaseBill", "$settleup", "$groupSmartSettle"],
+          },
+        },
+      },
       { $unwind: "$rows" },
       { $replaceRoot: { newRoot: "$rows" } },
       {
@@ -200,44 +217,47 @@ const createSmartSettle = async (req: Request, res: Response): Promise<void> => 
       }
     }
 
-    const adjustmentTransactions = await Promise.all(
-      adjustmentSettlements.map(({ payer, payee, amount }) =>
-        SettleUp.create({
-          transactionName: "Adjustments for smart settle",
-          type: "settleup",
-          participants: [
-            new Types.ObjectId(payer),
-            new Types.ObjectId(payee),
-          ],
-          currency: "SGD",
-          exchangeRate: 1,
-          amount,
-          amountInSgd: amount,
-          payer: new Types.ObjectId(payer),
-          payee: new Types.ObjectId(payee),
-        })
-      )
+    const transfers = [
+      ...adjustmentSettlements.map(({ payer, payee, amount }) => ({
+        payer: new Types.ObjectId(payer),
+        payee: new Types.ObjectId(payee),
+        // Adjustments should retain their positive value; only the computed
+        // smart settle transfers are negated to offset balances.
+        amount: Math.abs(amount),
+        category: "adjustment" as const,
+      })),
+      ...smartSettlements.map(({ from, to, amount }) => ({
+        payer: new Types.ObjectId(from),
+        payee: new Types.ObjectId(to),
+        // Smart settle transfers should offset balances, so they are stored as
+        // negative amounts (matching the legacy individual settleup logic).
+        amount: -amount,
+        category: "settlement" as const,
+      })),
+    ];
+
+    const totalAmount = round2(
+      transfers.reduce((sum, transfer) => sum + transfer.amount, 0)
     );
 
-    const smartSettleTransactions = await Promise.all(
-      smartSettlements.map(({ from, to, amount }) =>
-        SettleUp.create({
-          transactionName: "Smart Settle",
-          type: "settleup",
-          participants: [new Types.ObjectId(from), new Types.ObjectId(to)],
-          currency: "SGD",
-          exchangeRate: 1,
-          amount: -amount,
-          amountInSgd: -amount,
-          payer: new Types.ObjectId(from),
-          payee: new Types.ObjectId(to),
-        })
-      )
-    );
+    if (transfers.length === 0) {
+      res.status(201).json({ transaction: null });
+      return;
+    }
+
+    const groupSmartSettle = await GroupSmartSettle.create({
+      transactionName: "Group Smart Settle",
+      type: "groupSmartSettle",
+      participants: participantObjIds,
+      currency: "SGD",
+      exchangeRate: 1,
+      amount: totalAmount,
+      amountInSgd: totalAmount,
+      transfers,
+    });
 
     res.status(201).json({
-      adjustments: adjustmentTransactions,
-      smartSettles: smartSettleTransactions,
+      transaction: groupSmartSettle,
     });
   } catch (err) {
     console.error("Error creating smart settle transactions:", err);

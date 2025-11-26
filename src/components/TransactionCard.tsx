@@ -28,6 +28,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     purchase: "🛒",
     bill: "🍔",
     recurring: "🔁",
+    groupSmartSettle: "🤝",
   };
 
   const formatDateTime = (isoString: string) => {
@@ -66,7 +67,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
       }}
     >
       <CardContent className="px-0 divide-y">
-        <div className="px-4 pb-3 flex justify-between items-start">
+        <div className="px-4 pb-1 flex justify-between items-start">
           <div className="flex gap-2">
             <span className="text-3xl pr-1">{icon}</span>
             <div>
@@ -78,47 +79,52 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <p className="font-semibold text-sm">
-              ${transaction.amountInSgd.toFixed(2)}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              {transaction.type === "settleup"
-                ? `Transferred`
-                : `Paid by ${getUserDisplayName(transaction.paidBy)}`}
-            </p>
-          </div>
-        </div>
-        <div className="px-4">
-          <div className="text-xs text-muted-foreground mb-1  mt-3">
-            {transaction.type === "settleup"
-              ? ""
-              : `Split with ${transaction.splitsInSgd.length} people`}
-          </div>
+          {transaction.type !== "groupSmartSettle" && (
+            <div className="text-right">
+              <p className="font-semibold text-sm">
+                ${transaction.amountInSgd.toFixed(2)}
+              </p>
 
-          <div className="flex flex-wrap gap-2">
-            {transaction.type === "settleup" ? (
-              <>
-                <Badge variant="secondary" className="font-semibold">
-                  {getUserDisplayName(transaction.payer)}
-                </Badge>
-                <span className="text-muted-foreground">→</span>
-                <Badge variant="secondary" className="font-semibold">
-                  {getUserDisplayName(transaction.payee)}
-                </Badge>
-              </>
-            ) : (
-              transaction.splitsInSgd.map((p) => (
-                <Badge key={p.user} variant="secondary">
-                  <span className="font-semibold">
-                    {getUserDisplayName(p.user)}
-                  </span>{" "}
-                  <span className="font-normal">${p.amount.toFixed(2)}</span>
-                </Badge>
-              ))
-            )}
-          </div>
+              <p className="text-muted-foreground pb-2 text-xs">
+                {transaction.type === "settleup"
+                  ? `Transferred`
+                  : `Paid by ${getUserDisplayName(transaction.paidBy)}`}
+              </p>
+            </div>
+          )}
         </div>
+        {transaction.type !== "groupSmartSettle" && (
+          <div className="px-4">
+            <div className="text-xs text-muted-foreground mb-1 mt-3">
+              {transaction.type === "settleup"
+                ? ""
+                : `Split with ${transaction.splitsInSgd.length} people`}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {transaction.type === "settleup" ? (
+                <>
+                  <Badge variant="secondary" className="font-semibold">
+                    {getUserDisplayName(transaction.payer)}
+                  </Badge>
+                  <span className="text-muted-foreground">→</span>
+                  <Badge variant="secondary" className="font-semibold">
+                    {getUserDisplayName(transaction.payee)}
+                  </Badge>
+                </>
+              ) : (
+                transaction.splitsInSgd.map((p) => (
+                  <Badge key={p.user} variant="secondary">
+                    <span className="font-semibold">
+                      {getUserDisplayName(p.user)}
+                    </span>{" "}
+                    <span className="font-normal">${p.amount.toFixed(2)}</span>
+                  </Badge>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

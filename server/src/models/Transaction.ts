@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
-export type TransactionType = "purchase" | "bill" | "settleup" | "recurring";
+export type TransactionType = "purchase" | "bill" | "settleup" | "recurring"| "groupSmartSettle";
 
 export interface BaseTransaction extends Document {
   transactionName: string;

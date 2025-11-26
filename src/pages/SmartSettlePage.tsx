@@ -35,9 +35,9 @@ interface SmartBalance {
   amount: number;
 }
 
-const GroupSettleUpPage = () => {
+const SmartSettlePage = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, refreshUser } = useUser();
   const token = localStorage.getItem("token");
 
   const [friends, setFriends] = useState<
@@ -141,10 +141,6 @@ const GroupSettleUpPage = () => {
       setSmartSettlements(response.data.settlements ?? []);
       setSmartBalances(response.data.balances ?? []);
 
-      if ((response.data.settlements ?? []).length === 0) {
-        toast.success("Everyone in this group is already settled!");
-      }
-
       return true;
     } catch (error) {
       console.error("Error generating smart settle plan:", error);
@@ -180,12 +176,9 @@ const GroupSettleUpPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if ((response.data?.settlements ?? []).length === 0) {
-        toast.success("Everyone in this group is already settled!");
-      } else {
-        toast.success("Smart settle created successfully");
-      }
+      const transferCount = response.data?.transaction?.transfers?.length ?? 0;
 
+      await refreshUser();
       setCurrentStep(3);
     } catch (error) {
       console.error("Error creating smart settle plan:", error);
@@ -210,7 +203,7 @@ const GroupSettleUpPage = () => {
     },
     {
       id: 3,
-      title: "Record Settle Up",
+      title: "Save Smart Settle",
     },
   ];
 
@@ -302,7 +295,7 @@ const GroupSettleUpPage = () => {
                   variant="outline"
                   onClick={() => setDrawerOpen(true)}
                 >
-                  Select participants
+                  Select Participants
                 </Button>
                 <Button
                   type="button"
@@ -314,7 +307,7 @@ const GroupSettleUpPage = () => {
                       <Loader2 className="h-4 w-4 animate-spin" /> Calculating
                     </span>
                   ) : (
-                    "Preview smart settle"
+                    "Preview Smart Settle"
                   )}
                 </Button>
               </div>
@@ -384,7 +377,7 @@ const GroupSettleUpPage = () => {
               </div>
             ) : (
               <div className="rounded-xl border border-dashed border-muted/50 bg-white/60 px-4 py-6 text-center text-sm text-muted-foreground">
-                No transfers needed — this group is already settled.
+                This group is already settled.
               </div>
             )}
 
@@ -394,11 +387,15 @@ const GroupSettleUpPage = () => {
                 variant="outline"
                 onClick={() => setCurrentStep(1)}
               >
-                Change participants
+                Change Participants
               </Button>
               <Button
                 type="button"
-                disabled={isCreatingSmartSettle || isSmartLoading}
+                disabled={
+                  isCreatingSmartSettle ||
+                  isSmartLoading ||
+                  smartSettlements.length === 0
+                }
                 onClick={acceptSmartSettlePlan}
               >
                 {isCreatingSmartSettle ? (
@@ -406,38 +403,26 @@ const GroupSettleUpPage = () => {
                     <Loader2 className="h-4 w-4 animate-spin" /> Saving
                   </span>
                 ) : (
-                  "Accept suggestions"
+                  "Accept Suggestions"
                 )}
               </Button>
             </div>
           </Card>
         )}
 
+
         {currentStep === 3 && (
-          <Card className="p-6 text-center space-y-3">
-            <div className="flex justify-center">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
+          <Card className="p-6 text-center">
+            <div className="flex flex-col items-center gap-1">
+              <CheckCircle2 className="h-12 w-12 mt-5 text-green-600" />
+              <p className="text-lg font-semibold mt-1">Smart Settle Recorded</p>
             </div>
-            <p className="text-lg font-semibold">Smart settle recorded</p>
-            <p className="text-sm text-muted-foreground">
-              We created settle ups for your group based on the recommended transfers.
+            <p className="text-sm text-muted-foreground mb-2">
+              The number of transfers within your group has been minimised.
             </p>
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setSmartSettlements([]);
-                  setSmartBalances([]);
-                  setCurrentStep(1);
-                }}
-              >
-                Start another
-              </Button>
-              <Button className="flex-1" onClick={() => navigate(-1)}>
-                Back to previous
-              </Button>
-            </div>
+            <Button onClick={() => navigate("/dashboard")}>
+              Back to Home
+            </Button>
           </Card>
         )}
       </div>
@@ -445,8 +430,8 @@ const GroupSettleUpPage = () => {
       <PersonSelectDrawer
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-        title="Select participants"
-        description="Pick friends to include in this settlement plan."
+        title="Select Participants"
+        description="Select the friends in your group to include in this smart settle."
         people={participantOptions}
         selection={selectedParticipants}
         onSelectionChange={handleSelectionChange}
@@ -455,4 +440,4 @@ const GroupSettleUpPage = () => {
   );
 };
 
-export default GroupSettleUpPage;
+export default SmartSettlePage;
