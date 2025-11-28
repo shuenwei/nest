@@ -6,6 +6,7 @@ import { Settings, GaugeCircle, UserRoundX, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
+import { useEffect, useState } from "react";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
@@ -16,6 +17,13 @@ const menuItems = [
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useUser();
+  const [isTelegramApp, setIsTelegramApp] = useState(false);
+
+  useEffect(() => {
+    setIsTelegramApp(
+      Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user ?? false)
+    );
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("telegramId");
@@ -78,9 +86,11 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        <Button variant="link" className="w-full" onClick={handleLogout}>
-          Log Out
-        </Button>
+        {!isTelegramApp && (
+          <Button variant="link" className="w-full" onClick={handleLogout}>
+            Log Out
+          </Button>
+        )}
       </div>
 
       <Navbar />

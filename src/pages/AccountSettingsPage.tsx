@@ -85,26 +85,6 @@ const AccountSettingsPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.async = true;
-    script.setAttribute("data-telegram-login", "nestExpenseApp_bot");
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-userpic", "false");
-    script.setAttribute("data-radius", "10");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
-
-    const container = document.getElementById("telegram-login-button");
-    if (container) container.appendChild(script);
-
-    // Cleanup when component unmounts
-    return () => {
-      if (container) container.innerHTML = "";
-    };
-  }, []);
-
   const onSubmit = async (data: FormValues) => {
     if (!user?.telegramId) {
       toast.error("User information not found");
@@ -171,26 +151,20 @@ const AccountSettingsPage = () => {
                       {user?.displayName?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="text-center">
+                  <div className="text-center mb-4">
                     <p className="text-sm text-muted-foreground">
                       Your profile photo is synced with the profile photo found
                       on your Telegram account.
                     </p>
                   </div>
                 </div>
-                <div
-                  id="telegram-login-button"
-                  className="mt-4 mb-4 w-full flex justify-center"
-                />
                 <Alert>
                   <AlertCircleIcon />
                   <AlertTitle>Don't see your profile photo above?</AlertTitle>
                   <AlertDescription>
                     It might be due to your telegram privacy settings. To sync
-                    your profile photo, set your telegram display picture to
-                    'Everyone'. Then, click on the button to login with
-                    telegram. You can change you privacy settings back to
-                    'Friends Only' after.
+                    your profile photo, set your telegram display picture visibility to
+                    'Everyone'.
                   </AlertDescription>
                 </Alert>
               </CardContent>
