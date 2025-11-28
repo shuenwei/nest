@@ -70,11 +70,15 @@ const ViewTransactionPage = () => {
         }
       );
       navigate("/history");
-      await refreshUser();
-      toast.success("Transaction deleted successfully");
+      refreshUser();
+      toast.success("Success!", {
+                description: "Transaction deleted successfully!",
+              });
     } catch (error) {
       console.error("Error deleting transaction:", error);
-      toast.error("Failed to delete transaction");
+      toast.error("Error!", {
+                description: "Failed to delete transaction!",
+              });      
     } finally {
       setIsDeleting(false);
     }
