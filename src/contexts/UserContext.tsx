@@ -75,6 +75,22 @@ interface UserContextValue {
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
+const isTokenExpired = (token: string) => {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return true;
+
+    const { exp } = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+
+    return typeof exp === "number" ? exp * 1000 < Date.now() : true;
+  } catch (error) {
+    console.error("Failed to parse token for expiry", error);
+    return true;
+  }
+};
+
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem("user");
@@ -269,34 +285,58 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const tgUser = tg?.initDataUnsafe?.user;
       const initData = tg?.initData;
 
-      if (tgUser && initData) {
+      const storedToken = localStorage.getItem("token");
+      const hasValidToken = storedToken ? !isTokenExpired(storedToken) : false;
+
+      let telegramLoginTriggered = false;
+
+      const loginWithTelegram = async () => {
+        telegramLoginTriggered = true;
         setLoadingTelegram(true);
-        if (!tgUser.username) {
-          toast.error(
-            "Please set a Telegram username before using the mini app."
+        if (!tgUser?.username) {
+          toast.error("Please set a Telegram username before using the mini app.");
+          setLoadingTelegram(false);
+          return;
+        }
+
+        if (!initData) {
+          setLoadingTelegram(false);
+          return;
+        }
+
+        try {
+          const response = await axios.post<{
+            token: string;
+            telegramId: string;
+          }>(`${import.meta.env.VITE_API_URL}/auth/telegram-login`, {
+            initData,
+          });
+          const { token, telegramId } = response.data || {};
+          if (token && telegramId) {
+            localStorage.setItem("token", token);
+            localStorage.setItem("telegramId", telegramId);
+          }
+        } catch (error) {
+          console.error("Telegram mini app login failed:", error);
+          toast.error("Unable to sign you in with Telegram. Please try again.");
+        }
+        setLoadingTelegram(false);
+      };
+
+      if (tgUser && initData) {
+        if (hasValidToken) {
+          loginWithTelegram().catch((error) =>
+            console.error("Background Telegram login failed", error)
           );
         } else {
-          try {
-            const response = await axios.post<{
-              token: string;
-              telegramId: string;
-            }>(
-              `${import.meta.env.VITE_API_URL}/auth/telegram-login`,
-              { initData }
-            );
-            const { token, telegramId } = response.data || {};
-            if (token && telegramId) {
-              localStorage.setItem("token", token);
-              localStorage.setItem("telegramId", telegramId);
-            }
-          } catch (error) {
-            console.error("Telegram mini app login failed:", error);
-            toast.error("Unable to sign you in with Telegram. Please try again.");
-          }
+          await loginWithTelegram();
         }
       }
       await refreshUser(true);
-      setLoadingTelegram(false);
+
+      if (!telegramLoginTriggered) {
+        setLoadingTelegram(false);
+      }
     };
     init();
   }, []);
