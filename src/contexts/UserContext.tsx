@@ -169,6 +169,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+    const getLatestUpdatedAt = (records: Transaction[]) => {
+    const latestTimestamp = records.reduce<number | undefined>((latest, tx) => {
+      const timestamp = tx.updatedAt ?? tx.date;
+      const value = new Date(timestamp).getTime();
+      if (Number.isNaN(value)) return latest;
+      if (latest === undefined || value > latest) return value;
+      return latest;
+    }, undefined);
+
+    return latestTimestamp ? new Date(latestTimestamp).toISOString() : undefined;
+  };
+
+  const mergeTransactions = (
+    current: Transaction[],
+    updates: Transaction[],
+    deletedIds: string[]
+  ) => {
+    const merged = new Map(current.map((t) => [t._id, t]));
+    updates.forEach((tx) => merged.set(tx._id, tx));
+    deletedIds.forEach((id) => merged.delete(id));
+
+    return Array.from(merged.values()).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  };
+
   const refreshUser = async (includePhotos = false) => {
     const storedTelegramId = localStorage.getItem("telegramId");
     const token = localStorage.getItem("token");
@@ -230,16 +256,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUser(userData);
 
       try {
+        const latestUpdatedAt = getLatestUpdatedAt(transactions);
+        const knownTransactionIds = transactions.map((t) => t._id).join(",");
+
         const transRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/transaction/all/${userData.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
+            params: {
+              lastUpdatedAt: latestUpdatedAt,
+              knownTransactionIds,
+            },
           }
         );
-        setTransactions(transRes.data.transactions);
+        setTransactions((prev) =>
+          mergeTransactions(
+            prev,
+            transRes.data.transactions ?? [],
+            transRes.data.deletedTransactionIds ?? []
+          )
+        );
       } catch (err) {
         console.error("Failed to fetch transactions:", err);
-        setTransactions([]);
       }
 
       try {

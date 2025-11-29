@@ -9,6 +9,8 @@ interface BaseTransaction {
   amountInSgd: number;
   notes?: string;
   date: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Split {
