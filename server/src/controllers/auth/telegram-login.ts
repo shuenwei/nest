@@ -104,8 +104,12 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
           }
         );
 
+        const contentType = response.headers["content-type"];
         const photoBuffer = Buffer.from(response.data);
-        if (photoBuffer.length > 0) {
+        if (
+          contentType?.toLowerCase().startsWith("image/jpeg") &&
+          photoBuffer.length > 0
+        ) {
           updateData.profilePhoto = photoBuffer;
         }
       } catch (photoError) {
