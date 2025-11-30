@@ -103,7 +103,11 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
             responseType: "arraybuffer",
           }
         );
-        updateData.profilePhoto = Buffer.from(response.data);
+
+        const photoBuffer = Buffer.from(response.data);
+        if (photoBuffer.length > 0) {
+          updateData.profilePhoto = photoBuffer;
+        }
       } catch (photoError) {
         console.error("Failed to fetch Telegram profile photo:", photoError);
       }

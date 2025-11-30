@@ -86,10 +86,13 @@ bot.onText(/^\/start verify_(.+)$/, async (msg, match) => {
     const updateData: any = {
       telegramId: telegramUser.id.toString(),
       username: telegramUser.username.toLowerCase(),
-      profilePhoto: profilePhotoBuffer,
       verifiedAt: new Date(),
       hasSignedUp: true,
     };
+
+    if (profilePhotoBuffer) {
+      updateData.profilePhoto = profilePhotoBuffer;
+    }
 
     // Only set displayName if not already defined
     if (!existingUser?.displayName) {
