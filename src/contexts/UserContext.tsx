@@ -353,12 +353,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           if (token && telegramId) {
             localStorage.setItem("token", token);
             localStorage.setItem("telegramId", telegramId);
+            setLoadingTelegram(false);
           }
         } catch (error) {
           console.error("Telegram mini app login failed:", error);
-          toast.error("Unable to sign you in with Telegram. Please try again.");
+          toast.error("Hmm... Something went wrong. Let me try that again.");
+          setTimeout(loginWithTelegram, 3000);
         }
-        setLoadingTelegram(false);
       };
 
       if (tgUser && initData) {
