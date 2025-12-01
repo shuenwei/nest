@@ -50,8 +50,21 @@ export async function processReceipt(imageUrl: string): Promise<{
       const item = itemField.valueObject;
       const name = item?.Description?.valueString ?? "Unknown Item";
       const amount = item?.TotalPrice?.valueCurrency?.amount;
-      const price = typeof amount === "number" ? amount.toFixed(2) : "0.00";
-      items.push({ name, price });
+      const quantity = item?.Quantity?.valueNumber ?? 1;
+      const unitPrice = item?.Price?.valueCurrency?.amount;
+
+      let price = "0.00";
+      if (typeof unitPrice === "number") {
+        price = unitPrice.toFixed(2);
+      } else if (typeof amount === "number") {
+        const unitPrice = amount / quantity;
+        price = unitPrice.toFixed(2);
+      }
+
+      for (let i = 0; i < quantity; i++) {
+        const nameWithQuantity = `[${i + 1}/${quantity}] ${name}`;
+        items.push({ name: nameWithQuantity, price });
+      }
     }
   }
 
@@ -94,8 +107,21 @@ export async function processReceiptFromBuffer(buffer: Buffer): Promise<{
       const item = itemField.valueObject;
       const name = item?.Description?.valueString ?? "Unknown Item";
       const amount = item?.TotalPrice?.valueCurrency?.amount;
-      const price = typeof amount === "number" ? amount.toFixed(2) : "0.00";
-      items.push({ name, price });
+      const quantity = item?.Quantity?.valueNumber ?? 1;
+      const unitPrice = item?.Price?.valueCurrency?.amount;
+
+      let price = "0.00";
+      if (typeof unitPrice === "number") {
+        price = unitPrice.toFixed(2);
+      } else if (typeof amount === "number") {
+        const unitPrice = amount / quantity;
+        price = unitPrice.toFixed(2);
+      }
+
+      for (let i = 0; i < quantity; i++) {
+        const nameWithQuantity = `[${i + 1}/${quantity}] ${name}`;
+        items.push({ name: nameWithQuantity, price });
+      }
     }
   }
 
