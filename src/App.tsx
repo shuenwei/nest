@@ -25,6 +25,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
 import SmartSettlePage from "./pages/SmartSettlePage";
+import StandardLayout from "./layouts/StandardLayout";
 import { useUser } from "./contexts/UserContext";
 
 function App() {
@@ -121,44 +122,47 @@ function App() {
         {/* Protected Routes (Requires sign in) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route
-            path="/history/:transactionId"
-            element={<ViewTransactionPage />}
-          />
-          <Route path="/friends/:friendId" element={<ViewFriendPage />} />
-          <Route path="/notifications" element={<NotificationPage />} />
-          <Route path="/splitpurchase" element={<SplitPurchasePage />} />
-          <Route
-            path="/splitpurchase/edit/:transactionId"
-            element={<SplitPurchasePage />}
-          />
-          <Route path="/splitbill" element={<SplitBillPage />} />
-          <Route
-            path="/splitbill/edit/:transactionId"
-            element={<SplitBillPage />}
-          />
-          <Route path="/smartsettle" element={<SmartSettlePage />} />
-          <Route path="/settleup" element={<SettleUpPage />} />
-          <Route
-            path="/settleup/edit/:transactionId"
-            element={<SettleUpPage />}
-          />
-          <Route path="/recurring" element={<ManageRecurringPage />} />
-          <Route path="/recurring/add" element={<AddRecurringPage />} />
-          <Route
-            path="/recurring/:recurringId"
-            element={<ViewRecurringPage />}
-          />
-          <Route
-            path="/recurring/edit/:recurringId"
-            element={<AddRecurringPage />}
-          />
-          <Route path="/settings/account" element={<AccountSettingsPage />} />
-          <Route path="/settings/limits" element={<UsageLimitsPage />} />
-          <Route path="/settings/block" element={<BlockUsersPage />} />
+
+          <Route element={<StandardLayout />}>
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route
+              path="/history/:transactionId"
+              element={<ViewTransactionPage />}
+            />
+            <Route path="/friends/:friendId" element={<ViewFriendPage />} />
+            <Route path="/notifications" element={<NotificationPage />} />
+            <Route path="/splitpurchase" element={<SplitPurchasePage />} />
+            <Route
+              path="/splitpurchase/edit/:transactionId"
+              element={<SplitPurchasePage />}
+            />
+            <Route path="/splitbill" element={<SplitBillPage />} />
+            <Route
+              path="/splitbill/edit/:transactionId"
+              element={<SplitBillPage />}
+            />
+            <Route path="/smartsettle" element={<SmartSettlePage />} />
+            <Route path="/settleup" element={<SettleUpPage />} />
+            <Route
+              path="/settleup/edit/:transactionId"
+              element={<SettleUpPage />}
+            />
+            <Route path="/recurring" element={<ManageRecurringPage />} />
+            <Route path="/recurring/add" element={<AddRecurringPage />} />
+            <Route
+              path="/recurring/:recurringId"
+              element={<ViewRecurringPage />}
+            />
+            <Route
+              path="/recurring/edit/:recurringId"
+              element={<AddRecurringPage />}
+            />
+            <Route path="/settings/account" element={<AccountSettingsPage />} />
+            <Route path="/settings/limits" element={<UsageLimitsPage />} />
+            <Route path="/settings/block" element={<BlockUsersPage />} />
+          </Route>
         </Route>
       </Routes>
       <Toaster />

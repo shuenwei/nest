@@ -91,7 +91,7 @@ const DashboardPage = () => {
           }}
         />
 
-        <div className="relative z-10 px-6 pt-10 text-white flex flex-col h-full">
+        <div className="relative z-10 px-6 pt-[calc(2.5rem+env(safe-area-inset-top))] text-white flex flex-col h-full">
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-xl font-bold drop-shadow-md">

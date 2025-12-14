@@ -5,6 +5,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Outfit';
   src: url('/fonts/Outfit-Medium.ttf') format('truetype');
@@ -12,6 +13,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Outfit';
   src: url('/fonts/Outfit-SemiBold.ttf') format('truetype');
@@ -19,6 +21,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Outfit';
   src: url('/fonts/Outfit-Bold.ttf') format('truetype');
@@ -107,7 +110,7 @@
 
 .dark {
   color-scheme: light;
-    --radius: 0.625rem;
+  --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -145,18 +148,22 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   input,
   textarea,
   select,
   [contenteditable] {
     caret-color: #000;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Outfit', sans-serif;
   }
 
-  body, html, #root {
+  body,
+  html,
+  #root {
     scrollbar-width: none;
     overflow-y: scroll;
   }
@@ -169,7 +176,6 @@
 
   #root {
     min-height: 100dvh;
-    padding-top: env(safe-area-inset-top);
     background: #F8F8F8;
   }
 }
@@ -178,6 +184,7 @@
   padding-top: env(safe-area-inset-top);
 }
 
+/* Telegram Web App handling - only if needed for specific non-hero pages */
 body.telegram-webapp #root {
-  padding-top: calc(env(safe-area-inset-top) + 24px);
+  /* padding-top removed to allow immersive hero image */
 }
