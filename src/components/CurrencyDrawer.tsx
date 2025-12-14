@@ -8,6 +8,7 @@ import {
     DrawerDescription,
     DrawerFooter,
     DrawerHeader,
+
     DrawerTitle,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -66,12 +67,12 @@ export const CurrencyDrawer = ({
     };
 
     return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent className="max-h-[85vh]">
+        <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
+            <DrawerContent className="max-h-[95vh]">
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Select Currency</DrawerTitle>
                     <DrawerDescription>
-                        Choose the currency for this transaction.
+                        The exchange rate will automatically be updated to match the current Mastercard rate of the selected currency.
                     </DrawerDescription>
                 </DrawerHeader>
 
@@ -88,7 +89,7 @@ export const CurrencyDrawer = ({
                     </div>
                 </div>
 
-                <div className="px-4 pb-4 space-y-2 overflow-y-auto max-h-[55vh]">
+                <div className="px-4 pb-12 space-y-2 overflow-y-auto max-h-[90vh]">
                     {sortedCurrencies.length === 0 ? (
                         <p className="text-sm text-center py-4 text-muted-foreground">
                             No currency found.

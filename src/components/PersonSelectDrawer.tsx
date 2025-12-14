@@ -235,14 +235,14 @@ export const PersonSelectDrawer = ({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="max-h-[95vh]">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
           {description ? (
             <DrawerDescription>{description}</DrawerDescription>
           ) : null}
         </DrawerHeader>
-        <div className="px-4 pb-4 space-y-3 overflow-y-auto max-h-[55vh]">
+        <div className="px-4 pb-4 space-y-3 overflow-y-auto max-h-[90vh]">
           {people.length === 0 ? (
             <p className="text-sm">
               <Badge variant="destructive">{emptyStateText}</Badge>
