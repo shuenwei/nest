@@ -76,6 +76,8 @@ import { BillTransaction } from "@/lib/transaction";
 import imageCompression from "browser-image-compression";
 import ScanningScreen from "@/components/ScanningScreen";
 import { PersonSelectDrawer, PersonOption } from "@/components/PersonSelectDrawer";
+import { CurrencyDrawer } from "@/components/CurrencyDrawer";
+import { useLocationCurrency } from "@/hooks/useLocationCurrency";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -285,9 +287,11 @@ const SplitBillPage = () => {
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
+  const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
   const [activeSharedByIndex, setActiveSharedByIndex] = useState<number | null>(
     null
   );
+  const { detectedCurrency, detectedCity } = useLocationCurrency();
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -894,8 +898,7 @@ const SplitBillPage = () => {
         navigate("/history");
       } else {
         const response = await axios.put(
-          `${
-            import.meta.env.VITE_API_URL
+          `${import.meta.env.VITE_API_URL
           }/transaction/bill/update/${transactionId}`,
           payload,
           {
@@ -1000,8 +1003,8 @@ const SplitBillPage = () => {
                         {isTranslating
                           ? "Translating..."
                           : isTranslated
-                          ? "Receipt Translated"
-                          : "Translate Receipt"}
+                            ? "Receipt Translated"
+                            : "Translate Receipt"}
                       </Button>
                     </AlertDescription>
                   </Alert>
@@ -1069,46 +1072,40 @@ const SplitBillPage = () => {
                       <FormItem className="col-span-6 w-full">
                         <FormLabel>Currency</FormLabel>
                         <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className="w-full justify-between text-left font-normal px-3 h-11"
-                              >
-                                {field.value
-                                  ? SUPPORTED_CURRENCIES.find(
-                                      (c) => c.code === field.value
-                                    )?.code
-                                  : "Select currency"}
-                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              side="bottom"
-                              align="center"
-                              avoidCollisions={false}
-                              className="w-full p-0"
-                            >
-                              <Command>
-                                <CommandInput placeholder="Search" />
-                                <CommandEmpty>No currency found.</CommandEmpty>
-                                <CommandGroup className="max-h-70 overflow-y-auto">
-                                  {SUPPORTED_CURRENCIES.map((curr) => (
-                                    <CommandItem
-                                      key={curr.code}
-                                      value={`${curr.code} ${curr.name}`}
-                                      onSelect={() => field.onChange(curr.code)}
-                                    >
-                                      {curr.code}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-between text-left font-normal px-3 h-11"
+                            onClick={() => setCurrencyDrawerOpen(true)}
+                          >
+                            <span className="flex items-center gap-2 truncate">
+                              {field.value ? (
+                                <>
+                                  <span className="text-lg">
+                                    {
+                                      SUPPORTED_CURRENCIES.find(
+                                        (c) => c.code === field.value
+                                      )?.flag
+                                    }
+                                  </span>
+                                  <span>{field.value}</span>
+                                </>
+                              ) : (
+                                "Select"
+                              )}
+                            </span>
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                          </Button>
                         </FormControl>
                         <FormMessage />
+                        <CurrencyDrawer
+                          open={currencyDrawerOpen}
+                          onOpenChange={setCurrencyDrawerOpen}
+                          selectedCurrency={field.value}
+                          onSelect={field.onChange}
+                          detectedCurrency={detectedCurrency}
+                          detectedCity={detectedCity}
+                        />
                       </FormItem>
                     )}
                   />
