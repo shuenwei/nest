@@ -94,11 +94,11 @@ const DashboardPage = () => {
         <div className="relative z-10 px-6 pt-[calc(2.5rem+env(safe-area-inset-top))] [.telegram-webapp_&]:pt-[calc(3.75rem+env(safe-area-inset-top))] text-white flex flex-col h-full">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-xl font-bold drop-shadow-md">
-                {randomGreeting}!
+              <h1 className="text-xl font-semibold drop-shadow-sm">
+                nest
               </h1>
               <p className="text-white text-sm drop-shadow-sm">
-                Welcome back, {user.displayName}
+                {randomGreeting}, {user.displayName}!
               </p>
             </div>
             <Avatar className="h-11 w-11 ring-2 ring-white/20 shadow-md" onClick={() => navigate("/settings")}>
@@ -325,9 +325,9 @@ const DashboardPage = () => {
       <div className="bg-white rounded-t-[2rem] min-h-[50vh] -mt-8 relative z-20 px-6 pt-8 pb-24">
         <div className="w-full max-w-sm mx-auto">
 
-          <div className="pt-2 space-y-3">
+          <div className="space-y-3">
             {filteredFriends.map((f) => (
-              <FriendCard key={f.id} userId={f.id} />
+              <FriendCard key={f.id} userId={f.id} variant="flat" />
             ))}
 
             {filteredFriends.length === 0 && (

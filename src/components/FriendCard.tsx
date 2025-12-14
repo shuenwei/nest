@@ -11,12 +11,14 @@ interface FriendCardProps {
   userId: string;
   footer?: ReactNode;
   disableClick?: boolean;
+  variant?: "default" | "flat";
 }
 
 export function FriendCard({
   userId,
   footer,
   disableClick = false,
+  variant = "default",
 }: FriendCardProps) {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -27,14 +29,14 @@ export function FriendCard({
 
   return (
     <Card
-      className="mb-3 py-4 shadow-xs"
+      className={`mb-3 py-4 ${variant === "default" ? "shadow-xs" : "shadow-none"}`}
       onClick={
         disableClick
           ? undefined
           : () => {
-              triggerHapticImpact("light");
-              navigate(`/friends/${encodeURIComponent(id)}`);
-            }
+            triggerHapticImpact("light");
+            navigate(`/friends/${encodeURIComponent(id)}`);
+          }
       }
     >
       <CardContent className="px-4 flex items-center justify-between">
@@ -67,24 +69,22 @@ export function FriendCard({
         </div>
         <div className="text-right">
           <p
-            className={`text-xs font-medium mb-0.5 ${
-              balance < 0
-                ? "text-red-500"
-                : balance > 0
+            className={`text-xs font-medium mb-0.5 ${balance < 0
+              ? "text-red-500"
+              : balance > 0
                 ? "text-green-600"
                 : "text-muted-foreground"
-            }`}
+              }`}
           >
             {balance < 0 ? "You owe" : balance > 0 ? "Owes you" : "Settled up"}
           </p>
           <p
-            className={`font-semibold ${
-              balance < 0
-                ? "text-red-600"
-                : balance > 0
+            className={`font-semibold ${balance < 0
+              ? "text-red-600"
+              : balance > 0
                 ? "text-green-700"
                 : "text-muted-foreground"
-            }`}
+              }`}
           >
             {balance === 0 ? "$0.00" : `$${Math.abs(balance).toFixed(2)}`}
           </p>
