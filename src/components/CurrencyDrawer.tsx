@@ -108,7 +108,7 @@ export const CurrencyDrawer = ({
                                             "w-full rounded-xl border px-4 py-3 text-left transition-colors",
                                             "flex items-center justify-between gap-4",
                                             isSelected
-                                                ? "border-primary/60 bg-primary/5"
+                                                ? "border-primary/60 bg-primary/3"
                                                 : "border-border hover:bg-secondary/50"
                                         )}
                                         onClick={() => handleSelect(currency.code)}
