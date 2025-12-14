@@ -296,25 +296,25 @@ const DashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-emerald-400/30 backdrop-blur-sm border border-emerald-500/20 rounded-3xl p-4 shadow-lg text-white">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/20 rounded-3xl p-4 shadow-lg text-white">
               <div className="flex items-center justify-between mb-2">
-                <div className="bg-emerald-600/30 p-2 rounded-full text-emerald-100">
+                <div className="bg-white/20 p-2 rounded-full text-white">
                   <MoveDownLeft className="w-5 h-5" />
                 </div>
               </div>
               <div>
-                <p className="text-emerald-100/90 text-sm font-medium tracking-wide">Friends Owe</p>
+                <p className="text-white/80 text-sm font-medium tracking-wide">Friends Owe</p>
                 <p className="text-xl font-bold mt-1 text-white">${friendsOwe}</p>
               </div>
             </div>
-            <div className="bg-rose-400/30 backdrop-blur-sm border border-rose-500/20 rounded-3xl p-4 shadow-lg text-white">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/20 rounded-3xl p-4 shadow-lg text-white">
               <div className="flex items-center justify-between mb-2">
-                <div className="bg-rose-600/30 p-2 rounded-full text-rose-100">
+                <div className="bg-white/20 p-2 rounded-full text-white">
                   <MoveUpRight className="w-5 h-5" />
                 </div>
               </div>
               <div>
-                <p className="text-rose-100/90 text-sm font-medium tracking-wide">You Owe</p>
+                <p className="text-white/80 text-sm font-medium tracking-wide">You Owe</p>
                 <p className="text-xl font-bold mt-1 text-white">${youOwe}</p>
               </div>
             </div>
