@@ -200,7 +200,7 @@ export const PersonSelectDrawer = ({
             className={cn(
               "flex h-8 w-8 items-center justify-center transition-colors",
               isFavourited
-                ? "text-red-500"
+                ? "text-red-300"
                 : "text-gray-200 hover:text-gray-300"
             )}
             onClick={(event) => {
@@ -214,7 +214,7 @@ export const PersonSelectDrawer = ({
             <Heart
               className={cn(
                 "h-6 w-6",
-                isFavourited ? "fill-red-500" : "fill-gray-200"
+                isFavourited ? "fill-red-300" : "fill-gray-200"
               )}
             />
           </button>
@@ -223,7 +223,7 @@ export const PersonSelectDrawer = ({
               "flex h-6 w-6 items-center justify-center rounded-full border",
               isSelected
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-muted"
+                : "border-gray-200"
             )}
           >
             {isSelected ? <Check className="h-4 w-4" /> : null}

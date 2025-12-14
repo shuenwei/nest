@@ -123,7 +123,7 @@ export const CurrencyDrawer = ({
                                                             variant="secondary"
                                                             className="text-[10px] h-5 px-1.5 gap-1"
                                                         >
-                                                            Detected
+                                                            Based on your location
                                                             {detectedCity && (
                                                                 <span className="text-muted-foreground font-normal">
                                                                     • {detectedCity}
