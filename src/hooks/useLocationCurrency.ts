@@ -5,6 +5,7 @@ import { getCurrencyFromCountryCode } from "@/lib/currencies";
 export const useLocationCurrency = () => {
     const [detectedCurrency, setDetectedCurrency] = useState<string | null>(null);
     const [detectedCity, setDetectedCity] = useState<string | null>(null);
+    const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +23,7 @@ export const useLocationCurrency = () => {
                     const response = await axios.get(
                         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
                     );
-                    const { countryCode, locality, city } = response.data;
+                    const { countryCode, locality, city, countryName } = response.data;
 
                     if (countryCode) {
                         const currency = getCurrencyFromCountryCode(countryCode);
@@ -31,6 +32,10 @@ export const useLocationCurrency = () => {
 
                     if (locality || city) {
                         setDetectedCity(locality || city);
+                    }
+
+                    if (countryName) {
+                        setDetectedCountry(countryName);
                     }
                 } catch (err) {
                     console.error("Error fetching location data:", err);
@@ -47,5 +52,5 @@ export const useLocationCurrency = () => {
         );
     }, []);
 
-    return { detectedCurrency, detectedCity, loading, error };
+    return { detectedCurrency, detectedCity, detectedCountry, loading, error };
 };
