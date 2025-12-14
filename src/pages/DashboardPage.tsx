@@ -49,8 +49,8 @@ const DashboardPage = () => {
     setEndDate,
   } = useUser();
 
-  const { detectedCity, detectedCountry } = useLocationCurrency();
-  const { imageUrl, loading: imageLoading } = useCityImage(detectedCountry);
+  const { detectedCity } = useLocationCurrency();
+  const { imageUrl, loading: imageLoading } = useCityImage(detectedCity);
 
   if (!user) return null;
 

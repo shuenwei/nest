@@ -20,7 +20,7 @@ export const useCityImage = (country: string | null) => {
                 }
 
                 const response = await axios.get("https://api.unsplash.com/search/photos", {
-                    params: { query: country, per_page: 1, orientation: "landscape", order_by: "popular" },
+                    params: { query: `${country}`, per_page: 1, orientation: "landscape" },
                     headers: {
                         Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
                     },

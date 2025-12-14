@@ -30,8 +30,8 @@ export const useLocationCurrency = () => {
                         setDetectedCurrency(currency);
                     }
 
-                    if (locality || city) {
-                        setDetectedCity(locality || city);
+                    if (city || locality) {
+                        setDetectedCity(city || locality);
                     }
 
                     if (countryName) {
