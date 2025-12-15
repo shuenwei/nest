@@ -22,56 +22,46 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
 
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
-
-    const formattedDate = date.toLocaleDateString("en-GB", {
+    return date.toLocaleDateString("en-GB", {
       day: "numeric",
       month: "long",
       year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
-
-    const formattedTime = date
-      .toLocaleTimeString("en-GB", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })
-      .toLowerCase()
-      .replace(":", ".")
-      .replace(/\s?(am|pm)/, (_, suffix) => suffix);
-    return `${formattedDate} ${formattedTime}`;
   };
 
   return (
-    <Card className="mb-3 py-5 shadow-xs">
-      <CardContent className="px-0">
-        <div className="px-4 flex justify-between items-start">
-          <div className="flex justify-between items-start">
-            <div className="flex gap-2">
-              <div className="text-3xl">{iconMap[transaction.type]}</div>
-              <div>
-                <h1 className="text-sm font-semibold">
-                  {transaction.transactionName}
-                </h1>
-                <p className="text-muted-foreground text-xs">
-                  {formatDateTime(transaction.date)}
-                </p>
-              </div>
-            </div>
-          </div>
+    <Card className="mb-6 shadow-none border-none bg-transparent">
+      <CardContent className="px-0 pb-4 flex flex-col items-center justify-center text-center space-y-3">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-3xl border mb-4">
+          {iconMap[transaction.type]}
+        </div>
 
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">
+            {transaction.type === "groupSmartSettle"
+              ? "Smart Settle"
+              : ""}
+          </p>
           {transaction.type !== "groupSmartSettle" && (
-            <div className="text-right">
-              <p className="text-sm font-semibold">
-                ${transaction.amountInSgd.toFixed(2)}
-              </p>
-
-              {transaction.currency !== "SGD" && (
-                <p className="text-xs text-muted-foreground ml-2">
-                  {transaction.currency} {transaction.amount.toFixed(2)}
-                </p>
-              )}
-            </div>
+            <h1 className="text-4xl font-bold tracking-tight">
+              ${transaction.amountInSgd.toFixed(2)}
+            </h1>
           )}
+          {transaction.currency !== "SGD" && transaction.type !== "groupSmartSettle" && (
+            <p className="text-sm text-muted-foreground">
+              {transaction.currency} {transaction.amount.toFixed(2)}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-1 pt-2">
+          <h2 className="font-semibold text-xl">{transaction.transactionName}</h2>
+          <p className="text-xs text-muted-foreground">
+            {formatDateTime(transaction.date)}
+          </p>
         </div>
       </CardContent>
     </Card>

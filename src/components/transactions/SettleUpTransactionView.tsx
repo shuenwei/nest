@@ -3,6 +3,8 @@ import type { SettleUpTransaction } from "@/lib/transaction";
 import { CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface SettleUpTransactionViewProps {
   transaction: SettleUpTransaction;
@@ -13,72 +15,123 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
 }) => {
   const { user } = useUser();
   const friends = user?.friends || [];
-  const getUserDisplayName = (userId: string) => {
-    if (userId === user?.id) return "You";
-    return friends.find((f) => f.id === userId)?.displayName ?? "???";
+
+  const getFriendDetails = (userId: string) => {
+    if (userId === user?.id) {
+      return {
+        displayName: `${user?.displayName || "You"} (You)`,
+        profilePhoto: user?.profilePhoto || null,
+        username: user?.username,
+      };
+    }
+    const friend = friends.find((f) => f.id === userId);
+    return {
+      displayName: friend?.displayName ?? "Unknown",
+      profilePhoto: friend?.profilePhoto || null,
+      username: friend?.username,
+    };
   };
 
+  const payer = getFriendDetails(transaction.payer);
+  const payee = getFriendDetails(transaction.payee);
+
   return (
-    <CardContent className="p-6 space-y-6">
-      {/* Transfer Details */}
-      <div>
-        <h3 className="text-sm font-semibold mb-4">Transfer Details</h3>
-        <div className="flex items-center justify-center gap-3 py-2">
-          <div className="w-1/3 text-center">
-            <div className="font-medium">
-              {getUserDisplayName(transaction.payer)}
-            </div>
-            <div className="text-xs text-muted-foreground">Paid</div>
+    <CardContent className="p-0 space-y-6 pb-6">
+      {/* Meta Info Row */}
+      {transaction.currency !== "SGD" && (
+        <div className="flex flex-wrap gap-2 text-xs px-6 pt-6 justify-center">
+          <Badge variant="outline" className="font-normal text-muted-foreground">
+            1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency}
+          </Badge>
+        </div>
+      )}
+
+      {/* Transfer Flow */}
+      <div className="px-6 pt-6">
+        <p className="text-xs font-medium text-muted-foreground mb-4 font-medium">
+          Transfer Details
+        </p>
+
+        <div className="flex items-center justify-between gap-2 p-3 bg-secondary/30 rounded-xl border border-border/50">
+          {/* Payer */}
+          <div className="flex flex-col items-center w-[40%] text-center">
+            <Avatar className="h-12 w-12 mb-2">
+              <AvatarImage src={payer.profilePhoto || ""} alt={payer.displayName} />
+              <AvatarFallback className="text-sm">
+                {payer.displayName
+                  .replace(" (You)", "")
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold text-sm leading-tight text-center">{payer.displayName}</span>
+            {payer.username && (
+              <span className="text-[10px] text-muted-foreground mt-0.5">@{payer.username}</span>
+            )}
           </div>
-          <ArrowRight className="size-5 text-muted-foreground" />
-          <div className="w-1/3 text-center">
-            <div className="font-medium">
-              {getUserDisplayName(transaction.payee)}
-            </div>
-            <div className="text-xs text-muted-foreground">Received</div>
+
+          <div className="flex flex-col items-center justify-center text-muted-foreground">
+            <ArrowRight className="h-5 w-5" />
+            <span className="text-[10px] font-medium mt-1">SENT</span>
+          </div>
+
+          {/* Payee */}
+          <div className="flex flex-col items-center w-[40%] text-center">
+            <Avatar className="h-12 w-12 mb-2">
+              <AvatarImage src={payee.profilePhoto || ""} alt={payee.displayName} />
+              <AvatarFallback className="text-sm">
+                {payee.displayName
+                  .replace(" (You)", "")
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold text-sm leading-tight text-center">{payee.displayName}</span>
+            {payee.username && (
+              <span className="text-[10px] text-muted-foreground mt-0.5">@{payee.username}</span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Amount Details */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Amount</h3>
-        <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Amount</span>
-            <span>
-              {transaction.currency} {transaction.amount.toFixed(2)}
-            </span>
-          </div>
-
-          {transaction.currency !== "SGD" && (
+      {/* Amount Breakdown for foreign currency */}
+      {transaction.currency !== "SGD" && (
+        <div className="px-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2 font-medium">
+            Amount
+          </p>
+          <div className="bg-secondary/30 rounded-xl p-4 space-y-2 text-sm border border-border/50">
             <div className="flex justify-between items-center">
-              <span className="text-sm">SGD Equivalent</span>
+              <span className="text-muted-foreground">Original Amount</span>
+              <span className="font-medium">
+                {transaction.currency} {transaction.amount.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">SGD Equivalent</span>
               <span className="font-medium">
                 ${transaction.amountInSgd.toFixed(2)}
               </span>
             </div>
-          )}
-
-          {transaction.currency !== "SGD" && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Exchange Rate</span>
-              <span className="font-medium">
-                1 SGD = {transaction.exchangeRate.toFixed(5)}{" "}
-                {transaction.currency}
-              </span>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Notes Section (if available) */}
       {transaction.notes && (
-        <div>
-          <h3 className="text-sm font-semibold mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
-            {transaction.notes}
+        <div className="px-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2 font-medium">
+            Notes
           </p>
+          <div className="p-3 bg-secondary/50 rounded-lg text-sm border border-border/50">
+            {transaction.notes}
+          </div>
         </div>
       )}
     </CardContent>

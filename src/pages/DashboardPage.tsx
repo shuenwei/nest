@@ -92,14 +92,14 @@ const DashboardPage = () => {
         <div className="relative z-10 px-6 pt-[calc(2.5rem+env(safe-area-inset-top))] [.telegram-webapp_&]:pt-[calc(3.75rem+env(safe-area-inset-top))] text-white flex flex-col h-full">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-xl font-semibold drop-shadow-sm">
+              <h1 className="text-xl font-semibold drop-shadow-md">
                 nest
               </h1>
-              <p className="text-white text-sm drop-shadow-sm">
+              <p className="text-white text-sm drop-shadow-md">
                 {randomGreeting}, {user.displayName}!
               </p>
             </div>
-            <Avatar className="h-11 w-11 ring-2 ring-white/20 shadow-md" onClick={() => navigate("/settings")}>
+            <Avatar className="h-11 w-11 shadow-md" onClick={() => navigate("/settings")}>
               <AvatarImage
                 src={user.profilePhoto ? user.profilePhoto : ""}
                 alt={user.displayName}
