@@ -9,6 +9,18 @@ export const useLocationCurrency = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [isAccessGranted, setIsAccessGranted] = useState(false);
+    const [canOpenSettings, setCanOpenSettings] = useState(false);
+
+    const openSettings = () => {
+        const locationManager = window.Telegram?.WebApp?.LocationManager;
+        if (locationManager) {
+            locationManager.openSettings();
+        } else {
+            console.warn("LocationManager not available");
+        }
+    };
+
     useEffect(() => {
         const fetchDetails = async (latitude: number, longitude: number) => {
             try {
@@ -41,11 +53,17 @@ export const useLocationCurrency = () => {
         const isInTelegram = !!window.Telegram?.WebApp?.initData;
 
         if (locationManager && isInTelegram) {
+            setCanOpenSettings(true);
             setLoading(true);
             try {
                 locationManager.init(() => {
+                    if (locationManager.isLocationAvailable) {
+                        setIsAccessGranted(locationManager.isAccessGranted);
+                    }
+
                     locationManager.getLocation((data) => {
                         if (data) {
+                            setIsAccessGranted(true);
                             fetchDetails(data.latitude, data.longitude);
                         } else {
                             console.error("Telegram LocationManager returned null data");
@@ -63,16 +81,18 @@ export const useLocationCurrency = () => {
                     return;
                 }
 
-                // Fallback logic duplicated here for safety if Telegram fails critically
+                // Fallback logic
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
+                        setIsAccessGranted(true);
                         fetchDetails(latitude, longitude);
                     },
                     (err) => {
                         console.error("Geolocation error:", err);
                         setError(err.message);
                         setLoading(false);
+                        setIsAccessGranted(false);
                     }
                 );
             }
@@ -88,15 +108,17 @@ export const useLocationCurrency = () => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
+                setIsAccessGranted(true);
                 fetchDetails(latitude, longitude);
             },
             (err) => {
                 console.error("Geolocation error:", err);
                 setError(err.message);
                 setLoading(false);
+                setIsAccessGranted(false);
             }
         );
     }, []);
 
-    return { detectedCurrency, detectedCity, detectedCountry, loading, error };
+    return { detectedCurrency, detectedCity, detectedCountry, loading, error, isAccessGranted, canOpenSettings, openSettings };
 };

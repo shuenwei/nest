@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
 import { useEffect, useState } from "react";
+import { useLocation } from "@/contexts/LocationContext";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
@@ -18,6 +19,7 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useUser();
   const [isTelegramApp, setIsTelegramApp] = useState(false);
+  const { isAccessGranted, canOpenSettings, openSettings } = useLocation();
 
   useEffect(() => {
     setIsTelegramApp(
@@ -85,6 +87,29 @@ const SettingsPage = () => {
             ))}
           </CardContent>
         </Card>
+
+        {canOpenSettings && !isAccessGranted && (
+          <Card className="mb-6 shadow-xs border-amber-200 bg-amber-50">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-sm text-amber-900">
+                  Location Access
+                </div>
+                <div className="text-xs text-amber-700">
+                  Enable location to detect currency
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white border-amber-200 text-amber-900 hover:bg-amber-100"
+                onClick={openSettings}
+              >
+                Enable
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {!isTelegramApp && (
           <Button variant="link" className="w-full" onClick={handleLogout}>

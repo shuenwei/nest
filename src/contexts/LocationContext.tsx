@@ -7,6 +7,9 @@ interface LocationContextValue {
     detectedCountry: string | null;
     loading: boolean;
     error: string | null;
+    isAccessGranted: boolean;
+    canOpenSettings: boolean;
+    openSettings: () => void;
 }
 
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
