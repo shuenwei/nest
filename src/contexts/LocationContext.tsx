@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useLocationCurrency } from "@/hooks/useLocationCurrency";
+import { useCityImage } from "@/hooks/useCityImage";
 
 interface LocationContextValue {
     detectedCurrency: string | null;
@@ -10,15 +11,18 @@ interface LocationContextValue {
     isAccessGranted: boolean;
     canOpenSettings: boolean;
     openSettings: () => void;
+    imageUrl: string;
+    imageLoading: boolean;
 }
 
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
     const locationData = useLocationCurrency();
+    const { imageUrl, loading: imageLoading } = useCityImage(locationData.detectedCity);
 
     return (
-        <LocationContext.Provider value={locationData}>
+        <LocationContext.Provider value={{ ...locationData, imageUrl, imageLoading }}>
             {children}
         </LocationContext.Provider>
     );
