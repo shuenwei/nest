@@ -1,4 +1,4 @@
-export {};
+export { };
 
 declare global {
   interface Window {
@@ -7,7 +7,7 @@ declare global {
         ready?: () => void;
         expand?: () => void;
         close?: () => void;
-        requestFullscreen?: () => void; // ✅ new method
+        requestFullscreen?: () => void;
         isExpanded?: boolean;
         disableVerticalSwipes?: () => void;
         enableVerticalSwipes?: () => void;
@@ -26,7 +26,27 @@ declare global {
           notificationOccurred?: (type: "error" | "success" | "warning") => void;
           selectionChanged?: () => void;
         };
+        LocationManager?: {
+          init: (callback?: () => void) => void;
+          getLocation: (callback: (data: LocationData) => void) => void;
+          openSettings: () => void;
+          isLocationAvailable: boolean;
+          isAccessRequested: boolean;
+          isAccessGranted: boolean;
+        };
       };
     };
+  }
+
+  interface LocationData {
+    latitude: number;
+    longitude: number;
+    altitude: number | null;
+    course: number | null;
+    speed: number | null;
+    horizontal_accuracy: number | null;
+    vertical_accuracy: number | null;
+    course_accuracy: number | null;
+    speed_accuracy: number | null;
   }
 }
