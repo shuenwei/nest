@@ -69,7 +69,7 @@ import { PurchaseTransaction } from "@/lib/transaction";
 import axios from "axios";
 import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 import { CurrencyDrawer } from "@/components/CurrencyDrawer";
-import { useLocationCurrency } from "@/hooks/useLocationCurrency";
+import { useLocation } from "@/contexts/LocationContext";
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -413,7 +413,7 @@ const SplitPurchasePage = () => {
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
-  const { detectedCurrency, detectedCity } = useLocationCurrency();
+  const { detectedCurrency, detectedCity } = useLocation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");

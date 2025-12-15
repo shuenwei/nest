@@ -57,7 +57,7 @@ import { SettleUpTransaction } from "@/lib/transaction";
 import axios from "axios";
 import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 import { CurrencyDrawer } from "@/components/CurrencyDrawer";
-import { useLocationCurrency } from "@/hooks/useLocationCurrency";
+import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -251,7 +251,7 @@ const SettleUpPage = () => {
   const [payerDrawerOpen, setPayerDrawerOpen] = useState(false);
   const [payeeDrawerOpen, setPayeeDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
-  const { detectedCurrency, detectedCity } = useLocationCurrency();
+  const { detectedCurrency, detectedCity } = useLocationContext();
 
   const { user, refreshUser, transactions } = useUser();
   const location = useLocation();

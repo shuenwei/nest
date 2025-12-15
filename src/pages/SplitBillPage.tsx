@@ -77,7 +77,7 @@ import imageCompression from "browser-image-compression";
 import ScanningScreen from "@/components/ScanningScreen";
 import { PersonSelectDrawer, PersonOption } from "@/components/PersonSelectDrawer";
 import { CurrencyDrawer } from "@/components/CurrencyDrawer";
-import { useLocationCurrency } from "@/hooks/useLocationCurrency";
+import { useLocation } from "@/contexts/LocationContext";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -291,7 +291,7 @@ const SplitBillPage = () => {
   const [activeSharedByIndex, setActiveSharedByIndex] = useState<number | null>(
     null
   );
-  const { detectedCurrency, detectedCity } = useLocationCurrency();
+  const { detectedCurrency, detectedCity } = useLocation();
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);

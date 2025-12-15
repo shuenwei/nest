@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLocationCurrency } from "@/hooks/useLocationCurrency";
+import { useLocation } from "@/contexts/LocationContext";
 import { useCityImage } from "@/hooks/useCityImage";
 
 const greetings = [
@@ -49,7 +49,7 @@ const DashboardPage = () => {
     setEndDate,
   } = useUser();
 
-  const { detectedCity } = useLocationCurrency();
+  const { detectedCity } = useLocation();
   const { imageUrl, loading: imageLoading } = useCityImage(detectedCity);
 
   if (!user) return null;
