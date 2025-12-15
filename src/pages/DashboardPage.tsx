@@ -84,7 +84,7 @@ const DashboardPage = () => {
       {/* Hero Section */}
       <div className="relative w-full min-h-[50vh] bg-gray-200 pb-16">
         <div
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${imageUrl})`,
             opacity: imageLoading ? 0 : 1
