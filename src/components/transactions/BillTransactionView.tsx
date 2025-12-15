@@ -1,7 +1,7 @@
 import type React from "react";
 import type { BillTransaction } from "@/lib/transaction";
 import { CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/UserContext";
@@ -36,14 +36,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
 
   return (
     <CardContent className="px-0 space-y-6 pb-6">
-      {/* Meta Info Row */}
-      {transaction.currency !== "SGD" && (
-        <div className="flex flex-wrap gap-2 text-xs px-6 pt-6 justify-center">
-          <Badge variant="outline" className="font-normal text-muted-foreground">
-            1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency}
-          </Badge>
-        </div>
-      )}
+
 
       {/* Paid By Section */}
       <div className="px-6 pt-6">

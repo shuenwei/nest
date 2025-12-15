@@ -4,6 +4,7 @@ import type React from "react";
 
 import type { Transaction } from "@/lib/transaction";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface TransactionHeaderProps {
   transaction: Transaction;
@@ -62,6 +63,29 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
           <p className="text-xs text-muted-foreground">
             {formatDateTime(transaction.date)}
           </p>
+
+          <div className="flex flex-wrap gap-2 text-xs justify-center pt-2">
+            {transaction.type === "purchase" && (
+              <Badge
+                variant="outline"
+                className="font-normal text-muted-foreground"
+              >
+                {transaction.splitMethod === "even"
+                  ? "Split Equally"
+                  : "Split Manually"}
+              </Badge>
+            )}
+            {transaction.currency !== "SGD" &&
+              transaction.type !== "groupSmartSettle" && (
+                <Badge
+                  variant="outline"
+                  className="font-normal text-muted-foreground"
+                >
+                  1 SGD = {transaction.exchangeRate.toFixed(5)}{" "}
+                  {transaction.currency}
+                </Badge>
+              )}
+          </div>
         </div>
       </CardContent>
     </Card>

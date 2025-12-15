@@ -1,7 +1,7 @@
 import type React from "react";
 import type { PurchaseTransaction } from "@/lib/transaction";
 import { CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/contexts/UserContext";
 import { Separator } from "@/components/ui/separator";
@@ -35,18 +35,8 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
   const paidBy = getFriendDetails(transaction.paidBy);
 
   return (
-    <CardContent className="p-0 space-y-6 pb-6">
-      {/* Meta Info Row */}
-      <div className="flex flex-wrap gap-2 text-xs px-6 pt-6 justify-center">
-        <Badge variant="outline" className="font-normal text-muted-foreground">
-          {transaction.splitMethod === "even" ? "Split Equally" : "Split Manually"}
-        </Badge>
-        {transaction.currency !== "SGD" && (
-          <Badge variant="outline" className="font-normal text-muted-foreground">
-            1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency}
-          </Badge>
-        )}
-      </div>
+    <CardContent className="p-0 space-y-6 py-6">
+
 
       {/* Paid By Section */}
       <div className="px-6">

@@ -4,7 +4,7 @@ import { CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
 
 interface SettleUpTransactionViewProps {
   transaction: SettleUpTransaction;
@@ -37,14 +37,7 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
 
   return (
     <CardContent className="p-0 space-y-6 pb-6">
-      {/* Meta Info Row */}
-      {transaction.currency !== "SGD" && (
-        <div className="flex flex-wrap gap-2 text-xs px-6 pt-6 justify-center">
-          <Badge variant="outline" className="font-normal text-muted-foreground">
-            1 SGD = {transaction.exchangeRate.toFixed(5)} {transaction.currency}
-          </Badge>
-        </div>
-      )}
+
 
       {/* Transfer Flow */}
       <div className="px-6 pt-6">
