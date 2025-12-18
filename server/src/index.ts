@@ -9,6 +9,7 @@ import userRoutes from "./routes/user";
 import transactionRoutes from "./routes/transaction";
 import exchangeRoutes from "./routes/exchange";
 import translationRoutes from "./routes/translation";
+import webhookRoutes from "./routes/webhook";
 import "./utils/telegram-bot";
 import checkBearerToken from "./middlewares/check-bearer-token";
 import errorHandler from "./middlewares/error-handler";
@@ -27,6 +28,8 @@ const setup = async () => {
   });
 
   app.post("/cron/recurring", cronRecurring);
+
+  app.use("/webhook", webhookRoutes);
 
   app.use("/auth", authRoutes, errorHandler);
   app.use("/user", checkBearerToken, userRoutes, errorHandler);

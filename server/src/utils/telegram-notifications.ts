@@ -130,3 +130,65 @@ export async function notifyTransfer(
     console.error("Transfer notification error:", err);
   }
 }
+
+export async function notifyTransactionCreated(
+  transactionId: string,
+  userId: string | Types.ObjectId,
+  transactionName: string,
+  amount: number,
+  currency: string
+): Promise<void> {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user || !user.telegramId) return;
+
+    const chatId = Number(user.telegramId);
+    const escapedName = mdEscape(transactionName);
+    const escapedAmount = mdEscape(amount.toFixed(2));
+    const escapedCurrency = mdEscape(currency);
+
+    const message = [
+      "📧 *New Transaction*",
+      "",
+      `*🛒 ${escapedName}*`,
+      "",
+      `*💸 ${escapedCurrency} ${escapedAmount}*`,
+      "",
+      "Transaction created from your forwarded bank email.",
+    ].join("\n");
+
+    await bot.sendMessage(chatId, message, {
+      parse_mode: "MarkdownV2",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "🔍 View Transaction",
+              web_app: {
+                url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+              },
+            },
+          ],
+        ],
+      },
+    });
+  } catch (err) {
+    console.error("Failed to notify user of email transaction:", err);
+  }
+}
+
+export async function sendTelegramMessage(
+  userId: string | Types.ObjectId,
+  text: string
+): Promise<void> {
+  try {
+    const user = await User.findById(userId).lean();
+    if (!user || !user.telegramId) return;
+
+    const chatId = Number(user.telegramId);
+    // Send as plain text (no markdown parsing) to avoid errors with special chars in codes
+    await bot.sendMessage(chatId, text);
+  } catch (err) {
+    console.error("Failed to send generic telegram message:", err);
+  }
+}

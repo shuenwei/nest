@@ -21,6 +21,7 @@ import ViewTransactionPage from "./pages/ViewTransactionPage";
 import ViewRecurringPage from "./pages/ViewRecurringPage";
 import UsageLimitsPage from "./pages/UsageLimitsPage";
 import BlockUsersPage from "./pages/BlockUsersPage";
+import EmailForwardingPage from "./pages/EmailForwardingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
@@ -162,6 +163,7 @@ function App() {
             <Route path="/settings/account" element={<AccountSettingsPage />} />
             <Route path="/settings/limits" element={<UsageLimitsPage />} />
             <Route path="/settings/block" element={<BlockUsersPage />} />
+            <Route path="/settings/emailforwarding" element={<EmailForwardingPage />} />
           </Route>
         </Route>
       </Routes>
