@@ -25,5 +25,6 @@ dist-ssr
 
 .env
 server/src/controllers/exchange/
+server/src/utils/currency.ts
 /dev-dist
 tsconfig.tsbuildinfo

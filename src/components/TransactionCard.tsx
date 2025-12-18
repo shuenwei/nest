@@ -80,7 +80,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             </div>
           </div>
           {transaction.type !== "groupSmartSettle" && (
-            <div className="text-right">
+            <div className="text-right shrink-0 whitespace-nowrap">
               <p className="font-semibold text-sm">
                 ${transaction.amountInSgd.toFixed(2)}
               </p>
