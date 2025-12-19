@@ -34,7 +34,7 @@ const ExportTransactionsPage = () => {
         return "Select date";
     };
 
-    const handleExport = () => {
+    const handleExport = async () => {
         const header = ["Date", "Note", "Amount", "Category"];
         const rows = transactions
             .filter((t) => {
@@ -69,23 +69,37 @@ const ExportTransactionsPage = () => {
             });
 
         const csvContent = [header.join(","), ...rows].join("\n");
-        const blob = new Blob([csvContent], {
-            type: "text/csv;charset=utf-8;",
+        const file = new File([csvContent], "transactions.csv", {
+            type: "text/csv",
         });
-        const url = URL.createObjectURL(blob);
 
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-            window.open(url, "_blank");
-            toast.success("Transactions exported successfully!");
-        } else {
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "transactions.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            toast.success("Transactions exported successfully!");
+        // 1. Try Native Share (Works on iOS, some Androids)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: "Export Transactions",
+                    text: "Here is your transaction history.",
+                });
+                toast.success("Transactions exported successfully!");
+                return;
+            } catch (error) {
+                console.warn("Share API failed or cancelled", error);
+                // Fallthrough to clipboard if share fails (except user cancellation, but hard to distinguish reliably across browsers)
+                if ((error as Error).name === "AbortError") return;
+            }
         }
+
+        // 2. Fallback: Download via Link
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "transactions.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download started");
     };
 
     return (
