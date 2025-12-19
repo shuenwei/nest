@@ -2,25 +2,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail } from "lucide-react";
+import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
 import { useEffect, useState } from "react";
 import { useLocation } from "@/contexts/LocationContext";
+import { format } from "date-fns";
 
 const menuItems = [
   { label: "Account Settings", icon: Settings, path: "/settings/account" },
   { label: "Usage Limits", icon: GaugeCircle, path: "/settings/limits" },
   { label: "Email Forwarding", icon: Mail, path: "/settings/emailforwarding" },
+  { label: "Export Transactions", icon: Download, path: "/settings/export" },
   //{ label: "Block Users", icon: UserRoundX, path: "/settings/block" },
 ];
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, transactions, loading, updating } = useUser();
   const [isTelegramApp, setIsTelegramApp] = useState(false);
   const { isAccessGranted, canOpenSettings, openSettings } = useLocation();
+
+  const isLoading = loading || updating;
 
   useEffect(() => {
     setIsTelegramApp(

@@ -22,6 +22,7 @@ import ViewRecurringPage from "./pages/ViewRecurringPage";
 import UsageLimitsPage from "./pages/UsageLimitsPage";
 import BlockUsersPage from "./pages/BlockUsersPage";
 import EmailForwardingPage from "./pages/EmailForwardingPage";
+import ExportTransactionsPage from "./pages/ExportTransactionsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
@@ -164,6 +165,7 @@ function App() {
             <Route path="/settings/limits" element={<UsageLimitsPage />} />
             <Route path="/settings/block" element={<BlockUsersPage />} />
             <Route path="/settings/emailforwarding" element={<EmailForwardingPage />} />
+            <Route path="/settings/export" element={<ExportTransactionsPage />} />
           </Route>
         </Route>
       </Routes>

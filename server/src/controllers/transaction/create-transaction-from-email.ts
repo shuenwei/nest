@@ -99,7 +99,7 @@ const createTransactionFromEmail = async (
         if (parsedData.type === "transfer") {
             await sendTelegramMessage(
                 user._id,
-                `💸 You forwarded a PayNow/Bank transfer email. This email type is not supported at this moment. If this was forward automatically, tune your email filter to only forward transaction emails. You can do so by adding subject keywords to your filter.`
+                `🚫 You forwarded a PayNow/bank transfer email. This email type is not supported at this moment. If this was forwarded automatically, tune your email filter to only forward transaction emails. You can do so by specifying keywords for your email subject line in your filter.`
             );
             res.status(200).json({ message: "Transfer detected but not supported yet" });
             return;

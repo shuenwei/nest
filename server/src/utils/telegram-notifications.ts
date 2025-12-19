@@ -154,7 +154,7 @@ export async function notifyTransactionCreated(
       "",
       `*💸 ${escapedCurrency} ${escapedAmount}*`,
       "",
-      "Transaction created from your forwarded bank email.",
+      "Transaction created from your forwarded bank email\\.",
     ].join("\n");
 
     await bot.sendMessage(chatId, message, {
