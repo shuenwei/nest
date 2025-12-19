@@ -78,8 +78,11 @@ const ExportTransactionsPage = () => {
             window.Telegram.WebApp.downloadFile({
                 url: url,
                 file_name: "transactions.csv"
+            }, (accepted) => {
+                if (accepted) {
+                    toast.success("Download started!");
+                }
             });
-            toast.success("Download started!");
         } else {
             const link = document.createElement("a");
             link.setAttribute("href", url);

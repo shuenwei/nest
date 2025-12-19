@@ -34,7 +34,10 @@ declare global {
           isAccessRequested: boolean;
           isAccessGranted: boolean;
         };
-        downloadFile: (params: { url: string; file_name: string }) => void;
+        downloadFile: (
+          params: { url: string; file_name: string },
+          callback?: (accepted: boolean) => void
+        ) => void;
       };
     };
   }
