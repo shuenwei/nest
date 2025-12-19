@@ -98,7 +98,7 @@ const ExportTransactionsPage = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success("Download started");
+        toast.success("Transactions exported successfully!");
     };
 
     return (
