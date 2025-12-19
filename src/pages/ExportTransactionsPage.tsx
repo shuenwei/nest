@@ -73,13 +73,22 @@ const ExportTransactionsPage = () => {
             type: "text/csv;charset=utf-8;",
         });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "transactions.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast.success("Transactions exported successfully!");
+
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+            window.Telegram.WebApp.downloadFile({
+                url: url,
+                file_name: "transactions.csv"
+            });
+            toast.success("Download started!");
+        } else {
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "transactions.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success("Transactions exported successfully!");
+        }
     };
 
     return (
