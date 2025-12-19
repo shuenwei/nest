@@ -75,14 +75,8 @@ const ExportTransactionsPage = () => {
         const url = URL.createObjectURL(blob);
 
         if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-            window.Telegram.WebApp.downloadFile({
-                url: url,
-                file_name: "transactions.csv"
-            }, (accepted) => {
-                if (accepted) {
-                    toast.success("Download started!");
-                }
-            });
+            window.open(url, "_blank");
+            toast.success("Transactions exported successfully!");
         } else {
             const link = document.createElement("a");
             link.setAttribute("href", url);
