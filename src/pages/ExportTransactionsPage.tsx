@@ -73,19 +73,18 @@ const ExportTransactionsPage = () => {
             type: "text/csv",
         });
 
-        // 1. Try Native Share (Works on iOS, some Androids)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // 1. Try Native Share (Only for Telegram Mini App)
+        const isTelegram = !!window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+        if (isTelegram && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
                 await navigator.share({
                     files: [file],
-                    title: "Export Transactions",
-                    text: "Here is your transaction history.",
                 });
                 toast.success("Transactions exported successfully!");
                 return;
             } catch (error) {
                 console.warn("Share API failed or cancelled", error);
-                // Fallthrough to clipboard if share fails (except user cancellation, but hard to distinguish reliably across browsers)
                 if ((error as Error).name === "AbortError") return;
             }
         }
