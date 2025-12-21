@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Check } from "lucide-react";
+import { ArrowLeft, Copy, CircleCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -97,7 +97,7 @@ const EmailForwardingPage = () => {
                                 onClick={copyToClipboard}
                             >
                                 {copied ? (
-                                    <Check className="h-4 w-4 text-green-500" />
+                                    <CircleCheck className="h-4 w-4 text-green-600" />
                                 ) : (
                                     <Copy className="h-4 w-4" />
                                 )}
@@ -119,14 +119,14 @@ const EmailForwardingPage = () => {
                             <p>1. Go to Gmail settings on desktop (gear icon) &gt; "See all settings" &gt; "Forwarding and POP/IMAP".</p>
                             <p>2. Click "Add a forwarding address" and enter your Nest email address (above).</p>
                             <p>3. Verify the address (a verification link will be sent to your Nest telegram bot chat).</p>
-                            <p>4. <strong>Important: Set up a filter to forward only bank emails</strong></p>
-                            <p>   - Go to the "Filters and Blocked Addresses" tab.</p>
-                            <p>   - Click "Create a new filter".</p>
-                            <p>   - In the "From" field, enter your bank's email address.</p>
-                            <p>   - In the "Subject" field, enter keywords that can be found in all your bank's transactions email subject line, such as "transaction was successful".</p>
-                            <p>   - Click "Create filter".</p>
-                            <p>   - Check "Forward it to:" and select your Nest email address.</p>
-                            <p>   - Click "Create filter".</p>
+                            <p><strong>Important: To protect your privacy, set up a filter to forward only bank transaction emails!</strong></p>
+                            <p>4. Go to the "Filters and Blocked Addresses" tab.</p>
+                            <p>5. Click "Create a new filter".</p>
+                            <p>6. In the "From" field, enter your bank's email address.</p>
+                            <p>7. In the "Subject" field, enter keywords that can be found in all your bank's transactions email subject line, such as "transaction was successful". Doing this helps to filter out OTP emails for your privacy.</p>
+                            <p>8. Click "Create filter".</p>
+                            <p>9. Check "Forward it to:" and select your Nest email address.</p>
+                            <p>10. Click "Create filter".</p>
                             <p className="italic mt-2 text-xs">Note: Do not use the general "Forwarding" tab as it will forward all emails.</p>
                         </AccordionContent>
                     </AccordionItem>
@@ -138,10 +138,12 @@ const EmailForwardingPage = () => {
                         <AccordionContent className="pb-4 text-sm text-muted-foreground space-y-3">
                             <p>1. Go to Outlook Settings on desktop (gear icon) &gt; "Mail" &gt; "Rules".</p>
                             <p>2. Click "Add new rule".</p>
+                            <p><strong>Important: To protect your privacy, set up a filter to forward only bank transaction emails!</strong></p>
                             <p>3. Name it appropriately, such as "Forward Bank Emails".</p>
                             <p>4. Add a condition: "From" &gt; [Your Bank's Email Address].</p>
-                            <p>5. Add an action: "Forward to" &gt; [Your Nest Email Address].</p>
-                            <p>6. Click "Save".</p>
+                            <p>5. Add a second condition: "Subject Includes" &gt; [Enter keywords that can be found in all your bank's transactions email subject line, such as "transaction was successful"]. Doing this helps to filter out OTP emails for your privacy.</p>
+                            <p>6. Add an action: "Forward to" &gt; [Your Nest Email Address].</p>
+                            <p>7. Click "Save".</p>
                             <p className="italic mt-2 text-xs">Note: Do not use the general "Forwarding" tab as it will forward all emails.</p>
                         </AccordionContent>
                     </AccordionItem>
