@@ -127,7 +127,7 @@ const SettingsPage = () => {
           </Button>
         )}
 
-        <p className="text-center pt-10 text-muted-foreground">
+        <p className="text-center pt-5 text-xs text-gray-400">
           Made by @shuenwei
         </p>
       </div>
