@@ -41,7 +41,6 @@ const DashboardPage = () => {
   const {
     user,
     spending,
-    isLoadingSpending,
     startDate,
     endDate,
     setStartDate,
@@ -118,13 +117,9 @@ const DashboardPage = () => {
           <div className="bg-white/20 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-8 text-white shadow-lg">
             <p className="text-white/80 text-sm font-medium mb-1">Total Spent</p>
             <div className="flex items-center gap-3">
-              {isLoadingSpending ? (
-                <Skeleton className="h-10 w-32 bg-white/30 backdrop-blur-md rounded-md" />
-              ) : (
-                <span className="text-4xl font-bold tracking-tight">
-                  ${spending.toFixed(2)}
-                </span>
-              )}
+              <span className="text-4xl font-bold">
+                ${spending.toFixed(2)}
+              </span>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Popover>
@@ -301,7 +296,7 @@ const DashboardPage = () => {
                 </div>
               </div>
               <div>
-                <p className="text-white/80 text-sm font-medium tracking-wide">Friends Owe</p>
+                <p className="text-white/80 text-sm font-medium">Friends Owe</p>
                 <p className="text-xl font-bold mt-1 text-white">${friendsOwe}</p>
               </div>
             </div>
@@ -312,7 +307,7 @@ const DashboardPage = () => {
                 </div>
               </div>
               <div>
-                <p className="text-white/80 text-sm font-medium tracking-wide">You Owe</p>
+                <p className="text-white/80 text-sm font-medium">You Owe</p>
                 <p className="text-xl font-bold mt-1 text-white">${youOwe}</p>
               </div>
             </div>

@@ -64,8 +64,6 @@ interface UserContextValue {
   loadingTelegram: boolean;
   updating: boolean;
   refreshUser: (includePhotos?: boolean) => Promise<void>;
-  fetchSpending: () => Promise<void>;
-  isLoadingSpending: boolean;
   spending: number;
   startDate: Date | undefined;
   endDate: Date | undefined;
@@ -113,13 +111,40 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return saved ? new Date(saved) : undefined;
   });
   const [spending, setSpending] = useState<number>(0);
-  const [isLoadingSpending, setIsLoadingSpending] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchSpending();
+    if (!user) {
+      setSpending(0);
+      return;
     }
-  }, [startDate, endDate]);
+
+    const calculateSpending = () => {
+      let total = 0;
+      const userId = user.id;
+
+      transactions.forEach((t) => {
+        const txDate = new Date(t.date);
+        let inRange = true;
+
+        if (startDate && txDate < startDate) inRange = false;
+        if (endDate && txDate > endDate) inRange = false;
+
+        if (!inRange) return;
+
+        // Check if transaction has splitsInSgd (Purchase, Bill, Recurring)
+        // We use 'splitsInSgd' in t check which works for discriminated unions if we cast or check existence
+        if ("splitsInSgd" in t && Array.isArray(t.splitsInSgd)) {
+          const userSplit = t.splitsInSgd.find((s) => s.user === userId);
+          if (userSplit) {
+            total += userSplit.amount;
+          }
+        }
+      });
+      setSpending(parseFloat(total.toFixed(2)));
+    };
+
+    calculateSpending();
+  }, [startDate, endDate, transactions, user]);
 
   useEffect(() => {
     if (user) {
@@ -133,43 +158,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
 
-  const fetchSpending = async (userId?: string) => {
-    setIsLoadingSpending(true);
-    if (!user && !userId) {
-      return;
-    } else if (user && !userId) {
-      userId = user.id;
-    }
-
-    try {
-      const params = new URLSearchParams();
-      if (startDate)
-        params.append(
-          "startDate",
-          formatISO(startDate, { representation: "complete" })
-        );
-      if (endDate)
-        params.append(
-          "endDate",
-          formatISO(endDate, { representation: "complete" })
-        );
-
-      const token = localStorage.getItem("token");
-
-      const res = await axios.get(
-        `${
-          import.meta.env.VITE_API_URL
-        }/transaction/spending/${userId}?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setSpending(res.data.totalSpent);
-      setIsLoadingSpending(false);
-    } catch (err) {
-      console.error("Failed to fetch spending:", err);
-    }
-  };
-
-    const getLatestUpdatedAt = (records: Transaction[]) => {
+  const getLatestUpdatedAt = (records: Transaction[]) => {
     const latestTimestamp = records.reduce<number | undefined>((latest, tx) => {
       const timestamp = tx.updatedAt ?? tx.date;
       const value = new Date(timestamp).getTime();
@@ -282,8 +271,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/transaction/recurring/${
-            userData.id
+          `${import.meta.env.VITE_API_URL}/transaction/recurring/${userData.id
           }`,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -295,7 +283,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         toast.error("Failed to load recurring transactions");
       }
 
-      fetchSpending(userData.id);
+
       localStorage.setItem("displayname", userData.displayName);
 
       setUpdating(false);
@@ -451,9 +439,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         recurringTemplates,
         setRecurringTemplates,
         fetchRecurringTemplates,
-        fetchSpending,
         spending,
-        isLoadingSpending,
         startDate,
         endDate,
         setStartDate,
