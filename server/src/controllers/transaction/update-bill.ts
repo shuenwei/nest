@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Bill } from "../../models/BillTransaction";
+import { BalanceService } from "../../services/balance-service";
 
 const updateBill = async (req: Request, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
 
     const authUserId = req.auth?.id?.toString();
-    const existingBill = await Bill.findById(transactionId).select(
-      "participants"
-    );
+    const existingBill = await Bill.findById(transactionId);
     if (!existingBill) {
       res.status(404).json({ error: "Bill not found" });
       return;
@@ -122,6 +121,8 @@ const updateBill = async (req: Request, res: Response): Promise<void> => {
       },
       { new: true, runValidators: true }
     );
+
+    await BalanceService.handleTransactionChange(existingBill, updatedBill);
 
     if (!updatedBill) {
       res.status(404).json({ error: "Bill not found" });

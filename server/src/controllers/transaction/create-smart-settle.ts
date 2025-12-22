@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Transaction } from "../../models/Transaction";
 import { GroupSmartSettle } from "../../models/GroupSmartSettleTransaction";
+import { BalanceService } from "../../services/balance-service";
 
 interface FlowRow {
   from: Types.ObjectId;
@@ -255,6 +256,8 @@ const createSmartSettle = async (req: Request, res: Response): Promise<void> => 
       amountInSgd: totalAmount,
       transfers,
     });
+
+    await BalanceService.handleTransactionChange(null, groupSmartSettle);
 
     res.status(201).json({
       transaction: groupSmartSettle,

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { RecurringTemplate } from "../../models/RecurringTemplate";
 import { Recurring } from "../../models/RecurringTransaction";
+import { BalanceService } from "../../services/balance-service";
 
 const createRecurringTransaction = async (
   req: Request,
@@ -37,6 +38,8 @@ const createRecurringTransaction = async (
       splitsInSgd: tpl.splitsInSgd,
       templateId: tpl._id,
     });
+
+    await BalanceService.handleTransactionChange(null, tx);
 
     res.status(201).json(tx);
     return;

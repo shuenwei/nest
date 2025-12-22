@@ -17,6 +17,10 @@ import getUserSpending from "../controllers/transaction/get-user-spending";
 import scanReceipt from "../controllers/transaction/scan";
 import getSmartSettle from "../controllers/transaction/get-smart-settle";
 import createSmartSettle from "../controllers/transaction/create-smart-settle";
+import recalculateBalances from "../controllers/transaction/recalculate-balances";
+import getBalancesLegacy from "../controllers/transaction/get-balance-legacy";
+import verifyBalance from "../controllers/transaction/verify-balance";
+import verifyAllBalances from "../controllers/transaction/verify-all-balances";
 
 const router = Router();
 
@@ -28,6 +32,9 @@ router.post("/bill/create", createBill);
 router.put("/bill/update/:transactionId", updateBill);
 router.post("/recurring/create", createRecurringTemplate);
 router.get("/balances/:userId", getBalances);
+router.get("/balances/legacy/:userId", getBalancesLegacy);
+router.get("/verify-all", verifyAllBalances);
+router.get("/verify/:userId", verifyBalance);
 router.get("/all/:userId", getUserTransactions);
 router.get("/recurring/:userId", getUserRecurringTemplates);
 router.get("/all/:userId1/:userId2", getTransactionsBetweenUsers);
@@ -39,5 +46,6 @@ router.post("/smart-settle", getSmartSettle);
 router.post("/smart-settle/create", createSmartSettle);
 
 router.post("/scan", scanReceipt);
+router.post("/recalculate", recalculateBalances);
 
 export default router;

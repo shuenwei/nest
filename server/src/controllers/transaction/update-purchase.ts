@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Purchase } from "../../models/PurchaseTransaction";
+import { BalanceService } from "../../services/balance-service";
 
 const updatePurchase = async (req: Request, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
 
     const authUserId = req.auth?.id?.toString();
-    const existingPurchase = await Purchase.findById(transactionId).select(
-      "participants"
-    );
+    const existingPurchase = await Purchase.findById(transactionId);
     if (!existingPurchase) {
       res.status(404).json({ error: "Purchase not found" });
       return;
@@ -75,6 +74,8 @@ const updatePurchase = async (req: Request, res: Response): Promise<void> => {
       },
       { new: true, runValidators: true }
     );
+
+    await BalanceService.handleTransactionChange(existingPurchase, updatedPurchase);
 
     if (!updatedPurchase) {
       res.status(404).json({ error: "Purchase not found" });

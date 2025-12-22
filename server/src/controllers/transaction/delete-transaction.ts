@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Transaction } from "../../models/Transaction";
+import { BalanceService } from "../../services/balance-service";
 
 const deleteTransaction = async (
   req: Request,
@@ -18,7 +19,7 @@ const deleteTransaction = async (
     const authUserId = req.auth?.id?.toString();
     const existingTransaction = await Transaction.findById(
       transactionId
-    ).select("participants");
+    );
     if (!existingTransaction) {
       res.status(404).json({ error: "Transaction not found" });
       return;
@@ -36,6 +37,8 @@ const deleteTransaction = async (
     const deletedTransaction = await Transaction.findByIdAndDelete(
       transactionId
     );
+
+    await BalanceService.handleTransactionChange(existingTransaction, null);
 
     if (!deletedTransaction) {
       res.status(404).json({ error: "Transaction not found" });

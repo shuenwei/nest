@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Bill } from "../../models/BillTransaction";
 import { notifySplits } from "../../utils/telegram-notifications";
+import { BalanceService } from "../../services/balance-service";
 
 const createBill = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -101,6 +102,8 @@ const createBill = async (req: Request, res: Response): Promise<void> => {
 
       splitsInSgd: splitsInSgdObj,
     });
+
+    await BalanceService.handleTransactionChange(null, newBill);
 
     if (splitsInSgdObj.length > 0) {
       await notifySplits(

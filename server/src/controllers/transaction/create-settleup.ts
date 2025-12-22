@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { SettleUp } from "../../models/SettleUpTransaction";
 import { notifyTransfer } from "../../utils/telegram-notifications";
+import { BalanceService } from "../../services/balance-service";
 
 const createSettleUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -41,6 +42,8 @@ const createSettleUp = async (req: Request, res: Response): Promise<void> => {
       payer: payerId,
       payee: payeeId,
     });
+
+    await BalanceService.handleTransactionChange(null, newSettleUp);
 
     await notifyTransfer(
       newSettleUp._id.toString(),

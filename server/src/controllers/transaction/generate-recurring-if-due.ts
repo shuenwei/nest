@@ -3,6 +3,7 @@ import { RecurringTemplate } from "../../models/RecurringTemplate";
 import { Recurring } from "../../models/RecurringTransaction";
 import { addDays, addWeeks, addMonths, addYears, isBefore } from "date-fns";
 import { notifySplits } from "../../utils/telegram-notifications";
+import { BalanceService } from "../../services/balance-service";
 
 /** Advance helper */
 function advance(date: Date, freq: "daily" | "weekly" | "monthly" | "yearly") {
@@ -49,6 +50,9 @@ const generateIfDue = async (
       ],
       { session }
     );
+
+    // Update balances atomically within the same session
+    await BalanceService.handleTransactionChange(null, newRecurring, session);
 
     newRecurringId = newRecurring._id.toString();
 

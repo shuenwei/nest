@@ -121,6 +121,10 @@ const SettingsPage = () => {
             Log Out
           </Button>
         )}
+
+        <p className="text-center pt-10 text-muted-foreground">
+          Made by @shuenwei
+        </p>
       </div>
 
       <Navbar />

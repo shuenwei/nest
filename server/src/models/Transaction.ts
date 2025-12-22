@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, model } from "mongoose";
 
-export type TransactionType = "purchase" | "bill" | "settleup" | "recurring"| "groupSmartSettle";
+export type TransactionType = "purchase" | "bill" | "settleup" | "recurring" | "groupSmartSettle";
 
 export interface BaseTransaction extends Document {
   transactionName: string;
@@ -25,7 +25,7 @@ const BaseTransactionSchema = new Schema<BaseTransaction>(
     transactionName: String,
     type: { type: String, required: true },
     participants: [
-      { type: Schema.Types.ObjectId, ref: "User", required: true },
+      { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     ],
     currency: { type: String, required: true },
     exchangeRate: { type: Number, required: true },

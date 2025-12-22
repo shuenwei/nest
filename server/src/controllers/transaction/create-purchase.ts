@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Purchase } from "../../models/PurchaseTransaction";
 import { notifySplits } from "../../utils/telegram-notifications";
+import { BalanceService } from "../../services/balance-service";
 
 const createPurchase = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -58,6 +59,8 @@ const createPurchase = async (req: Request, res: Response): Promise<void> => {
       manualSplits: manualSplitsObj,
       splitsInSgd: splitsInSgdObj,
     });
+
+    await BalanceService.handleTransactionChange(null, newPurchase);
 
     if (splitsInSgdObj.length > 0) {
       await notifySplits(

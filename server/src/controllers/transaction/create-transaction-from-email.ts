@@ -8,6 +8,7 @@ import {
     notifyTransactionCreated,
     sendTelegramMessage,
 } from "../../utils/telegram-notifications";
+import { BalanceService } from "../../services/balance-service";
 
 import { simpleParser } from "mailparser";
 
@@ -144,6 +145,8 @@ const createTransactionFromEmail = async (
             });
 
             console.log(`Created transaction ${newPurchase._id} for user ${user.username}`);
+
+            await BalanceService.handleTransactionChange(null, newPurchase);
 
             const purchase = newPurchase as any;
             await notifyTransactionCreated(
