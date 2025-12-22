@@ -11,6 +11,24 @@ const updateProfilePhoto = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
+  // Auth Check
+  const authUserId = req.auth?.id;
+  if (!authUserId) {
+    res.status(401).json({ error: "Unauthorised" });
+    return;
+  }
+
+  const requester = await User.findById(authUserId);
+  if (!requester) {
+    res.status(401).json({ error: "Unauthorised" });
+    return;
+  }
+
+  if (requester.telegramId !== telegramId && !requester.get("isAdmin")) {
+    res.status(403).json({ error: "Unauthorised" });
+    return;
+  }
+
   try {
     const user = await User.findOne({ telegramId });
 

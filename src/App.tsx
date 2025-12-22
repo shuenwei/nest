@@ -27,6 +27,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
 import SmartSettlePage from "./pages/SmartSettlePage";
+import AdminPage from "./pages/AdminPage";
 import StandardLayout from "./layouts/StandardLayout";
 import { useUser } from "./contexts/UserContext";
 
@@ -127,6 +128,7 @@ function App() {
 
           <Route element={<StandardLayout />}>
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route

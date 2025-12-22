@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download } from "lucide-react";
+import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
@@ -77,7 +77,12 @@ const SettingsPage = () => {
 
         <Card className="mb-6 py-0 shadow-xs">
           <CardContent className="px-0 divide-y">
-            {menuItems.map(({ label, icon: Icon, path }) => (
+            {[
+              ...menuItems,
+              ...(user?.isAdmin
+                ? [{ label: "Admin Dashboard", icon: ShieldCheck, path: "/admin" }]
+                : []),
+            ].map(({ label, icon: Icon, path }) => (
               <div
                 key={label}
                 className="flex items-center justify-between px-4 py-3"

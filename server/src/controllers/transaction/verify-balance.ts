@@ -9,7 +9,18 @@ const verifyBalance = async (req: Request, res: Response): Promise<void> => {
         const { userId } = req.params;
 
         const authUserId = req.auth?.id?.toString();
-        if (!authUserId || authUserId !== userId) {
+        if (!authUserId) {
+            res.status(401).json({ error: "Unauthorised" });
+            return;
+        }
+
+        const requester = await User.findById(authUserId);
+        if (!requester) {
+            res.status(401).json({ error: "Unauthorised" });
+            return;
+        }
+
+        if (authUserId !== userId && !requester.get("isAdmin")) {
             res.status(403).json({ error: "Unauthorised" });
             return;
         }

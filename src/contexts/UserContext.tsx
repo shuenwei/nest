@@ -37,6 +37,7 @@ interface User {
   profilePhoto?: string;
   verifiedAt?: string;
   hasSignedUp: boolean;
+  isAdmin?: boolean;
   friends: Friend[];
   blockedUsers: BlockedUser[];
   monthlyUsage?: {

@@ -51,6 +51,7 @@ const getUserByTelegramId = async (
       telegramId: user.telegramId,
       verifiedAt: user.verifiedAt,
       hasSignedUp: user.hasSignedUp,
+      isAdmin: user.get("isAdmin") || false,
       profilePhoto: base64Photo,
       friends: friends.map((friend) => ({
         id: friend._id.toString(),

@@ -6,6 +6,18 @@ import { Balance } from "../../models/Balance";
 
 const verifyAllBalances = async (req: Request, res: Response): Promise<void> => {
     try {
+        const authUserId = req.auth?.id;
+        if (!authUserId) {
+            res.status(401).json({ error: "Unauthorised" });
+            return;
+        }
+
+        const requester = await User.findById(authUserId);
+        if (!requester || !requester.get("isAdmin")) {
+            res.status(403).json({ error: "Unauthorised" });
+            return;
+        }
+
         // 1. Get all users
         const users = await User.find({}).select("_id friends");
         const report: any[] = [];

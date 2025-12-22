@@ -1,13 +1,23 @@
 import { Request, Response } from "express";
 import { BalanceService } from "../../services/balance-service";
+import { User } from "../../models/User";
 
 const recalculateBalances = async (
     req: Request,
     res: Response
 ): Promise<void> => {
     try {
-        // Optional: Add authorization check here if not already covered by middleware
-        // For now, relying on the router's auth middleware.
+        const authUserId = req.auth?.id;
+        if (!authUserId) {
+            res.status(401).json({ error: "Unauthorised" });
+            return;
+        }
+
+        const requester = await User.findById(authUserId);
+        if (!requester || !requester.get("isAdmin")) {
+            res.status(403).json({ error: "Unauthorised" });
+            return;
+        }
 
         await BalanceService.recalculateAllBalances();
 
