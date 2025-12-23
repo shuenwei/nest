@@ -20,15 +20,15 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { useUser } from "@/contexts/UserContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 
 const ViewFriendPage = () => {
   const navigate = useNavigate();
-  const { user, loading, refreshUser } = useUser();
+  const { user, loading, refreshUser, transactions } = useUser();
   const [isRemoving, setIsRemoving] = useState(false);
   const { friendId } = useParams<{ friendId: string }>();
-  const [isFetching, setIsFetching] = useState(false);
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -46,35 +46,14 @@ const ViewFriendPage = () => {
   if (!friendId || !user) return null;
 
   const friend = user.friends.find((f) => f.id === friendId)!;
-  const [friendTransactions, setFriendTransactions] = useState<Transaction[]>(
-    []
-  );
-
   const friendName = friend.displayName;
 
-  useEffect(() => {
-    const fetchFriendTransactions = async () => {
-      if (!user?.id || !friendId) return;
-      setIsFetching(true);
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/transaction/all/${
-            user.id
-          }/${friendId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setFriendTransactions(res.data);
-      } catch (err) {
-        console.error("Failed to fetch transactions between users:", err);
-        toast.error("Failed to fetch transactions");
-      } finally {
-        setIsFetching(false);
-      }
-    };
-    fetchFriendTransactions();
-  }, [user?.id, friendId]);
+  const friendTransactions = useMemo(() => {
+    return transactions.filter(
+      (t) =>
+        t.participants.includes(user.id) && t.participants.includes(friendId)
+    );
+  }, [transactions, user.id, friendId]);
 
   const handleDelete = async () => {
     if (!friendId) return;
@@ -189,21 +168,9 @@ const ViewFriendPage = () => {
           <TransactionCard key={txn._id} transactionId={txn._id} />
         ))}
 
-        {isFetching && (
-          <div className="flex flex-col gap-8 pt-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 w-full">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex flex-col gap-2 flex-1">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {!isFetching && friendTransactions.length === 0 && (
+
+        {friendTransactions.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             No transactions found.
           </div>
