@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Purchase } from "../../models/PurchaseTransaction";
 import { BalanceService } from "../../services/balance-service";
+import { notifyTransactionUpdated } from "../../utils/telegram-notifications";
 
 const updatePurchase = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -94,6 +95,15 @@ const updatePurchase = async (req: Request, res: Response): Promise<void> => {
     }
 
     await BalanceService.handleTransactionChange(existingPurchase, updatedPurchase);
+
+    await notifyTransactionUpdated(
+      transactionId,
+      transactionName,
+      updatedPurchase!.participants,
+      authUserId!,
+      currency,
+      amount
+    );
 
     if (!updatedPurchase) {
       res.status(404).json({ error: "Purchase not found" });

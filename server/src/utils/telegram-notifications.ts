@@ -16,7 +16,10 @@ export async function notifySplits(
   transactionId: string,
   transactionName: string,
   paidBy: string | Types.ObjectId,
-  splits: Split[]
+  participants: (string | Types.ObjectId)[],
+  splits: Split[],
+  currency: string,
+  amount: number
 ): Promise<void> {
   try {
     const payer = await User.findById(paidBy).lean();
@@ -24,27 +27,55 @@ export async function notifySplits(
     const paidByName = payer.displayName || payer.username;
     const paidByUsername = payer.username;
 
-    for (const split of splits) {
-      const splitUser = await User.findById(split.user).lean();
-      if (!splitUser || !splitUser.hasSignedUp || !splitUser.telegramId) {
+    // Get unique set of user IDs to notify (participants + payer)
+    // Note: Set automatically handles duplicates if payer is in participants
+    const userIdsToNotify = new Set([
+      ...participants.map((p) => p.toString()),
+      paidBy.toString(),
+    ]);
+
+    for (const userId of userIdsToNotify) {
+      const user = await User.findById(userId).lean();
+      if (!user || !user.hasSignedUp || !user.telegramId) {
         continue;
       }
-      if (String(splitUser._id) === String(payer._id)) {
-        continue;
-      }
-      const chatId = Number(splitUser.telegramId);
-      const amount = Number(split.amount).toFixed(2);
-      const message = [
+
+      const chatId = Number(user.telegramId);
+
+      // Find if this user has a split portion
+      const userSplit = splits.find(s => s.user.toString() === userId);
+      const userShare = userSplit ? Number(userSplit.amount) : 0;
+
+      const isPayer = String(user._id) === String(payer._id);
+
+      const parts = [
         "🧾 *New Transaction*",
         "",
-        `🛒 *${mdEscape(transactionName)}* paid by *${mdEscape(
-          paidByName
-        )}* \\(\\@${mdEscape(paidByUsername)}\\)`,
+        `🛒 *${mdEscape(transactionName)}* paid by *${mdEscape(paidByName)}* \\(@${mdEscape(paidByUsername || "")}\\)`,
         "",
-        `💸 Your Share: *SGD ${mdEscape(amount)}*`,
-        "",
-        "You can view this transaction in the nest app\\.",
-      ].join("\n");
+      ];
+
+      if (currency !== "SGD") {
+        parts.push(`💰 Total: *${mdEscape(currency)} ${mdEscape(amount.toFixed(2))}*`);
+      } else {
+        parts.push(`💰 Total: *SGD ${mdEscape(amount.toFixed(2))}*`);
+      }
+
+      parts.push("");
+
+      if (userShare > 0 && !isPayer) {
+        parts.push(`💸 Your Share: *SGD ${mdEscape(userShare.toFixed(2))}*`);
+      } else if (isPayer) {
+        parts.push(`✅ You paid for this`);
+      } else {
+        parts.push(`ℹ️ You are a participant`);
+      }
+
+      parts.push("");
+      parts.push("You can view this transaction in the nest app\\.");
+
+      const message = parts.join("\n");
+
       try {
         await bot.sendMessage(chatId, message, {
           parse_mode: "MarkdownV2",
@@ -62,11 +93,81 @@ export async function notifySplits(
           },
         });
       } catch (err) {
-        console.error(`Failed to notify ${splitUser.username}:`, err);
+        console.error(`Failed to notify ${user.username}:`, err);
       }
     }
   } catch (err) {
     console.error("Notification error:", err);
+  }
+}
+
+export async function notifyTransactionUpdated(
+  transactionId: string,
+  transactionName: string,
+  participants: (string | Types.ObjectId)[],
+  editorId: string | Types.ObjectId,
+  currency: string,
+  amount: number
+): Promise<void> {
+  try {
+    const editor = await User.findById(editorId).lean();
+    const editorName = editor ? (editor.displayName || editor.username) : "Someone";
+    const editorUsername = editor ? editor.username : "";
+
+    // Get unique set of user IDs to notify
+    const userIdsToNotify = new Set([
+      ...participants.map((p) => p.toString()),
+      editorId.toString(), // Ensure editor is included
+    ]);
+
+    for (const userId of userIdsToNotify) {
+      const user = await User.findById(userId).lean();
+      if (!user || !user.hasSignedUp || !user.telegramId) {
+        continue;
+      }
+
+      const chatId = Number(user.telegramId);
+
+      const parts = [
+        "📝 *Transaction Updated*",
+        "",
+        `🛒 *${mdEscape(transactionName)}* edited by *${mdEscape(editorName || "Unknown")}* \\(@${mdEscape(editorUsername || "")}\\)`,
+        "",
+      ];
+
+      if (currency !== "SGD") {
+        parts.push(`💰 Total: *${mdEscape(currency)} ${mdEscape(amount.toFixed(2))}*`);
+      } else {
+        parts.push(`💰 Total: *SGD ${mdEscape(amount.toFixed(2))}*`);
+      }
+
+      parts.push("");
+      parts.push("You can view the latest changes in the nest app\\.");
+
+      const message = parts.join("\n");
+
+      try {
+        await bot.sendMessage(chatId, message, {
+          parse_mode: "MarkdownV2",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🔍 View Transaction",
+                  web_app: {
+                    url: `${process.env.CLIENT_URL}/history/${transactionId}`,
+                  },
+                },
+              ],
+            ],
+          },
+        });
+      } catch (err) {
+        console.error(`Failed to notify ${user.username} of update:`, err);
+      }
+    }
+  } catch (err) {
+    console.error("Update notification error:", err);
   }
 }
 

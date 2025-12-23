@@ -60,12 +60,15 @@ const generateIfDue = async (
     await template.save({ session });
   });
 
-  if (newRecurringId && template.splitsInSgd.length > 0) {
+  if (newRecurringId && (template.splitsInSgd.length > 0 || template.participants.length > 0)) {
     await notifySplits(
       newRecurringId,
       template.transactionName,
       template.paidBy,
-      template.splitsInSgd
+      template.participants,
+      template.splitsInSgd,
+      "SGD",
+      template.amount
     );
   }
 };

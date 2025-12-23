@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Bill } from "../../models/BillTransaction";
 import { BalanceService } from "../../services/balance-service";
+import { notifyTransactionUpdated } from "../../utils/telegram-notifications";
 
 const updateBill = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -140,6 +141,15 @@ const updateBill = async (req: Request, res: Response): Promise<void> => {
     }
 
     await BalanceService.handleTransactionChange(existingBill, updatedBill);
+
+    await notifyTransactionUpdated(
+      transactionId,
+      transactionName,
+      updatedBill!.participants,
+      authUserId!,
+      currency,
+      amount
+    );
 
     if (!updatedBill) {
       res.status(404).json({ error: "Bill not found" });

@@ -113,12 +113,15 @@ const createBill = async (req: Request, res: Response): Promise<void> => {
 
     await BalanceService.handleTransactionChange(null, newBill);
 
-    if (splitsInSgdObj.length > 0) {
+    if (splitsInSgdObj.length > 0 || participantsObjIds.length > 0) {
       await notifySplits(
         newBill._id.toString(),
         transactionName,
         paidByObjId,
-        splitsInSgdObj
+        participantsObjIds,
+        splitsInSgdObj,
+        currency,
+        amount
       );
     }
 
