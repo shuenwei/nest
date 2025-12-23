@@ -27,6 +27,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingIndicator from "./components/LoadingIndicator";
 import LoadingScreen from "./components/LoadingScreen";
 import SmartSettlePage from "./pages/SmartSettlePage";
+import ManageCategoriesPage from "./pages/ManageCategoriesPage";
 import AdminPage from "./pages/AdminPage";
 import StandardLayout from "./layouts/StandardLayout";
 import { useUser } from "./contexts/UserContext";
@@ -167,6 +168,7 @@ function App() {
             <Route path="/settings/limits" element={<UsageLimitsPage />} />
             <Route path="/settings/block" element={<BlockUsersPage />} />
             <Route path="/settings/emailforwarding" element={<EmailForwardingPage />} />
+            <Route path="/settings/categories" element={<ManageCategoriesPage />} />
             <Route path="/settings/export" element={<ExportTransactionsPage />} />
           </Route>
         </Route>

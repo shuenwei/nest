@@ -75,6 +75,24 @@ const updatePurchase = async (req: Request, res: Response): Promise<void> => {
       { new: true, runValidators: true }
     );
 
+    if (req.body.categoryIds) {
+      const categoryIds = req.body.categoryIds.map(toObjectId);
+      const userCategoryIndex = updatedPurchase!.userCategories!.findIndex(
+        (uc: { userId: Types.ObjectId }) => uc.userId.toString() === authUserId
+      );
+
+      if (userCategoryIndex > -1) {
+        updatedPurchase!.userCategories![userCategoryIndex].categoryIds =
+          categoryIds;
+      } else {
+        updatedPurchase!.userCategories!.push({
+          userId: new Types.ObjectId(authUserId),
+          categoryIds,
+        });
+      }
+      await updatedPurchase!.save();
+    }
+
     await BalanceService.handleTransactionChange(existingPurchase, updatedPurchase);
 
     if (!updatedPurchase) {

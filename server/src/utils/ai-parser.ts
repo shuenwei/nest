@@ -8,12 +8,13 @@ const AZURE_AI_API_KEY = process.env.AZURE_AI_API_KEY;
 const DEPLOYMENT_NAME = process.env.AZURE_AI_DEPLOYMENT_NAME || "gpt-5-mini";
 
 export type AIParsedResult =
-    | { type: "purchase"; merchant: string; amount: number; currency: string; date: string }
+    | { type: "purchase"; merchant: string; amount: number; currency: string; date: string; categories?: string[] }
     | { type: "transfer"; amount: number; currency: string; date: string }
     | { type: "irrelevant"; reason?: string };
 
 export const parseEmailWithAI = async (
-    emailText: string
+    emailText: string,
+    availableCategories?: string[]
 ): Promise<AIParsedResult> => {
     if (!AZURE_AI_ENDPOINT || !AZURE_AI_API_KEY) {
         console.warn("Missing Azure AI credentials. Returning mock data.");
@@ -28,6 +29,16 @@ export const parseEmailWithAI = async (
     }
 
     try {
+        const categoryInstruction = availableCategories && availableCategories.length > 0
+            ? `
+          3. CATEGORIZE the transaction (if purchase) by selecting ALL applicable categories from this list:
+             [${availableCategories.map(c => `"${c}"`).join(", ")}]
+             - Choose all that fit well.
+             - If none fit, return an empty array or omit the field.
+             - Return the EXACT strings from the list.
+            `
+            : "";
+
         const prompt = `
       You are a specialized financial transaction parser.
       Analyze the following email text (which may be raw MIME or HTML) and categorize it.
@@ -39,6 +50,8 @@ export const parseEmailWithAI = async (
 
       2. EXTRACT data based on the type.
 
+      ${categoryInstruction}
+
       Return strictly VALID JSON matching one of these structures:
 
       [TYPE: purchase]
@@ -47,7 +60,8 @@ export const parseEmailWithAI = async (
         "merchant": string,
         "amount": number,
         "currency": string (3-letter code),
-        "date": string (ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ)
+        "date": string (ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ),
+        "categories": string[] (optional, list of matching category names)
       }
 
       [TYPE: transfer]

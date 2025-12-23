@@ -58,6 +58,14 @@ const createPurchase = async (req: Request, res: Response): Promise<void> => {
       splitMethod,
       manualSplits: manualSplitsObj,
       splitsInSgd: splitsInSgdObj,
+      userCategories: req.body.categoryIds
+        ? [
+          {
+            userId: new Types.ObjectId(req.auth!.id),
+            categoryIds: req.body.categoryIds.map(toObjectId),
+          },
+        ]
+        : [],
     });
 
     await BalanceService.handleTransactionChange(null, newPurchase);

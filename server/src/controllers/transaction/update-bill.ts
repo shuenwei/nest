@@ -122,6 +122,23 @@ const updateBill = async (req: Request, res: Response): Promise<void> => {
       { new: true, runValidators: true }
     );
 
+    if (req.body.categoryIds) {
+      const categoryIds = req.body.categoryIds.map(toObjectId);
+      const userCategoryIndex = updatedBill!.userCategories!.findIndex(
+        (uc: { userId: Types.ObjectId }) => uc.userId.toString() === authUserId
+      );
+
+      if (userCategoryIndex > -1) {
+        updatedBill!.userCategories![userCategoryIndex].categoryIds = categoryIds;
+      } else {
+        updatedBill!.userCategories!.push({
+          userId: new Types.ObjectId(authUserId),
+          categoryIds,
+        });
+      }
+      await updatedBill!.save();
+    }
+
     await BalanceService.handleTransactionChange(existingBill, updatedBill);
 
     if (!updatedBill) {

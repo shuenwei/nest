@@ -79,7 +79,8 @@ const createTransactionFromEmail = async (
             return;
         }
 
-        const parsedData = await parseEmailWithAI(emailBody);
+        const categoryNames = user.categories ? user.categories.map((c: any) => c.name) : [];
+        const parsedData = await parseEmailWithAI(emailBody, categoryNames);
 
         if (!parsedData) {
             console.warn("AI failed to parse transaction details");
@@ -107,7 +108,7 @@ const createTransactionFromEmail = async (
         }
 
         if (parsedData.type === "purchase") {
-            const { merchant, amount, currency, date } = parsedData;
+            const { merchant, amount, currency, date, categories } = parsedData;
 
             if (!amount) {
                 console.warn("No amount found in purchase email");
@@ -128,6 +129,26 @@ const createTransactionFromEmail = async (
                 }
             }
 
+            // Match category names back to IDs
+            let userCategoriesPayload: any = undefined;
+            if (categories && Array.isArray(categories) && user.categories) {
+                const matchedCategoryIds: any[] = [];
+
+                categories.forEach(catName => {
+                    const matchedCat = user.categories.find((c: any) => c.name === catName);
+                    if (matchedCat) {
+                        matchedCategoryIds.push(matchedCat._id);
+                    }
+                });
+
+                if (matchedCategoryIds.length > 0) {
+                    userCategoriesPayload = [{
+                        userId: user._id,
+                        categoryIds: matchedCategoryIds
+                    }];
+                }
+            }
+
             const newPurchase = await Purchase.create({
                 transactionName: merchant || "Purchase created from email",
                 type: "purchase",
@@ -142,6 +163,7 @@ const createTransactionFromEmail = async (
                 splitMethod: "even",
                 manualSplits: [{ user: user._id, amount: amount }],
                 splitsInSgd: [{ user: user._id, amount: amountInSgd }],
+                userCategories: userCategoriesPayload,
             });
 
             console.log(`Created transaction ${newPurchase._id} for user ${user.username}`);
@@ -154,7 +176,8 @@ const createTransactionFromEmail = async (
                 user._id,
                 purchase.transactionName,
                 purchase.amount,
-                purchase.currency
+                purchase.currency,
+                purchase.amountInSgd
             );
 
             res.status(201).json(newPurchase);

@@ -101,6 +101,14 @@ const createBill = async (req: Request, res: Response): Promise<void> => {
       subtotalInSgd,
 
       splitsInSgd: splitsInSgdObj,
+      userCategories: req.body.categoryIds
+        ? [
+          {
+            userId: new Types.ObjectId(req.auth!.id),
+            categoryIds: req.body.categoryIds.map(toObjectId),
+          },
+        ]
+        : [],
     });
 
     await BalanceService.handleTransactionChange(null, newBill);

@@ -5,6 +5,7 @@ import type React from "react";
 import type { Transaction } from "@/lib/transaction";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/contexts/UserContext";
 
 interface TransactionHeaderProps {
   transaction: Transaction;
@@ -13,6 +14,7 @@ interface TransactionHeaderProps {
 const TransactionHeader: React.FC<TransactionHeaderProps> = ({
   transaction,
 }) => {
+  const { user } = useUser();
   const iconMap: Record<Transaction["type"], string> = {
     settleup: "💸",
     purchase: "🛒",
@@ -85,6 +87,30 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
                   {transaction.currency}
                 </Badge>
               )}
+
+            {(() => {
+              if (!user) return null;
+              const categories = Array.isArray(transaction.userCategories)
+                ? transaction.userCategories
+                : [];
+              const userCats =
+                categories.find((uc) => uc.userId === user.id)?.categoryIds ||
+                [];
+
+              return userCats.map((catId) => {
+                const category = user.categories.find((c) => c.id === catId);
+                if (!category) return null;
+                return (
+                  <Badge
+                    key={category.id}
+                    variant="default"
+                    className="font-normal"
+                  >
+                    {category.name}
+                  </Badge>
+                );
+              });
+            })()}
           </div>
         </div>
       </CardContent>

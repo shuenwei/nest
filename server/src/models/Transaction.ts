@@ -12,6 +12,10 @@ export interface BaseTransaction extends Document {
   amountInSgd: number;
   notes?: string;
   date: Date;
+  userCategories?: {
+    userId: Schema.Types.ObjectId;
+    categoryIds: Schema.Types.ObjectId[];
+  }[];
 }
 
 const baseOptions = {
@@ -33,6 +37,12 @@ const BaseTransactionSchema = new Schema<BaseTransaction>(
     amountInSgd: { type: Number, required: true },
     notes: String,
     date: { type: Date, default: Date.now },
+    userCategories: [
+      {
+        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        categoryIds: [{ type: Schema.Types.ObjectId, required: true }],
+      },
+    ],
   },
   baseOptions
 );

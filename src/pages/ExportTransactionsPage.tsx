@@ -57,6 +57,18 @@ const ExportTransactionsPage = () => {
 
                 const dateStr = format(new Date(t.date), "yyyy-MM-dd HH:mm:ss XX");
 
+                let categoryName = "Uncategorised";
+                if (user && t.userCategories) {
+                    const userCatEntry = t.userCategories.find((uc) => uc.userId === user.id);
+                    if (userCatEntry && userCatEntry.categoryIds.length > 0) {
+                        const firstCategoryId = userCatEntry.categoryIds[0];
+                        const foundCategory = user.categories.find(c => c.id === firstCategoryId);
+                        if (foundCategory) {
+                            categoryName = foundCategory.name;
+                        }
+                    }
+                }
+
                 return [
                     dateStr,
                     t.transactionName
@@ -64,7 +76,7 @@ const ExportTransactionsPage = () => {
                         .replace(/"/g, "")
                         .replace(/,/g, " "),
                     splitInSgd.toFixed(2),
-                    "Uncategorised",
+                    categoryName,
                 ].join(",");
             });
 

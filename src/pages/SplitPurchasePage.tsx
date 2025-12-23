@@ -69,7 +69,9 @@ import { PurchaseTransaction } from "@/lib/transaction";
 import axios from "axios";
 import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 import { CurrencyDrawer } from "@/components/CurrencyDrawer";
+import { CategorySelectDrawer } from "@/components/CategorySelectDrawer";
 import { useLocation } from "@/contexts/LocationContext";
+import { FolderOpen } from "lucide-react";
 
 interface ExchangeRateDialogProps {
   open: boolean;
@@ -404,6 +406,7 @@ const formSchema = z.object({
     })
   ),
   notes: z.string().optional(),
+  categoryIds: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -412,6 +415,7 @@ const SplitPurchasePage = () => {
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
+  const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const { detectedCurrency, detectedCity } = useLocation();
   const navigate = useNavigate();
@@ -488,6 +492,7 @@ const SplitPurchasePage = () => {
       selectedPeople: [],
       manualSplits: [],
       notes: "",
+      categoryIds: [],
     },
   });
 
@@ -526,6 +531,9 @@ const SplitPurchasePage = () => {
         amount: s.amount.toFixed(2),
       })),
       notes: data.notes ?? "",
+      categoryIds:
+        data.userCategories?.find((uc) => uc.userId === currentUserId)
+          ?.categoryIds ?? [],
     });
 
     setCurrentExchangeRate(data.exchangeRate);
@@ -713,6 +721,7 @@ const SplitPurchasePage = () => {
       splitMethod: values.splitMethod,
       manualSplits: manualSplits,
       splitsInSgd: sgdManualSplits,
+      categoryIds: values.categoryIds,
     };
     setIsSubmitting(true);
     try {
@@ -794,6 +803,46 @@ const SplitPurchasePage = () => {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="categoryIds"
+                  render={({ field }) => (
+                    <FormItem className="col-span-8 w-full">
+                      <FormLabel>Category (Optional)</FormLabel>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setCategoryDrawerOpen(true)}
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            {field.value && field.value.length > 0 ? (
+                              <span>
+                                {field.value.length === 1
+                                  ? user?.categories?.find(
+                                    (c) => c.id === field.value[0]
+                                  )?.name
+                                  : `${field.value.length} categories`}
+                              </span>
+                            ) : (
+                              "Select Category"
+                            )}
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                        </Button>
+                      </FormControl>
+                      <FormMessage />
+                      <CategorySelectDrawer
+                        open={categoryDrawerOpen}
+                        onOpenChange={setCategoryDrawerOpen}
+                        selectedCategoryIds={field.value}
+                        onSelect={field.onChange}
+                      />
                     </FormItem>
                   )}
                 />
@@ -916,7 +965,7 @@ const SplitPurchasePage = () => {
                         {field.value
                           ? getFriendNameById(field.value)
                           : "Select who paid"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                       </Button>
                     </FormControl>
                     <FormMessage />
@@ -991,7 +1040,7 @@ const SplitPurchasePage = () => {
                           {field.value.length > 0
                             ? `${field.value.length} people selected`
                             : "Select people"}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
                         </Button>
                       </FormControl>
                       <FormMessage />

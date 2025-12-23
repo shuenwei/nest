@@ -1,7 +1,7 @@
 interface BaseTransaction {
   _id: string;
   transactionName: string;
-  type: "purchase" | "bill" | "settleup" | "recurring"| "groupSmartSettle";
+  type: "purchase" | "bill" | "settleup" | "recurring" | "groupSmartSettle";
   participants: string[];
   currency: string;
   exchangeRate: number;
@@ -11,6 +11,10 @@ interface BaseTransaction {
   date: string;
   createdAt?: string;
   updatedAt?: string;
+  userCategories?: {
+    userId: string;
+    categoryIds: string[];
+  }[];
 }
 
 export interface Split {

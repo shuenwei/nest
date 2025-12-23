@@ -77,7 +77,9 @@ import imageCompression from "browser-image-compression";
 import ScanningScreen from "@/components/ScanningScreen";
 import { PersonSelectDrawer, PersonOption } from "@/components/PersonSelectDrawer";
 import { CurrencyDrawer } from "@/components/CurrencyDrawer";
+import { CategorySelectDrawer } from "@/components/CategorySelectDrawer";
 import { useLocation } from "@/contexts/LocationContext";
+import { FolderOpen } from "lucide-react";
 
 // Exchange Rate Dialog Component
 interface ExchangeRateDialogProps {
@@ -276,6 +278,7 @@ const formSchema = z.object({
   gst: z.boolean(),
   gstPercentage: z.string(),
   notes: z.string().optional(),
+  categoryIds: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -288,6 +291,7 @@ const SplitBillPage = () => {
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
+  const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [activeSharedByIndex, setActiveSharedByIndex] = useState<number | null>(
     null
   );
@@ -470,6 +474,7 @@ const SplitBillPage = () => {
       gst: false,
       gstPercentage: "9",
       notes: "",
+      categoryIds: [],
     },
   });
 
@@ -512,6 +517,9 @@ const SplitBillPage = () => {
       gst: data.gst,
       gstPercentage: data.gstPercentage.toString(),
       notes: data.notes ?? "",
+      categoryIds:
+        data.userCategories?.find((uc) => uc.userId === currentUserId)
+          ?.categoryIds ?? [],
     });
 
     setCurrentExchangeRate(data.exchangeRate);
@@ -856,6 +864,7 @@ const SplitBillPage = () => {
       amountInSgd: parseFloat(totalInSGD.toFixed(2)),
       notes: values.notes ?? "",
       date: values.date,
+      categoryIds: values.categoryIds,
 
       /* bill-specific */
       paidBy: values.paidBy,
@@ -1189,6 +1198,47 @@ const SplitBillPage = () => {
                           ))}
                         </div>
                       )}
+                    </FormItem>
+                  )}
+                />
+
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="categoryIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category (Optional)</FormLabel>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setCategoryDrawerOpen(true)}
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            {field.value && field.value.length > 0 ? (
+                              <span>
+                                {field.value.length === 1
+                                  ? user?.categories?.find(
+                                    (c) => c.id === field.value[0]
+                                  )?.name
+                                  : `${field.value.length} categories`}
+                              </span>
+                            ) : (
+                              "Select Category"
+                            )}
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                        </Button>
+                      </FormControl>
+                      <FormMessage />
+                      <CategorySelectDrawer
+                        open={categoryDrawerOpen}
+                        onOpenChange={setCategoryDrawerOpen}
+                        selectedCategoryIds={field.value}
+                        onSelect={field.onChange}
+                      />
                     </FormItem>
                   )}
                 />

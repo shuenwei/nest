@@ -78,6 +78,10 @@ const getUserByTelegramId = async (
         scans: user.limits?.scans ?? MONTHLY_SCAN_LIMIT,
         translations: user.limits?.translations ?? MONTHLY_TRANSLATE_LIMIT,
       },
+      categories: user.categories.map((cat) => ({
+        id: cat._id.toString(),
+        name: cat.name,
+      })),
     });
   } catch (error) {
     console.error("Error fetching user:", error);

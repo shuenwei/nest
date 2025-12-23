@@ -136,7 +136,8 @@ export async function notifyTransactionCreated(
   userId: string | Types.ObjectId,
   transactionName: string,
   amount: number,
-  currency: string
+  currency: string,
+  amountInSgd: number
 ): Promise<void> {
   try {
     const user = await User.findById(userId).lean();
@@ -147,12 +148,19 @@ export async function notifyTransactionCreated(
     const escapedAmount = mdEscape(amount.toFixed(2));
     const escapedCurrency = mdEscape(currency);
 
+    let amountDisplay = `*💸 ${escapedCurrency} ${escapedAmount}*`;
+
+    if (currency.toUpperCase() !== "SGD") {
+      const escapedSgdAmount = mdEscape(amountInSgd.toFixed(2));
+      amountDisplay += ` \\(SGD ${escapedSgdAmount}\\)`;
+    }
+
     const message = [
       "📧 *New Transaction*",
       "",
       `*🛒 ${escapedName}*`,
       "",
-      `*💸 ${escapedCurrency} ${escapedAmount}*`,
+      amountDisplay,
       "",
       "Transaction created from your forwarded bank email\\.",
     ].join("\n");

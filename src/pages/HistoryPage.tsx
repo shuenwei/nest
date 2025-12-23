@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/NavBar";
-import { Search } from "lucide-react";
+import { Search, Folder } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -17,18 +17,24 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CategorySelectDrawer } from "@/components/CategorySelectDrawer";
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { user, transactions: expenses, loading, updating } = useUser();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const isLoading = loading || updating;
 
   const filtered = expenses.filter((e) => {
+    // 1. Text Search
     const matchesSearch = e.transactionName
       .toLowerCase()
       .includes(search.toLowerCase());
+
+    // 2. Type/Payer Filter
     const matchesFilter =
       filter === "all" ||
       (filter === "you" &&
@@ -37,9 +43,35 @@ const HistoryPage = () => {
       (filter === "friend" &&
         (e.type === "purchase" || e.type === "bill") &&
         e.paidBy !== user?.id) ||
-      (filter === "settle" && e.type === "settleup");
+      (filter === "settle" && e.type === "settleup") ||
+      (filter === "smartSettle" && e.type === "groupSmartSettle");
 
-    return matchesSearch && matchesFilter;
+    // 3. Category Filter
+    let matchesCategory = true;
+    if (selectedCategoryIds.length > 0 && user) {
+      if (!Array.isArray(e.userCategories)) {
+        matchesCategory = false;
+      } else {
+        const userCatEntry = e.userCategories.find(
+          (uc) => uc.userId === user.id
+        );
+        if (
+          !userCatEntry ||
+          !userCatEntry.categoryIds ||
+          userCatEntry.categoryIds.length === 0
+        ) {
+          matchesCategory = false;
+        } else {
+          // Check if ANY of the transaction's categories are in the selected list
+          const hasCommonCategory = userCatEntry.categoryIds.some((cid) =>
+            selectedCategoryIds.includes(cid)
+          );
+          matchesCategory = hasCommonCategory;
+        }
+      }
+    }
+
+    return matchesSearch && matchesFilter && matchesCategory;
   });
 
   return (
@@ -61,21 +93,45 @@ const HistoryPage = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-full rounded-xl">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="you">You paid</SelectItem>
-              <SelectItem value="friend">Friends paid</SelectItem>
-              <SelectItem value="settle">Settle up</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="mb-4 flex gap-2">
+          <div className="flex-1">
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-full rounded-xl bg-background">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="you">You paid</SelectItem>
+                <SelectItem value="friend">Friends paid</SelectItem>
+                <SelectItem value="settle">Settle up</SelectItem>
+                <SelectItem value="smartSettle">Smart Settle Up</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <button
+            onClick={() => setIsCategoryDrawerOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-w-[44px]"
+          >
+            {selectedCategoryIds.length === 0 ? (
+              <Folder size={16} className="text-muted-foreground" />
+            ) : (
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground">
+                {selectedCategoryIds.length}
+              </div>
+            )}
+          </button>
         </div>
 
-{isLoading ? (
+        {/* Category Drawer */}
+        <CategorySelectDrawer
+          open={isCategoryDrawerOpen}
+          onOpenChange={setIsCategoryDrawerOpen}
+          selectedCategoryIds={selectedCategoryIds}
+          onSelect={setSelectedCategoryIds}
+        />
+
+        {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
               <Card key={index} className="mb-3 py-3 shadow-xs">

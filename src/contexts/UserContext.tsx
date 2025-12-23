@@ -49,6 +49,10 @@ interface User {
     scans: number;
     translations: number;
   };
+  categories: {
+    id: string;
+    name: string;
+  }[];
 }
 
 interface UserContextValue {
@@ -70,6 +74,8 @@ interface UserContextValue {
   endDate: Date | undefined;
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  selectedCategoryIds: string[];
+  setSelectedCategoryIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
@@ -111,7 +117,36 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem("endDate");
     return saved ? new Date(saved) : undefined;
   });
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem("selectedCategoryIds");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [spending, setSpending] = useState<number>(0);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "selectedCategoryIds",
+      JSON.stringify(selectedCategoryIds)
+    );
+  }, [selectedCategoryIds]);
+
+  // Cleanup selected categories when user categories change (e.g. deletion)
+  useEffect(() => {
+    if (!user) return;
+
+    const currentCategoryIds = new Set((user.categories || []).map((c) => c.id));
+
+    // Only update if there are selected IDs that no longer exist
+    const needsCleanup = selectedCategoryIds.some(
+      (id) => !currentCategoryIds.has(id)
+    );
+
+    if (needsCleanup) {
+      setSelectedCategoryIds((prev) =>
+        prev.filter((id) => currentCategoryIds.has(id))
+      );
+    }
+  }, [user, selectedCategoryIds]);
 
   useEffect(() => {
     if (!user) {
@@ -130,6 +165,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (startDate && txDate < startDate) inRange = false;
         if (endDate && txDate > endDate) inRange = false;
 
+        // Filter by category
+        if (selectedCategoryIds.length > 0) {
+          const categories = Array.isArray(t.userCategories)
+            ? t.userCategories
+            : [];
+          const userCats =
+            categories.find((uc) => uc.userId === userId)?.categoryIds || [];
+          const hasMatch = userCats.some((id) =>
+            selectedCategoryIds.includes(id)
+          );
+          if (!hasMatch) inRange = false;
+        }
+
         if (!inRange) return;
 
         // Check if transaction has splitsInSgd (Purchase, Bill, Recurring)
@@ -145,7 +193,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
 
     calculateSpending();
-  }, [startDate, endDate, transactions, user]);
+  }, [startDate, endDate, transactions, user, selectedCategoryIds]);
 
   useEffect(() => {
     if (user) {
@@ -445,6 +493,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         endDate,
         setStartDate,
         setEndDate,
+        selectedCategoryIds,
+        setSelectedCategoryIds,
       }}
     >
       {children}

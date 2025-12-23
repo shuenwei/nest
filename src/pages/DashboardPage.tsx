@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import Navbar from "@/components/NavBar";
 import FriendCard from "@/components/FriendCard";
 import { MoveDownLeft, MoveUpRight, CalendarIcon } from "lucide-react";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "@/contexts/LocationContext";
+import { CategorySelectDrawer } from "@/components/CategorySelectDrawer";
 
 const greetings = [
   "Hi",
@@ -45,11 +47,25 @@ const DashboardPage = () => {
     endDate,
     setStartDate,
     setEndDate,
+    selectedCategoryIds,
+    setSelectedCategoryIds
   } = useUser();
 
   const { imageUrl, imageLoading } = useLocation();
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
 
   if (!user) return null;
+
+  const getCategoryFilterText = () => {
+    if (selectedCategoryIds.length === 0) return "All Categories";
+    if (selectedCategoryIds.length === 1) {
+      return (
+        user.categories.find((c) => c.id === selectedCategoryIds[0])?.name ||
+        "1 Category"
+      );
+    }
+    return `${selectedCategoryIds.length} Categories`;
+  };
 
   const getDateRangeText = () => {
     if (!startDate && !endDate) {
@@ -285,6 +301,20 @@ const DashboardPage = () => {
                   </div>
                 </PopoverContent>
               </Popover>
+
+              <span
+                className="text-white/90 text-xs bg-black/10 px-2 py-1 rounded-full border border-white/10 cursor-pointer hover:bg-black/20 transition-colors"
+                onClick={() => setIsCategoryDrawerOpen(true)}
+              >
+                {getCategoryFilterText()}
+              </span>
+
+              <CategorySelectDrawer
+                open={isCategoryDrawerOpen}
+                onOpenChange={setIsCategoryDrawerOpen}
+                selectedCategoryIds={selectedCategoryIds}
+                onSelect={(ids) => setSelectedCategoryIds(ids)}
+              />
             </div>
           </div>
 

@@ -37,6 +37,11 @@ const UserSchema = new mongoose.Schema({
     scans: { type: Number },
     translations: { type: Number },
   },
+  categories: [
+    {
+      name: { type: String, required: true },
+    },
+  ],
 });
 
 export const User = mongoose.model("User", UserSchema);
