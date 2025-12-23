@@ -134,7 +134,9 @@ export const CategorySelectDrawer = ({
                     </div>
                 </div>
                 <DrawerFooter>
-                    <Button onClick={() => onOpenChange(false)}>Done</Button>
+                    <DrawerClose asChild>
+                        <Button className="mb-7">Done</Button>
+                    </DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
