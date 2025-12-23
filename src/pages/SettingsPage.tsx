@@ -129,7 +129,14 @@ const SettingsPage = () => {
         )}
 
         <p className="text-center pt-5 text-xs text-gray-400">
-          Made by @shuenwei
+          Made by{" "}
+          <a
+            href="https://www.instagram.com/shuenwei/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            @shuenwei
+          </a>
         </p>
       </div>
 
