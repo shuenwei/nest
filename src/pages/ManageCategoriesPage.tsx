@@ -195,7 +195,7 @@ const ManageCategoriesPage = () => {
 
                 {(!user?.categories || user.categories.length === 0) && (
                     <div className="text-center py-8 text-muted-foreground">
-                        You don't have any categories.
+                        You have not added any categories.
                     </div>
                 )}
             </div>

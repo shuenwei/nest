@@ -127,8 +127,8 @@ export const CategorySelectDrawer = ({
                         )}
 
                         {sortedCategories.length === 0 && searchQuery === "" && categories.length === 0 && (
-                            <div className="text-center py-8">
-                                <p className="text-muted-foreground text-sm mb-2">No categories yet</p>
+                            <div className="text-center py-8 px-4">
+                                <p className="text-muted-foreground text-sm mb-2">You have not added any categories. Add one in settings.</p>
                             </div>
                         )}
                     </div>
