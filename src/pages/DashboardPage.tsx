@@ -310,6 +310,8 @@ const DashboardPage = () => {
               </span>
 
               <CategorySelectDrawer
+                title="Filter Categories"
+                description="Select categories to filter by."
                 open={isCategoryDrawerOpen}
                 onOpenChange={setIsCategoryDrawerOpen}
                 selectedCategoryIds={selectedCategoryIds}

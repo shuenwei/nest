@@ -18,6 +18,8 @@ import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 interface CategorySelectDrawerProps {
+    title?: string;
+    description?: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     selectedCategoryIds: string[];
@@ -25,6 +27,8 @@ interface CategorySelectDrawerProps {
 }
 
 export const CategorySelectDrawer = ({
+    title,
+    description,
     open,
     onOpenChange,
     selectedCategoryIds,
@@ -65,9 +69,9 @@ export const CategorySelectDrawer = ({
         <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
             <DrawerContent className="max-h-[95vh]">
                 <DrawerHeader className="text-left">
-                    <DrawerTitle>Select Categories</DrawerTitle>
+                    <DrawerTitle>{title || "Select Categories"}</DrawerTitle>
                     <DrawerDescription>
-                        Select one or more categories for this transaction.
+                        {description || "Select one or more categories for this transaction."}
                     </DrawerDescription>
                 </DrawerHeader>
 
