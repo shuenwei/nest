@@ -347,7 +347,7 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-t-[2rem] min-h-[50vh] -mt-8 relative z-20 px-6 pt-8 pb-24">
+      <div className="bg-white rounded-t-[2rem] min-h-[calc(50vh+2rem)] -mt-8 relative z-20 px-6 pt-8 pb-24">
         <div className="w-full max-w-sm mx-auto">
 
           <div className="space-y-3">
