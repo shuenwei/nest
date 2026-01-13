@@ -422,14 +422,30 @@ const AddRecurringPage = () => {
   async function onSubmit(values: FormValues) {
     const originalAmount = Number.parseFloat(values.amount);
 
-    // Convert manual splits to proper format
-    const sgdManualSplits = values.manualSplits.map((split) => {
-      const splitAmount = Number.parseFloat(split.amount) || 0;
-      return {
-        user: split.user,
-        amount: splitAmount,
-      };
-    });
+    // Generate splits based on method
+    let sgdManualSplits;
+
+    if (values.splitMethod === "even") {
+      const perUserAmount =
+        values.selectedPeople.length > 0
+          ? Math.ceil((originalAmount / values.selectedPeople.length) * 100) /
+          100
+          : 0;
+
+      sgdManualSplits = values.selectedPeople.map((user) => ({
+        user,
+        amount: perUserAmount,
+      }));
+    } else {
+      // Convert manual splits to proper format
+      sgdManualSplits = values.manualSplits.map((split) => {
+        const splitAmount = Number.parseFloat(split.amount) || 0;
+        return {
+          user: split.user,
+          amount: splitAmount,
+        };
+      });
+    }
 
     // Validate that manual splits add up to the total if using manual split
     if (values.splitMethod === "manual") {

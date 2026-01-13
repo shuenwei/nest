@@ -313,7 +313,9 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
       const splitAmount = Number.parseFloat(split.amount) || 0;
       // If currency is not SGD, convert to SGD
       const splitAmountInSgd =
-        currency === "SGD" ? splitAmount : splitAmount / exchangeRate;
+        currency === "SGD"
+          ? splitAmount
+          : Math.ceil((splitAmount / exchangeRate) * 100) / 100;
       return {
         ...split,
         amountInSgd: splitAmountInSgd,
@@ -684,6 +686,10 @@ const SplitPurchasePage = () => {
   };
 
   async function onSubmit(values: FormValues) {
+    const participants = Array.from(
+      new Set([...values.selectedPeople, values.paidBy, currentUserId])
+    );
+
     // Convert all amounts to SGD for saving
     const originalAmount = Number.parseFloat(values.amount);
     const sgdAmount =
@@ -691,18 +697,32 @@ const SplitPurchasePage = () => {
         ? originalAmount
         : originalAmount / currentExchangeRate;
 
-    // Convert manual splits to SGD if needed
-    const sgdManualSplits = values.manualSplits.map((split) => {
-      const splitAmount = Number.parseFloat(split.amount) || 0;
-      const splitAmountInSgd =
-        values.currency === "SGD"
-          ? splitAmount
-          : splitAmount / currentExchangeRate;
-      return {
-        user: split.user,
-        amount: splitAmountInSgd.toFixed(2),
-      };
-    });
+    // Generate splits in SGD based on method
+    let sgdManualSplits;
+
+    if (values.splitMethod === "even") {
+      const perUserAmountSgd =
+        values.selectedPeople.length > 0
+          ? Math.ceil((sgdAmount / values.selectedPeople.length) * 100) / 100
+          : 0;
+
+      sgdManualSplits = values.selectedPeople.map((user) => ({
+        user,
+        amount: perUserAmountSgd.toFixed(2),
+      }));
+    } else {
+      sgdManualSplits = values.manualSplits.map((split) => {
+        const splitAmount = Number.parseFloat(split.amount) || 0;
+        const splitAmountInSgd =
+          values.currency === "SGD"
+            ? splitAmount
+            : splitAmount / currentExchangeRate;
+        return {
+          user: split.user,
+          amount: (Math.ceil(splitAmountInSgd * 100) / 100).toFixed(2),
+        };
+      });
+    }
 
     // Validate that manual splits add up to the total if using manual split
     if (values.splitMethod === "manual") {
@@ -727,10 +747,6 @@ const SplitPurchasePage = () => {
         return;
       }
     }
-
-    const participants = Array.from(
-      new Set([...values.selectedPeople, values.paidBy, currentUserId])
-    );
 
     const payload = {
       transactionName: values.transactionname,
