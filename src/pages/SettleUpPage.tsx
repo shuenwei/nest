@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -567,10 +568,13 @@ const SettleUpPage = () => {
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="flex flex-col text-left">
-                                    <span className="font-medium text-sm">
-                                      {selectedPayer.isYou
-                                        ? "You"
-                                        : selectedPayer.name}
+                                    <span className="font-medium text-sm flex items-center">
+                                      {selectedPayer.name}
+                                      {selectedPayer.isYou && (
+                                        <span className="ml-2">
+                                          <Badge className="font-semibold text-[10px] px-1.5 py-0 h-5">You</Badge>
+                                        </span>
+                                      )}
                                     </span>
                                     {selectedPayer.username && (
                                       <span className="text-xs text-muted-foreground/60">
@@ -644,10 +648,13 @@ const SettleUpPage = () => {
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="flex flex-col text-left">
-                                    <span className="font-medium text-sm">
-                                      {selectedPayee.isYou
-                                        ? "You"
-                                        : selectedPayee.name}
+                                    <span className="font-medium text-sm flex items-center">
+                                      {selectedPayee.name}
+                                      {selectedPayee.isYou && (
+                                        <span className="ml-2">
+                                          <Badge className="font-semibold text-[10px] px-1.5 py-0 h-5">You</Badge>
+                                        </span>
+                                      )}
                                     </span>
                                     {selectedPayee.username && (
                                       <span className="text-xs text-muted-foreground/60">

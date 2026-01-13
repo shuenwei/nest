@@ -44,6 +44,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUser } from "@/contexts/UserContext";
 import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 // Split calculation component
 interface SplitCalculationProps {
@@ -665,10 +666,13 @@ const AddRecurringPage = () => {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col text-left">
-                              <span className="font-medium text-sm">
-                                {selectedPayer.isYou
-                                  ? "You"
-                                  : selectedPayer.name}
+                              <span className="font-medium text-sm flex items-center">
+                                {selectedPayer.name}
+                                {selectedPayer.isYou && (
+                                  <span className="ml-2">
+                                    <Badge className="font-semibold text-[10px] px-1.5 py-0 h-5">You</Badge>
+                                  </span>
+                                )}
                               </span>
                               {selectedPayer.username && (
                                 <span className="text-xs text-muted-foreground/60">

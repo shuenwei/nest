@@ -1179,10 +1179,13 @@ const SplitBillPage = () => {
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="flex flex-col text-left">
-                                    <span className="font-medium text-sm">
-                                      {selectedPayer.isYou
-                                        ? "You"
-                                        : selectedPayer.name}
+                                    <span className="font-medium text-sm flex items-center">
+                                      {selectedPayer.name}
+                                      {selectedPayer.isYou && (
+                                        <span className="ml-2">
+                                          <Badge className="font-semibold text-[10px] px-1.5 py-0 h-5">You</Badge>
+                                        </span>
+                                      )}
                                     </span>
                                     {selectedPayer.username && (
                                       <span className="text-xs text-muted-foreground/60">
