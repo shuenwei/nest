@@ -29,6 +29,7 @@ const AdminPage = () => {
     const [loadingVerifySingle, setLoadingVerifySingle] = useState(false);
     const [verifySingleResult, setVerifySingleResult] = useState<any>(null);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -229,9 +230,13 @@ const AdminPage = () => {
                         </div>
 
                         {verifyAllResult && (
-                            <div className="mt-2 p-3 bg-slate-100 rounded text-xs font-mono overflow-auto max-h-40">
-                                <pre>{JSON.stringify(verifyAllResult, null, 2)}</pre>
-                            </div>
+                            <Alert variant={verifyAllResult.status === "MATCH" ? "default" : "destructive"} className="mt-4">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle>{verifyAllResult.status === "MATCH" ? "System Verified" : "Discrepancies Found"}</AlertTitle>
+                                <AlertDescription className="font-mono text-xs mt-2 overflow-auto max-h-40">
+                                    <pre>{JSON.stringify(verifyAllResult, null, 2)}</pre>
+                                </AlertDescription>
+                            </Alert>
                         )}
                     </CardContent>
                 </Card>
@@ -307,6 +312,80 @@ const AdminPage = () => {
                                         </AlertDescription>
                                     </Alert>
                                 )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* All Users Card */}
+                <Card className="mb-4 shadow-xs">
+                    <div className="flex items-center justify-between px-6 pt-3">
+                        <CardTitle className="text-lg">All Users</CardTitle>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                                try {
+                                    const res = await axios.get(
+                                        `${import.meta.env.VITE_API_URL}/user/all`,
+                                        { headers: { Authorization: `Bearer ${getToken()}` } }
+                                    );
+                                    setAllUsers(res.data);
+                                    toast.success(`Loaded ${res.data.length} users`);
+                                } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to load users");
+                                }
+                            }}
+                        >
+                            Refresh List
+                        </Button>
+                    </div>
+                    <CardContent className="px-6 space-y-4">
+
+                        {allUsers.length > 0 && (
+                            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                                {allUsers.map((u: any) => (
+                                    <div key={u._id} className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarImage src={u.profilePhoto || undefined} />
+                                                <AvatarFallback>{(u.displayName || "?").charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium text-sm truncate">{u.displayName}</p>
+                                                    {u.isAdmin && <span className="bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 rounded-full font-medium">ADMIN</span>}
+                                                    {u.hasSignedUp ? (
+                                                        <span className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded-full font-medium">NEST USER</span>
+                                                    ) : (
+                                                        <span className="bg-gray-100 text-gray-800 text-[10px] px-1.5 py-0.5 rounded-full font-medium">GUEST</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+                                                <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
+                                                    {u.verifiedAt ? (
+                                                        <span title="Last Signed In">Last seen: {new Date(u.verifiedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                    ) : (
+                                                        <span>Never signed in</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right shrink-0 ml-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => {
+                                                    setUsernameInput(u.username);
+                                                }}
+                                            >
+                                                <Search className="h-4 w-4 text-muted-foreground" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </CardContent>

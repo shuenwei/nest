@@ -13,9 +13,12 @@ import createCategory from "../controllers/user/create-category";
 import deleteCategory from "../controllers/user/delete-category";
 import renameCategory from "../controllers/user/rename-category";
 
+import getAllUsers from "../controllers/user/get-all-users";
+
 // initialize router
 const router = express.Router();
 
+router.get("/all", getAllUsers);
 router.get("/username/:username", getUserByUsername);
 router.get("/telegramid/:telegramId", getUserByTelegramId);
 router.patch("/displayname/:telegramId", updateDisplayName);
