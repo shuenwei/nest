@@ -106,7 +106,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return stored ? (JSON.parse(stored) as Transaction[]) : [];
   });
   const [loading, setLoading] = useState(true);
-  const [loadingTelegram, setLoadingTelegram] = useState(false);
+  const [loadingTelegram, setLoadingTelegram] = useState(() =>
+    Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user)
+  );
   const [updating, setUpdating] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
