@@ -5,11 +5,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
 import { RecurringTemplate } from "@/lib/recurring";
 import axios from "axios";
 import { toast } from "@/lib/toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,9 +33,20 @@ const ViewRecurringPage = () => {
 
   const friends = user?.friends || [];
 
-  const getFriendNameById = (userId: string) => {
-    if (userId === user?.id) return "You";
-    return friends.find((f) => f.id === userId)?.displayName ?? "Unknown";
+  const getFriendDetails = (userId: string) => {
+    if (userId === user?.id) {
+      return {
+        displayName: `${user?.displayName || "You"} (You)`,
+        profilePhoto: user?.profilePhoto || null,
+        username: user?.username,
+      };
+    }
+    const friend = friends.find((f) => f.id === userId);
+    return {
+      displayName: friend?.displayName ?? "Unknown",
+      profilePhoto: friend?.profilePhoto || null,
+      username: friend?.username,
+    };
   };
 
   const formatFrequency = (frequency: string) => {
@@ -118,6 +131,8 @@ const ViewRecurringPage = () => {
 
   if (!template || !user) return null;
 
+  const paidBy = getFriendDetails(template.paidBy);
+
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4">
       <div className="w-full max-w-sm pt-5 pb-24">
@@ -154,14 +169,14 @@ const ViewRecurringPage = () => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <Button
+                  <AlertDialogAction
                     onClick={handleDelete}
                     className="bg-destructive hover:bg-destructive/50"
                     disabled={isDeleting}
                   >
                     {isDeleting ? "Deleting..." : "Delete"}
-                  </Button>
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -169,75 +184,129 @@ const ViewRecurringPage = () => {
         </div>
 
         {/* Recurring Template Header */}
+        <Card className="mb-6 shadow-none border-none bg-transparent">
+          <CardContent className="px-0 pb-4 flex flex-col items-center justify-center text-center space-y-3">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-3xl border mb-4">
+              🔁
+            </div>
 
-        <Card className="mb-3 py-5 shadow-xs">
-          <CardContent className="px-0">
-            <div className="px-4 flex justify-between items-start">
-              <div className="flex justify-between items-start">
-                <div className="flex gap-2">
-                  <div className="text-3xl">🔁</div>
-                  <div>
-                    <h1 className="text-sm font-semibold">
-                      {template.transactionName}
-                    </h1>
-                    <p className="text-muted-foreground text-xs">
-                      Next Payment: {formatNextDueDate(template.nextDate)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">
+                ${template.amount.toFixed(2)}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {formatFrequency(template.frequency)}
+              </p>
+            </div>
 
-              <div className="text-right">
-                <p className="text-sm font-semibold">
-                  ${template.amount.toFixed(2)}
-                </p>
-                <p className="text-xs text-muted-foreground ml-2">
-                  {formatFrequency(template.frequency)}
-                </p>
-              </div>
+            <div className="space-y-1 pt-2">
+              <h2 className="font-semibold text-xl">
+                {template.transactionName}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Next Payment: {formatNextDueDate(template.nextDate)}
+              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Recurring Template Details */}
-
         <Card className="mb-3 py-0 shadow-xs">
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-0 space-y-6 py-6">
             {/* Paid By Section */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Paid By</h3>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="font-medium">
-                  {getFriendNameById(template.paidBy)}
-                </Badge>
+            <div className="px-6">
+              <p className="text-xs font-medium text-muted-foreground mb-3 font-medium">
+                Paid By
+              </p>
+              <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src={paidBy.profilePhoto || ""}
+                    alt={paidBy.displayName}
+                  />
+                  <AvatarFallback className="text-xs">
+                    {paidBy.displayName
+                      .replace(" (You)", "")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">
+                    {paidBy.displayName}
+                  </span>
+                  {paidBy.username && (
+                    <span className="text-[10px] text-muted-foreground">
+                      @{paidBy.username}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
+            <Separator />
+
             {/* Splits Section */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Split Details</h3>
-              <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
-                {template.splitsInSgd.map((split, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center"
-                  >
-                    <span className="text-sm">
-                      {getFriendNameById(split.user)}
-                    </span>
-                    <span>${split.amount.toFixed(2)}</span>
-                  </div>
-                ))}
+            <div className="px-6">
+              <p className="text-xs font-medium text-muted-foreground mb-4 font-medium">
+                Split Among
+              </p>
+              <div className="space-y-4">
+                {template.splitsInSgd.map((split, index) => {
+                  const splitUser = getFriendDetails(split.user);
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={splitUser.profilePhoto || ""}
+                            alt={splitUser.displayName}
+                          />
+                          <AvatarFallback className="text-xs">
+                            {splitUser.displayName
+                              .replace(" (You)", "")
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-sm">
+                            {splitUser.displayName}
+                          </span>
+                          {splitUser.username && (
+                            <span className="text-[10px] text-muted-foreground">
+                              @{splitUser.username}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="font-semibold text-sm">
+                        ${split.amount.toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             {/* Notes Section (if available) */}
             {template.notes && (
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Notes</h3>
-                <p className="text-sm text-muted-foreground bg-secondary/70 p-3 rounded-lg">
-                  {template.notes}
+              <div className="px-6">
+                <p className="text-xs font-medium text-muted-foreground mb-2 font-medium">
+                  Notes
                 </p>
+                <div className="p-3 bg-secondary/50 rounded-lg text-sm border border-border/50">
+                  {template.notes}
+                </div>
               </div>
             )}
           </CardContent>

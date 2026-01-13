@@ -2,11 +2,11 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Minus, Plus, ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle, ChevronDown, Minus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "@/lib/toast";
 import axios from "axios";
@@ -25,14 +25,6 @@ import { format } from "date-fns";
 import { startOfDay } from "date-fns";
 import { zonedTimeToUtc } from "date-fns-tz";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -46,14 +38,12 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/contexts/UserContext";
-import { RecurringTemplate } from "@/lib/recurring";
+import { PersonOption, PersonSelectDrawer } from "@/components/PersonSelectDrawer";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Split calculation component
 interface SplitCalculationProps {
@@ -141,9 +131,8 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
 
           {!isExactMatch && (
             <div
-              className={`flex justify-between items-center ${
-                remainingAmount < 0 ? "text-red-500" : "text-amber-500"
-              }`}
+              className={`flex justify-between items-center ${remainingAmount < 0 ? "text-red-500" : "text-amber-500"
+                }`}
             >
               <span className="text-sm font-medium">
                 {remainingAmount < 0 ? "Over-allocated" : "Remaining"}
@@ -184,7 +173,7 @@ const formSchema = z.object({
   startDate: z.date(),
   paidBy: z.string(),
   splitMethod: z.enum(["even", "manual"]),
-  selectedPeople: z.array(z.string()).nonempty("Select at least one user"),
+  selectedPeople: z.array(z.string()).min(1, "Select at least one user"),
   manualSplits: z.array(
     z.object({
       user: z.string(),
@@ -201,7 +190,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const AddRecurringPage = () => {
-  const [openPeopleSelect, setOpenPeopleSelect] = useState(false);
+  const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
+  const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const { recurringId } = useParams<{ recurringId?: string }>();
   const isEditMode = !!recurringId;
@@ -223,6 +213,31 @@ const AddRecurringPage = () => {
 
   const currentUserId = user?.id ?? "missing user";
 
+  const participantOptions: PersonOption[] = useMemo(
+    () => [
+      {
+        id: currentUserId,
+        name: user?.displayName ?? "You",
+        username: user?.username ?? "",
+        profilePhoto: user?.profilePhoto,
+        isYou: true,
+      },
+      ...friends.map((friend) => ({
+        id: friend.id,
+        name: friend.name,
+        username: friend.username,
+        profilePhoto: friend.profilePhoto,
+      })),
+    ],
+    [
+      currentUserId,
+      friends,
+      user?.displayName,
+      user?.profilePhoto,
+      user?.username,
+    ]
+  );
+
   useEffect(() => {
     if (user?.friends && Array.isArray(user.friends)) {
       const formattedFriends = user.friends.map((friend) => ({
@@ -236,10 +251,11 @@ const AddRecurringPage = () => {
     }
   }, [user]);
 
-  const getFriendNameById = (id: string) =>
-    id === currentUserId
-      ? "You"
-      : friends.find((f) => f.id === id)?.name ?? "Unknown";
+  const getFriendNameById = (id: string) => {
+    const person = participantOptions.find((option) => option.id === id);
+    if (!person) return "Unknown";
+    return person.isYou ? `${person.name} (You)` : person.name;
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -319,6 +335,7 @@ const AddRecurringPage = () => {
   const selectedPeople = form.watch("selectedPeople");
   const splitMethod = form.watch("splitMethod");
   const manualSplits = form.watch("manualSplits");
+  const paidBy = form.watch("paidBy");
 
   // Update manual splits when selected people change
   useEffect(() => {
@@ -448,8 +465,7 @@ const AddRecurringPage = () => {
         navigate("/recurring");
       } else {
         const response = await axios.put(
-          `${
-            import.meta.env.VITE_API_URL
+          `${import.meta.env.VITE_API_URL
           }/transaction/recurring/update/${recurringId}`,
           payload,
           {
@@ -472,6 +488,10 @@ const AddRecurringPage = () => {
       setIsSubmitting(false);
     }
   }
+
+  const selectedPayer = participantOptions.find(
+    (p) => p.id === form.getValues("paidBy")
+  );
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit flex justify-center px-4 overscroll-none">
@@ -508,7 +528,6 @@ const AddRecurringPage = () => {
                       <FormLabel>Transaction Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Netflix Subscription, Rent, etc."
                           {...field}
                         />
                       </FormControl>
@@ -540,6 +559,12 @@ const AddRecurringPage = () => {
                                 field.onChange(value);
                               }
                             }}
+                            onBlur={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (!isNaN(val)) {
+                                field.onChange(val.toFixed(2));
+                              }
+                            }}
                           />
                         </div>
                       </FormControl>
@@ -561,7 +586,7 @@ const AddRecurringPage = () => {
                           onValueChange={field.onChange}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select frequency" />
+                            <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="daily">Daily</SelectItem>
@@ -623,24 +648,49 @@ const AddRecurringPage = () => {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Paid by</FormLabel>
-                    <FormControl className="w-full">
-                      <Select
-                        key={field.value}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger className="w-full px-4">
-                          <SelectValue placeholder="Select who pays" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={currentUserId}>You</SelectItem>
-                          {friends.map((friend) => (
-                            <SelectItem key={friend.id} value={friend.id}>
-                              {friend.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <FormControl>
+                      <div>
+                        {selectedPayer ? (
+                          <div
+                            onClick={() => setPaidByDrawerOpen(true)}
+                            className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 transition-colors border border-border"
+                          >
+                            <Avatar className="h-10 w-10 border border-background">
+                              <AvatarImage
+                                src={selectedPayer.profilePhoto || ""}
+                                alt={selectedPayer.name}
+                              />
+                              <AvatarFallback>
+                                {selectedPayer.name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col text-left">
+                              <span className="font-medium text-sm">
+                                {selectedPayer.isYou
+                                  ? "You"
+                                  : selectedPayer.name}
+                              </span>
+                              {selectedPayer.username && (
+                                <span className="text-xs text-muted-foreground/60">
+                                  @{selectedPayer.username}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={() => setPaidByDrawerOpen(true)}
+                            className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl cursor-pointer hover:bg-secondary/20 transition-colors border border-dashed border-border/60"
+                          >
+                            <div className="h-10 w-10 rounded-full bg-secondary/30" />
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm text-muted-foreground">
+                                Select who paid
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -692,112 +742,50 @@ const AddRecurringPage = () => {
                     <FormItem>
                       <FormLabel>Split Between</FormLabel>
                       <FormControl>
-                        <Popover
-                          open={openPeopleSelect}
-                          onOpenChange={setOpenPeopleSelect}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openPeopleSelect}
-                              className="w-full justify-between text-left font-normal px-3"
-                            >
-                              {field.value.length > 0
-                                ? `${field.value.length} people selected`
-                                : "Select people"}
-                              <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            side="bottom"
-                            align="center"
-                            avoidCollisions={false}
-                            className="w-full p-0"
+                        <div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-between text-left font-normal px-3 h-11"
+                            onClick={() => setParticipantsDrawerOpen(true)}
                           >
-                            <Command>
-                              <CommandInput placeholder="Search people..." />
-                              <CommandList>
-                                <CommandEmpty>No user found.</CommandEmpty>
-                                <CommandGroup className="max-h-70 overflow-y-auto">
-                                  <CommandItem
-                                    value={currentUserId}
-                                    onSelect={() => {
-                                      const newValue = field.value.includes(
-                                        currentUserId
-                                      )
-                                        ? field.value.filter(
-                                            (v) => v !== currentUserId
-                                          )
-                                        : [...field.value, currentUserId];
-                                      field.onChange(newValue);
-                                    }}
-                                  >
-                                    <Checkbox
-                                      checked={field.value.includes(
-                                        currentUserId
-                                      )}
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    You
-                                  </CommandItem>
-                                  {friends.map((friend) => (
-                                    <CommandItem
-                                      key={friend.id}
-                                      value={friend.name}
-                                      onSelect={() => {
-                                        const newValue = field.value.includes(
-                                          friend.id
-                                        )
-                                          ? field.value.filter(
-                                              (v) => v !== friend.id
-                                            )
-                                          : [...field.value, friend.id];
-                                        field.onChange(newValue);
-                                      }}
-                                    >
-                                      <Checkbox
-                                        checked={field.value.includes(
-                                          friend.id
-                                        )}
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      {friend.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                            {field.value.length > 0
+                              ? `${field.value.length} people selected`
+                              : "Select people"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                          </Button>
+                        </div>
                       </FormControl>
-                      <FormMessage />
                       {field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((userId) => (
-                            <Badge
-                              key={userId}
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {getFriendNameById(userId)}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4 p-0 text-muted-foreground/50 hover:text-foreground"
-                                onClick={() => {
-                                  field.onChange(
-                                    field.value.filter((v) => v !== userId)
-                                  );
-                                }}
+                          {field.value.map((userId) => {
+                            const person = participantOptions.find(
+                              (opt) => opt.id === userId
+                            );
+                            if (!person) return null;
+                            return (
+                              <div
+                                key={userId}
+                                className="flex items-center gap-2 p-1.5 pr-2 bg-secondary/20 rounded-full border border-border/50"
                               >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))}
+                                <Avatar className="h-5 w-5 border border-background">
+                                  <AvatarImage
+                                    src={person.profilePhoto || ""}
+                                    alt={person.name}
+                                  />
+                                  <AvatarFallback className="text-[10px]">
+                                    {person.name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs font-medium">
+                                  {person.isYou ? "You" : person.name}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -877,7 +865,6 @@ const AddRecurringPage = () => {
                     <FormLabel>Notes (Optional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Add notes about this recurring payment..."
                         {...field}
                       />
                     </FormControl>
@@ -892,6 +879,36 @@ const AddRecurringPage = () => {
             </Button>
           </form>
         </Form>
+
+        {/* Drawers */}
+        <PersonSelectDrawer
+          open={paidByDrawerOpen}
+          onOpenChange={setPaidByDrawerOpen}
+          people={participantOptions}
+          selection={[form.getValues("paidBy")]}
+          onSelectionChange={(selectedIds) => {
+            if (selectedIds.length > 0) {
+              form.setValue("paidBy", selectedIds[0]);
+              setPaidByDrawerOpen(false);
+            }
+          }}
+          title="Who Paid?"
+          description="Select the person who paid for this."
+          mode="single"
+        />
+
+        <PersonSelectDrawer
+          open={participantsDrawerOpen}
+          onOpenChange={setParticipantsDrawerOpen}
+          people={participantOptions}
+          selection={selectedPeople}
+          onSelectionChange={(selectedIds) => {
+            form.setValue("selectedPeople", selectedIds);
+          }}
+          title="Split Between"
+          description="Select people to split this bill with."
+          mode="multiple"
+        />
       </div>
     </div>
   );

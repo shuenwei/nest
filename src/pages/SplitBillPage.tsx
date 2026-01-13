@@ -44,6 +44,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   Command,
@@ -982,20 +983,21 @@ const SplitBillPage = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Restaurant Details Card */}
-            <Card className="p-6">
+            {isPrefilled && (
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertTitle>Your receipt has been pre-filled!</AlertTitle>
+                <AlertDescription>
+                  The resturant name, item names and item prices have been
+                  pre-filled. Select the currency, friends for each item,
+                  and enter additional charges. Be sure to check for
+                  mistakes made by the AI.
+                </AlertDescription>
+              </Alert>
+            )}
+            {/* Details Card */}
+            <Card className="p-6 mb-4">
               <CardContent className="p-0 space-y-6">
-                {isPrefilled && (
-                  <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertTitle>Your receipt has been pre-filled!</AlertTitle>
-                    <AlertDescription>
-                      The resturant name, item names and item prices have been
-                      pre-filled. Select the currency, friends for each item,
-                      and enter additional charges. Be sure to check for
-                      mistakes made by the AI.
-                    </AlertDescription>
-                  </Alert>
-                )}
                 {isPrefilled && (
                   <Alert>
                     <Languages className="h-4 w-4" />
@@ -1029,44 +1031,6 @@ const SplitBillPage = () => {
                         <Input {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Paid By */}
-                <FormField
-                  control={form.control}
-                  name="paidBy"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Paid by</FormLabel>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-between text-left font-normal px-3 h-11"
-                          onClick={() => setPaidByDrawerOpen(true)}
-                        >
-                          {field.value
-                            ? getParticipantName(field.value)
-                            : "Select who paid"}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                      <FormMessage />
-                      <PersonSelectDrawer
-                        open={paidByDrawerOpen}
-                        onOpenChange={setPaidByDrawerOpen}
-                        title="Select payer"
-                        description="Choose who paid for this bill."
-                        people={participantOptions}
-                        selection={field.value ? [field.value] : []}
-                        onSelectionChange={(selection) => {
-                          const nextValue = selection[0] ?? "";
-                          field.onChange(nextValue);
-                        }}
-                        mode="single"
-                      />
                     </FormItem>
                   )}
                 />
@@ -1142,66 +1106,6 @@ const SplitBillPage = () => {
                   )}
                 </div>
 
-                {/* Participants */}
-                <FormField
-                  control={form.control}
-                  name="participants"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Participants</FormLabel>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-between text-left font-normal px-3 h-11"
-                          onClick={() => setParticipantsDrawerOpen(true)}
-                        >
-                          {field.value.length > 0
-                            ? `${field.value.length} people selected`
-                            : "Select participants"}
-                          <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                        </Button>
-                      </FormControl>
-                      <FormMessage />
-                      <PersonSelectDrawer
-                        open={participantsDrawerOpen}
-                        onOpenChange={setParticipantsDrawerOpen}
-                        title="Choose participants"
-                        description="Select the people included in this bill."
-                        people={participantOptions}
-                        selection={field.value}
-                        onSelectionChange={(selection) => field.onChange(selection)}
-                      />
-                      {field.value.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((participant) => (
-                            <Badge
-                              key={participant}
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {getParticipantName(participant)}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4 p-0 text-muted-foreground/50 hover:text-foreground"
-                                onClick={() => {
-                                  field.onChange(
-                                    field.value.filter((v) => v !== participant)
-                                  );
-                                }}
-                              >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
                 {/* Category */}
                 <FormField
                   control={form.control}
@@ -1239,6 +1143,155 @@ const SplitBillPage = () => {
                         selectedCategoryIds={field.value}
                         onSelect={field.onChange}
                       />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Paid By Card */}
+            <Card className="p-6 mb-4">
+              <CardContent className="p-0">
+                {/* Paid By */}
+                <FormField
+                  control={form.control}
+                  name="paidBy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Paid by</FormLabel>
+                      <FormControl>
+                        <div>
+                          {(() => {
+                            const selectedPayer = participantOptions.find(p => p.id === field.value);
+                            if (selectedPayer) {
+                              return (
+                                <div
+                                  onClick={() => setPaidByDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 transition-colors border border-border"
+                                >
+                                  <Avatar className="h-10 w-10 border border-background">
+                                    <AvatarImage
+                                      src={selectedPayer.profilePhoto || ""}
+                                      alt={selectedPayer.name}
+                                    />
+                                    <AvatarFallback>
+                                      {selectedPayer.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col text-left">
+                                    <span className="font-medium text-sm">
+                                      {selectedPayer.isYou
+                                        ? "You"
+                                        : selectedPayer.name}
+                                    </span>
+                                    {selectedPayer.username && (
+                                      <span className="text-xs text-muted-foreground/60">
+                                        @{selectedPayer.username}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div
+                                  onClick={() => setPaidByDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl cursor-pointer hover:bg-secondary/20 transition-colors border border-dashed border-border/60"
+                                >
+                                  <div className="h-10 w-10 rounded-full bg-secondary/30" />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-sm text-muted-foreground">
+                                      Select who paid
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                      <PersonSelectDrawer
+                        open={paidByDrawerOpen}
+                        onOpenChange={setPaidByDrawerOpen}
+                        title="Select payer"
+                        description="Choose who paid for this bill."
+                        people={participantOptions}
+                        selection={field.value ? [field.value] : []}
+                        onSelectionChange={(selection) => {
+                          const nextValue = selection[0] ?? "";
+                          field.onChange(nextValue);
+                        }}
+                        mode="single"
+                      />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Participants Card */}
+            <Card className="p-6 mb-4">
+              <CardContent className="p-0">
+                {/* Participants */}
+                <FormField
+                  control={form.control}
+                  name="participants"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Participants</FormLabel>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-between text-left font-normal px-3 h-11"
+                          onClick={() => setParticipantsDrawerOpen(true)}
+                        >
+                          {field.value.length > 0
+                            ? `${field.value.length} people selected`
+                            : "Select participants"}
+                          <Plus className="ml-2 h-4 w-4 shrink-0 opacity-30" />
+                        </Button>
+                      </FormControl>
+                      <FormMessage />
+                      <PersonSelectDrawer
+                        open={participantsDrawerOpen}
+                        onOpenChange={setParticipantsDrawerOpen}
+                        title="Choose participants"
+                        description="Select the people included in this bill."
+                        people={participantOptions}
+                        selection={field.value}
+                        onSelectionChange={(selection) => field.onChange(selection)}
+                      />
+                      {field.value.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {field.value.map((userId) => {
+                            const person = participantOptions.find(
+                              (opt) => opt.id === userId
+                            );
+                            if (!person) return null;
+                            return (
+                              <div
+                                key={userId}
+                                className="flex items-center gap-2 p-1.5 pr-2 bg-secondary/20 rounded-full border border-border/50"
+                              >
+                                <Avatar className="h-5 w-5 border border-background">
+                                  <AvatarImage
+                                    src={person.profilePhoto || ""}
+                                    alt={person.name}
+                                  />
+                                  <AvatarFallback className="text-[10px]">
+                                    {person.name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs font-medium">
+                                  {person.isYou ? "You" : person.name}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -1315,6 +1368,12 @@ const SplitBillPage = () => {
                                       field.onChange(value);
                                     }
                                   }}
+                                  onBlur={(e) => {
+                                    const val = parseFloat(e.target.value);
+                                    if (!isNaN(val)) {
+                                      field.onChange(val.toFixed(2));
+                                    }
+                                  }}
                                 />
                               </div>
                             </FormControl>
@@ -1373,28 +1432,31 @@ const SplitBillPage = () => {
                           />
                           {field.value.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
-                              {field.value.map((person) => (
-                                <Badge
-                                  key={person}
-                                  variant="secondary"
-                                  className="flex items-center gap-1"
-                                >
-                                  {getParticipantName(person)}
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground"
-                                    onClick={() => {
-                                      field.onChange(
-                                        field.value.filter((v) => v !== person)
-                                      );
-                                    }}
+                              {field.value.map((userId) => {
+                                const person = selectedParticipantOptions.find(
+                                  (opt) => opt.id === userId
+                                );
+                                if (!person) return null;
+                                return (
+                                  <div
+                                    key={userId}
+                                    className="flex items-center gap-2 p-1.5 pr-2 bg-secondary/20 rounded-full border border-border/50"
                                   >
-                                    <Minus className="h-3 w-3" />
-                                  </Button>
-                                </Badge>
-                              ))}
+                                    <Avatar className="h-5 w-5 border border-background">
+                                      <AvatarImage
+                                        src={person.profilePhoto || ""}
+                                        alt={person.name}
+                                      />
+                                      <AvatarFallback className="text-[10px]">
+                                        {person.name.charAt(0).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-xs font-medium">
+                                      {person.isYou ? "You" : person.name}
+                                    </span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
                         </FormItem>

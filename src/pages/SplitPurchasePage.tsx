@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Command,
   CommandEmpty,
@@ -866,6 +867,12 @@ const SplitPurchasePage = () => {
                                 field.onChange(value);
                               }
                             }}
+                            onBlur={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (!isNaN(val)) {
+                                field.onChange(val.toFixed(2));
+                              }
+                            }}
                           />
                         </FormControl>
                       </FormItem>
@@ -954,18 +961,56 @@ const SplitPurchasePage = () => {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Paid by</FormLabel>
-                    <FormControl className="w-full">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full justify-between text-left font-normal px-3 h-11"
-                        onClick={() => setPaidByDrawerOpen(true)}
-                      >
-                        {field.value
-                          ? getFriendNameById(field.value)
-                          : "Select who paid"}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-30" />
-                      </Button>
+                    <FormControl>
+                      <div>
+                        {(() => {
+                          const selectedPayer = participantOptions.find(p => p.id === field.value);
+                          if (selectedPayer) {
+                            return (
+                              <div
+                                onClick={() => setPaidByDrawerOpen(true)}
+                                className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 transition-colors border border-border"
+                              >
+                                <Avatar className="h-10 w-10 border border-background">
+                                  <AvatarImage
+                                    src={selectedPayer.profilePhoto || ""}
+                                    alt={selectedPayer.name}
+                                  />
+                                  <AvatarFallback>
+                                    {selectedPayer.name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col text-left">
+                                  <span className="font-medium text-sm">
+                                    {selectedPayer.isYou
+                                      ? "You"
+                                      : selectedPayer.name}
+                                  </span>
+                                  {selectedPayer.username && (
+                                    <span className="text-xs text-muted-foreground/60">
+                                      @{selectedPayer.username}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div
+                                onClick={() => setPaidByDrawerOpen(true)}
+                                className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl cursor-pointer hover:bg-secondary/20 transition-colors border border-dashed border-border/60"
+                              >
+                                <div className="h-10 w-10 rounded-full bg-secondary/30" />
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-sm text-muted-foreground">
+                                    Select who paid
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }
+                        })()}
+                      </div>
                     </FormControl>
                     <FormMessage />
                     <PersonSelectDrawer
@@ -1054,28 +1099,31 @@ const SplitPurchasePage = () => {
                       />
                       {field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((userId) => (
-                            <Badge
-                              key={userId}
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {getFriendNameById(userId)}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4 p-0 text-muted-foreground/50 hover:text-foreground"
-                                onClick={() => {
-                                  field.onChange(
-                                    field.value.filter((v) => v !== userId)
-                                  );
-                                }}
+                          {field.value.map((userId) => {
+                            const person = participantOptions.find(
+                              (opt) => opt.id === userId
+                            );
+                            if (!person) return null;
+                            return (
+                              <div
+                                key={userId}
+                                className="flex items-center gap-2 p-1.5 pr-2 bg-secondary/20 rounded-full border border-border/50"
                               >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))}
+                                <Avatar className="h-5 w-5 border border-background">
+                                  <AvatarImage
+                                    src={person.profilePhoto || ""}
+                                    alt={person.name}
+                                  />
+                                  <AvatarFallback className="text-[10px]">
+                                    {person.name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs font-medium">
+                                  {person.isYou ? "You" : person.name}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </FormItem>

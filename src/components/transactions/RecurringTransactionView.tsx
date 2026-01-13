@@ -1,9 +1,11 @@
 import type React from "react";
 import type { RecurringTransaction } from "@/lib/transaction";
 import { CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/contexts/UserContext";
+import { Separator } from "@/components/ui/separator";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -18,58 +20,136 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
   const { user } = useUser();
   const navigate = useNavigate();
   const friends = user?.friends || [];
-  const getUserDisplayName = (userId: string) => {
-    if (userId === user?.id) return "You";
-    return friends.find((f) => f.id === userId)?.displayName ?? "???";
+
+  const getFriendDetails = (userId: string) => {
+    if (userId === user?.id) {
+      return {
+        displayName: `${user?.displayName || "You"} (You)`,
+        profilePhoto: user?.profilePhoto || null,
+        username: user?.username,
+      };
+    }
+    const friend = friends.find((f) => f.id === userId);
+    return {
+      displayName: friend?.displayName ?? "Unknown",
+      profilePhoto: friend?.profilePhoto || null,
+      username: friend?.username,
+    };
   };
 
+  const paidBy = getFriendDetails(transaction.paidBy);
+
   return (
-    <CardContent className="p-6 space-y-6">
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          This is an automatically generated recurring transaction.
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-fit mt-1"
-            onClick={() => navigate(`/recurring/${transaction.templateId}`)}
-          >
-            View Associated Transaction
-          </Button>
-        </AlertDescription>
-      </Alert>
+    <CardContent className="p-0 space-y-6 py-6">
+      <div className="px-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            This is an automatically generated recurring transaction.
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit mt-1 h-auto py-1 px-2 text-xs"
+              onClick={() => navigate(`/recurring/${transaction.templateId}`)}
+            >
+              View Associated Transaction
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
 
       {/* Paid By Section */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Paid By</h3>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="font-medium">
-            {getUserDisplayName(transaction.paidBy)}
-          </Badge>
+      <div className="px-6">
+        <p className="text-xs font-medium text-muted-foreground mb-3 font-medium">
+          Paid By
+        </p>
+        <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
+          <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={paidBy.profilePhoto || ""}
+              alt={paidBy.displayName}
+            />
+            <AvatarFallback className="text-xs">
+              {paidBy.displayName
+                .replace(" (You)", "")
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">{paidBy.displayName}</span>
+            {paidBy.username && (
+              <span className="text-[10px] text-muted-foreground">
+                @{paidBy.username}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
+      <Separator />
+
       {/* Splits Section */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Split Details</h3>
-        <div className="bg-secondary/70 rounded-lg p-3 space-y-2">
-          {transaction.splitsInSgd.map((split, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <span className="text-sm">{getUserDisplayName(split.user)}</span>
-              <span>${split.amount.toFixed(2)}</span>
-            </div>
-          ))}
+      <div className="px-6">
+        <p className="text-xs font-medium text-muted-foreground mb-4 font-medium">
+          Split Among
+        </p>
+        <div className="space-y-4">
+          {transaction.splitsInSgd.map((split, index) => {
+            const splitUser = getFriendDetails(split.user);
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={splitUser.profilePhoto || ""}
+                      alt={splitUser.displayName}
+                    />
+                    <AvatarFallback className="text-xs">
+                      {splitUser.displayName
+                        .replace(" (You)", "")
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm">
+                      {splitUser.displayName}
+                    </span>
+                    {splitUser.username && (
+                      <span className="text-[10px] text-muted-foreground">
+                        @{splitUser.username}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="font-semibold text-sm">
+                  ${split.amount.toFixed(2)}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Notes Section (if available) */}
       {transaction.notes && (
-        <div>
-          <h3 className="text-sm font-semibold mb-2">Notes</h3>
-          <p className="text-sm text-muted-foreground bg-secondary/70 p-3 rounded-lg">
-            {transaction.notes}
+        <div className="px-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2 font-medium">
+            Notes
           </p>
+          <div className="p-3 bg-secondary/50 rounded-lg text-sm border border-border/50">
+            {transaction.notes}
+          </div>
         </div>
       )}
     </CardContent>

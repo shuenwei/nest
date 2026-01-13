@@ -12,6 +12,7 @@ import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -547,17 +548,55 @@ const SettleUpPage = () => {
                     <FormItem>
                       <FormLabel>From</FormLabel>
                       <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-between text-left font-normal px-3 h-11"
-                          onClick={() => setPayerDrawerOpen(true)}
-                        >
-                          {field.value
-                            ? getFriendNameById(field.value)
-                            : "Who is paying?"}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                        <div>
+                          {(() => {
+                            const selectedPayer = participantOptions.find(p => p.id === field.value);
+                            if (selectedPayer) {
+                              return (
+                                <div
+                                  onClick={() => setPayerDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 transition-colors border border-border"
+                                >
+                                  <Avatar className="h-10 w-10 border border-background">
+                                    <AvatarImage
+                                      src={selectedPayer.profilePhoto || ""}
+                                      alt={selectedPayer.name}
+                                    />
+                                    <AvatarFallback>
+                                      {selectedPayer.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col text-left">
+                                    <span className="font-medium text-sm">
+                                      {selectedPayer.isYou
+                                        ? "You"
+                                        : selectedPayer.name}
+                                    </span>
+                                    {selectedPayer.username && (
+                                      <span className="text-xs text-muted-foreground/60">
+                                        @{selectedPayer.username}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div
+                                  onClick={() => setPayerDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl cursor-pointer hover:bg-secondary/20 transition-colors border border-dashed border-border/60"
+                                >
+                                  <div className="h-10 w-10 rounded-full bg-secondary/30" />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-sm">
+                                      Who is paying?
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
                       </FormControl>
                       <FormMessage />
                       <PersonSelectDrawer
@@ -586,17 +625,55 @@ const SettleUpPage = () => {
                     <FormItem>
                       <FormLabel>To</FormLabel>
                       <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-between text-left font-normal px-3 h-11"
-                          onClick={() => setPayeeDrawerOpen(true)}
-                        >
-                          {field.value
-                            ? getFriendNameById(field.value)
-                            : "Who is receiving?"}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                        <div>
+                          {(() => {
+                            const selectedPayee = participantOptions.find(p => p.id === field.value);
+                            if (selectedPayee) {
+                              return (
+                                <div
+                                  onClick={() => setPayeeDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl cursor-pointer hover:bg-secondary/40 transition-colors border border-border"
+                                >
+                                  <Avatar className="h-10 w-10 border border-background">
+                                    <AvatarImage
+                                      src={selectedPayee.profilePhoto || ""}
+                                      alt={selectedPayee.name}
+                                    />
+                                    <AvatarFallback>
+                                      {selectedPayee.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col text-left">
+                                    <span className="font-medium text-sm">
+                                      {selectedPayee.isYou
+                                        ? "You"
+                                        : selectedPayee.name}
+                                    </span>
+                                    {selectedPayee.username && (
+                                      <span className="text-xs text-muted-foreground/60">
+                                        @{selectedPayee.username}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div
+                                  onClick={() => setPayeeDrawerOpen(true)}
+                                  className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl cursor-pointer hover:bg-secondary/20 transition-colors border border-dashed border-border/60"
+                                >
+                                  <div className="h-10 w-10 rounded-full bg-secondary/30" />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-sm">
+                                      Who is receiving?
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
                       </FormControl>
                       <FormMessage />
                       <PersonSelectDrawer
@@ -637,6 +714,12 @@ const SettleUpPage = () => {
                               const value = e.target.value;
                               if (validateAmount(value)) {
                                 field.onChange(value);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (!isNaN(val)) {
+                                field.onChange(val.toFixed(2));
                               }
                             }}
                           />
