@@ -798,7 +798,6 @@ const SplitPurchasePage = () => {
                       <FormLabel>Transaction Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Dinner, Movie tickets, etc."
                           {...field}
                         />
                       </FormControl>
@@ -1174,7 +1173,6 @@ const SplitPurchasePage = () => {
                     <FormLabel>Notes (Optional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Add notes about this expense..."
                         {...field}
                       />
                     </FormControl>

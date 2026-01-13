@@ -727,7 +727,6 @@ const SettleUpPage = () => {
                       <FormLabel>Notes (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Add notes about this payment..."
                           {...field}
                         />
                       </FormControl>

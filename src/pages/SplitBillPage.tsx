@@ -1026,7 +1026,7 @@ const SplitBillPage = () => {
                     <FormItem>
                       <FormLabel>Restaurant Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Restaurant name" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1281,7 +1281,6 @@ const SplitBillPage = () => {
                             <FormLabel>Item Name</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="e.g., Pasta, Pizza"
                                 {...field}
                               />
                             </FormControl>
@@ -1438,7 +1437,7 @@ const SplitBillPage = () => {
                               onValueChange={field.onChange}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select discount type" />
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="none">
@@ -1644,7 +1643,6 @@ const SplitBillPage = () => {
                       <FormLabel>Notes (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Add notes about this bill..."
                           {...field}
                         />
                       </FormControl>
