@@ -805,6 +805,12 @@ const SplitBillPage = () => {
         // Add GST proportionally
         breakdown[participant].amount += gstAmount * proportion;
         breakdown[participant].amountInSGD += gstAmountInSGD * proportion;
+
+        // Apply Rounding Up to 2 decimal places
+        breakdown[participant].amount =
+          Math.ceil(breakdown[participant].amount * 100) / 100;
+        breakdown[participant].amountInSGD =
+          Math.ceil(breakdown[participant].amountInSGD * 100) / 100;
       });
     }
 
@@ -851,7 +857,7 @@ const SplitBillPage = () => {
     const splitObj = calculatePersonBreakdown();
     const splitsInSgd = Object.entries(splitObj).map(([user, d]) => ({
       user,
-      amount: parseFloat(d.amountInSGD.toFixed(2)),
+      amount: d.amountInSGD,
     }));
 
     /* --------  Final payload -------- */

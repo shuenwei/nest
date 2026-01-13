@@ -72,7 +72,8 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
   if (splitMethod === "even") {
     // Even split calculation
     const totalPeople = selectedPeople.length;
-    const perUserAmount = totalPeople > 0 ? numericAmount / totalPeople : 0;
+    const perUserAmount =
+      totalPeople > 0 ? Math.ceil((numericAmount / totalPeople) * 100) / 100 : 0;
 
     return (
       <div className="mt-4 space-y-2">
@@ -109,6 +110,9 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
     );
     const remainingAmount = numericAmount - totalManualAmount;
     const isExactMatch = Math.abs(remainingAmount) < 0.01;
+    const isRoundUpExcess =
+      remainingAmount < 0 &&
+      Math.abs(remainingAmount) <= selectedPeople.length * 0.01 + 0.01;
 
     return (
       <div className="mt-4 space-y-2">
@@ -132,11 +136,19 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
 
           {!isExactMatch && (
             <div
-              className={`flex justify-between items-center ${remainingAmount < 0 ? "text-red-500" : "text-amber-500"
+              className={`flex justify-between items-center ${remainingAmount < 0
+                ? isRoundUpExcess
+                  ? "text-muted-foreground"
+                  : "text-red-500"
+                : "text-amber-500"
                 }`}
             >
               <span className="text-sm font-medium">
-                {remainingAmount < 0 ? "Over-allocated" : "Remaining"}
+                {remainingAmount < 0
+                  ? isRoundUpExcess
+                    ? "Excess (Round Up)"
+                    : "Over-allocated"
+                  : "Remaining"}
               </span>
               <span className="font-medium">
                 ${Math.abs(remainingAmount).toFixed(2)}
@@ -150,7 +162,7 @@ const SplitCalculation: React.FC<SplitCalculationProps> = ({
           </div>
         </div>
 
-        {!isExactMatch && (
+        {!isExactMatch && !isRoundUpExcess && (
           <Alert variant={remainingAmount < 0 ? "destructive" : "default"}>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -365,7 +377,9 @@ const AddRecurringPage = () => {
       selectedPeople.length > 0
     ) {
       const numericAmount = Number.parseFloat(amount);
-      const evenAmount = (numericAmount / selectedPeople.length).toFixed(2);
+      const evenAmount = (
+        Math.ceil((numericAmount / selectedPeople.length) * 100) / 100
+      ).toFixed(2);
 
       filteredSplits.forEach((split) => {
         split.amount = evenAmount;
@@ -385,7 +399,9 @@ const AddRecurringPage = () => {
       return;
 
     const numericAmount = Number.parseFloat(amount);
-    const evenAmount = (numericAmount / selectedPeople.length).toFixed(2);
+    const evenAmount = (
+      Math.ceil((numericAmount / selectedPeople.length) * 100) / 100
+    ).toFixed(2);
 
     const newSplits = selectedPeople.map((user) => ({
       user,
@@ -421,10 +437,18 @@ const AddRecurringPage = () => {
         return sum + item.amount;
       }, 0);
 
-      const difference = Math.abs(originalAmount - totalAmount);
-      if (difference > 0.01) {
+      if (totalAmount < originalAmount - 0.01) {
         toast.error("Error", {
-          description: "The allocated amounts don't match the total expense",
+          description: "The allocated amounts are less than the total expense",
+        });
+        return;
+      }
+
+      // Block if OVER-allocated by more than the safe round-up limit
+      const maxExcess = values.selectedPeople.length * 0.01 + 0.01;
+      if (totalAmount > originalAmount + maxExcess) {
+        toast.error("Error", {
+          description: "The allocated amounts exceed the total expense",
         });
         return;
       }
