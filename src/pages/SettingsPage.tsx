@@ -94,7 +94,7 @@ const SettingsPage = () => {
                     resetTutorial();
                     navigate("/dashboard");
                   } else if (action === "help") {
-                    window.open("https://t.me/shuenwei", "_blank");
+                    window.open("https://t.me/shuenwei");
                   } else if (path) {
                     navigate(path);
                   }
