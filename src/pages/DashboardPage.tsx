@@ -17,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "@/contexts/LocationContext";
 import { CategorySelectDrawer } from "@/components/CategorySelectDrawer";
+import TutorialOverlay from "@/components/Tutorial/TutorialOverlay";
 
 const greetings = [
   "Hi",
@@ -48,7 +49,9 @@ const DashboardPage = () => {
     setStartDate,
     setEndDate,
     selectedCategoryIds,
-    setSelectedCategoryIds
+    setSelectedCategoryIds,
+    hasSeenTutorial,
+    completeTutorial
   } = useUser();
 
   const { imageUrl, imageLoading } = useLocation();
@@ -94,6 +97,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] font-outfit relative">
+      {!hasSeenTutorial && <TutorialOverlay onComplete={completeTutorial} />}
       {/* Hero Section */}
       <div className="relative w-full min-h-[50vh] bg-gray-200 pb-16">
         <div

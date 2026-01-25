@@ -58,6 +58,9 @@ interface User {
 interface UserContextValue {
   user: User | null;
   setUser: (user: User | null) => void;
+  hasSeenTutorial: boolean;
+  completeTutorial: () => void;
+  resetTutorial: () => void;
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   recurringTemplates: RecurringTemplate[] | null;
@@ -101,6 +104,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const stored = localStorage.getItem("user");
     return stored ? (JSON.parse(stored) as User) : null;
   });
+
+  const [hasSeenTutorial, setHasSeenTutorial] = useState(() => {
+    return localStorage.getItem("hasSeenTutorial") === "true";
+  });
+
+  const completeTutorial = () => {
+    setHasSeenTutorial(true);
+    localStorage.setItem("hasSeenTutorial", "true");
+  };
+
+  const resetTutorial = () => {
+    setHasSeenTutorial(false);
+    localStorage.removeItem("hasSeenTutorial");
+  };
+
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const stored = localStorage.getItem("transactions");
     return stored ? (JSON.parse(stored) as Transaction[]) : [];
@@ -481,6 +499,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         setUser,
+        hasSeenTutorial,
+        completeTutorial,
+        resetTutorial,
         loading,
         loadingTelegram,
         updating,

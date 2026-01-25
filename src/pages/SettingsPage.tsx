@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download, ShieldCheck, Folder } from "lucide-react";
+import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download, ShieldCheck, Folder, CircleHelp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
@@ -16,12 +16,13 @@ const menuItems = [
   { label: "Manage Categories", icon: Folder, path: "/settings/categories" },
   { label: "Email Forwarding", icon: Mail, path: "/settings/emailforwarding" },
   { label: "Export Transactions", icon: Download, path: "/settings/export" },
+  { label: "Tutorial", icon: CircleHelp, action: "replay" },
   //{ label: "Block Users", icon: UserRoundX, path: "/settings/block" },
 ];
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { user, refreshUser, transactions, loading, updating } = useUser();
+  const { user, refreshUser, transactions, loading, updating, resetTutorial } = useUser();
   const [isTelegramApp, setIsTelegramApp] = useState(false);
   const { isAccessGranted, canOpenSettings, openSettings } = useLocation();
 
@@ -83,11 +84,18 @@ const SettingsPage = () => {
               ...(user?.isAdmin
                 ? [{ label: "Admin Dashboard", icon: ShieldCheck, path: "/admin" }]
                 : []),
-            ].map(({ label, icon: Icon, path }) => (
+            ].map(({ label, icon: Icon, path, action }) => (
               <div
                 key={label}
-                className="flex items-center justify-between px-4 py-3"
-                onClick={() => navigate(path)}
+                className="flex items-center justify-between px-4 py-3 cursor-pointer"
+                onClick={() => {
+                  if (action === "replay") {
+                    resetTutorial();
+                    navigate("/dashboard");
+                  } else if (path) {
+                    navigate(path);
+                  }
+                }}
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5" />
