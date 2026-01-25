@@ -41,7 +41,7 @@ const steps: Step[] = [
     icon: <span className="text-4xl">💸</span>,
   },
   {
-    title: "Smart Settle Up",
+    title: "Smart settle up",
     description: "Travelled as a group? Do a smart settle up at the end of the trip to minimise the number of transfers needed.",
     icon: <span className="text-4xl">🧳</span>,
   },

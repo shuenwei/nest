@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/NavBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download, ShieldCheck, Folder, CircleHelp } from "lucide-react";
+import { Settings, GaugeCircle, UserRoundX, ChevronRight, Mail, Download, ShieldCheck, Folder, CircleHelp, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "@/lib/toast";
@@ -17,6 +17,7 @@ const menuItems = [
   { label: "Email Forwarding", icon: Mail, path: "/settings/emailforwarding" },
   { label: "Export Transactions", icon: Download, path: "/settings/export" },
   { label: "Tutorial", icon: CircleHelp, action: "replay" },
+  { label: "Help", icon: MessageCircle, action: "help" },
   //{ label: "Block Users", icon: UserRoundX, path: "/settings/block" },
 ];
 
@@ -92,6 +93,8 @@ const SettingsPage = () => {
                   if (action === "replay") {
                     resetTutorial();
                     navigate("/dashboard");
+                  } else if (action === "help") {
+                    window.open("https://t.me/shuenwei", "_blank");
                   } else if (path) {
                     navigate(path);
                   }
