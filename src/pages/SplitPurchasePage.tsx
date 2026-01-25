@@ -607,6 +607,21 @@ const SplitPurchasePage = () => {
     }
   }, [currency]);
 
+  // Auto-select detected currency if user hasn't changed it
+  useEffect(() => {
+    if (
+      detectedCurrency &&
+      !isEditMode &&
+      !form.formState.dirtyFields.currency
+    ) {
+      const currentCurrency = form.getValues("currency");
+      // If we are currently on default "SGD" and detected is different
+      if (currentCurrency === "SGD" && detectedCurrency !== "SGD") {
+        form.setValue("currency", detectedCurrency);
+      }
+    }
+  }, [detectedCurrency, isEditMode, form]);
+
   // Update manual splits when selected people change
   useEffect(() => {
     if (initializing) return;
