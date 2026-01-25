@@ -51,6 +51,11 @@ const steps: Step[] = [
     icon: <span className="text-4xl">🧾</span>,
   },
   {
+    title: "Enable location access",
+    description: "Enable location access to automatically detect your currency.",
+    icon: <span className="text-4xl">📍</span>,
+  },
+  {
     title: "You're ready!",
     description: "Splitting bills should have never been this difficult. If you’ve got questions or feedback, just drop me a message on Telegram @shuenwei.",
     icon: <span className="text-4xl">🎉</span>,
