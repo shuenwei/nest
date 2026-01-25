@@ -52,7 +52,7 @@ const steps: Step[] = [
   },
   {
     title: "You're ready!",
-    description: "Splitting bills shouldn’t be this troublesome. If you’ve got questions or feedback, just drop me a message on Telegram @shuenwei.",
+    description: "Splitting bills should have never been this difficult. If you’ve got questions or feedback, just drop me a message on Telegram @shuenwei.",
     icon: <span className="text-4xl">🎉</span>,
   },
 ];
@@ -130,7 +130,7 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
                   <div
                     key={index}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentStep ? "w-6 bg-black" : "w-1.5 bg-gray-400"
+                      index === currentStep ? "w-6 bg-black" : "w-1.5 bg-gray-300"
                     }`}
                   />
                 ))}
