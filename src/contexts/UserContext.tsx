@@ -378,6 +378,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const init = async () => {
       const tg = window.Telegram?.WebApp;
       const tgUser = tg?.initDataUnsafe?.user;
+      console.log("Telegram User Data:", tgUser);
       const initData = tg?.initData;
 
       const storedToken = localStorage.getItem("token");
