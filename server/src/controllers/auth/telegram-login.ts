@@ -59,9 +59,7 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
 
   try {
     telegramUser = JSON.parse(userPayload);
-    console.log("Telegram Login - Parsed User:", telegramUser);
   } catch (err) {
-    console.error("Telegram Login - JSON Parse Error:", err, "Payload:", userPayload);
     res.status(400).json({ error: "Invalid user payload" });
     return;
   }
@@ -119,9 +117,6 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-      console.log("Telegram Login - Update Data:", JSON.stringify(updateData, null, 2));
-      console.log("Telegram Login - Initial Profile Photo:", updateData.profilePhoto ? "Present (Buffer)" : "Missing");
-
     const userDoc = await User.findOneAndUpdate(
       {
         $or: [{ telegramId }, { username }],
@@ -129,13 +124,6 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
       updateData,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
-
-    console.log("Telegram Login - Updated User Doc:", userDoc ? {
-      id: userDoc._id,
-      photoUrl: userDoc.photoUrl,
-      hasProfilePhoto: !!userDoc.profilePhoto,
-      contentType: userDoc.profilePhotoContentType
-    } : "null");
 
     const token = jwt.signToken(
       { id: userDoc._id, telegramId: userDoc.telegramId },
