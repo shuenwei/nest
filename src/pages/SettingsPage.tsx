@@ -55,14 +55,8 @@ const SettingsPage = () => {
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
               <AvatarImage
-                src={user?.photoUrl || ""}
-                alt={user?.displayName}
-                className="object-cover"
-              />
-              <AvatarImage
                 src={user?.profilePhoto ? user?.profilePhoto : ""}
                 alt={user?.displayName}
-                className="object-cover"
               />
               <AvatarFallback>
                 {user?.displayName

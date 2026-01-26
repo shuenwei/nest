@@ -21,7 +21,6 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
       return {
         displayName: `${user?.displayName || "You"} (You)`,
         profilePhoto: user?.profilePhoto || null,
-        photoUrl: user?.photoUrl,
         username: user?.username,
       };
     }
@@ -29,7 +28,6 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
     return {
       displayName: friend?.displayName ?? "Unknown",
       profilePhoto: friend?.profilePhoto || null,
-      photoUrl: friend?.photoUrl,
       username: friend?.username,
     };
   };
@@ -47,7 +45,6 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
         </p>
         <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={paidBy.photoUrl || ""} alt={paidBy.displayName} />
             <AvatarImage src={paidBy.profilePhoto || ""} alt={paidBy.displayName} />
             <AvatarFallback className="text-xs">
               {paidBy.displayName
@@ -99,10 +96,6 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
                         key={userId}
                         className="h-6 w-6 border-2 border-background"
                       >
-                        <AvatarImage
-                          src={friend.photoUrl || ""}
-                          alt={friend.displayName}
-                        />
                         <AvatarImage
                           src={friend.profilePhoto || ""}
                           alt={friend.displayName}
@@ -205,7 +198,6 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
               <div key={index} className="flex justify-between items-center bg-secondary/10 p-2 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={splitUser.photoUrl || ""} alt={splitUser.displayName} />
                     <AvatarImage src={splitUser.profilePhoto || ""} alt={splitUser.displayName} />
                     <AvatarFallback className="text-xs">
                       {splitUser.displayName

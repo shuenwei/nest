@@ -46,7 +46,6 @@ const SmartSettlePage = () => {
       name: string;
       username: string;
       profilePhoto?: string | null;
-      photoUrl?: string;
     }>
   >([]);
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
@@ -66,7 +65,6 @@ const SmartSettlePage = () => {
         name: friend.displayName,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       }));
 
       setFriends(formattedFriends);
@@ -82,7 +80,6 @@ const SmartSettlePage = () => {
         name: user?.displayName ?? "You",
         username: user?.username ?? "",
         profilePhoto: user?.profilePhoto,
-        photoUrl: user?.photoUrl,
         isYou: true,
       },
       ...friends.map((friend) => ({
@@ -90,7 +87,6 @@ const SmartSettlePage = () => {
         name: friend.name,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       })),
     ],
     [currentUserId, friends, user?.displayName, user?.profilePhoto, user?.username]
@@ -268,10 +264,7 @@ const SmartSettlePage = () => {
                         className="inline-flex items-center gap-2 rounded-lg bg-muted px-3 py-2"
                       >
                         <Avatar className="h-7 w-7">
-                          <AvatarImage 
-                            src={person.photoUrl || person.profilePhoto || undefined} 
-                            className="object-cover" 
-                          />
+                          <AvatarImage src={person.profilePhoto ?? undefined} />
                           <AvatarFallback>
                             {person.name?.[0]?.toUpperCase() ?? "?"}
                           </AvatarFallback>

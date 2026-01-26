@@ -20,7 +20,6 @@ export type PersonOption = {
   id: string;
   name: string;
   username?: string;
-  photoUrl?: string;
   profilePhoto?: string | null;
   isYou?: boolean;
 };
@@ -176,11 +175,7 @@ export const PersonSelectDrawer = ({
       >
         <div className="flex items-center gap-3">
           <Avatar className="h-11 w-11">
-            <AvatarImage
-              src={person.photoUrl || ""}
-              className="object-cover"
-            />
-            <AvatarImage src={person.profilePhoto ?? undefined} className="object-cover" />
+            <AvatarImage src={person.profilePhoto ?? undefined} />
             <AvatarFallback>
               {person.name?.[0]?.toUpperCase() ?? "?"}
             </AvatarFallback>

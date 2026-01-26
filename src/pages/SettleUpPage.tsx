@@ -269,7 +269,6 @@ const SettleUpPage = () => {
       name: string;
       username: string;
       profilePhoto?: string | null;
-      photoUrl?: string;
     }>
   >([]);
 
@@ -289,7 +288,6 @@ const SettleUpPage = () => {
         name: user?.displayName ?? "You",
         username: user?.username ?? "",
         profilePhoto: user?.profilePhoto,
-        photoUrl: user?.photoUrl,
         isYou: true,
       },
       ...filteredFriends.map((friend) => ({
@@ -297,7 +295,6 @@ const SettleUpPage = () => {
         name: friend.name,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       })),
     ],
     [
@@ -316,7 +313,6 @@ const SettleUpPage = () => {
         name: friend.displayName,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       }));
 
       setFriends(formattedFriends);
@@ -579,9 +575,8 @@ const SettleUpPage = () => {
                                 >
                                   <Avatar className="h-10 w-10 border border-background">
                                     <AvatarImage
-                                      src={selectedPayer.photoUrl || selectedPayer.profilePhoto || ""}
+                                      src={selectedPayer.profilePhoto || ""}
                                       alt={selectedPayer.name}
-                                      className="object-cover"
                                     />
                                     <AvatarFallback>
                                       {selectedPayer.name.charAt(0).toUpperCase()}
@@ -660,9 +655,8 @@ const SettleUpPage = () => {
                                 >
                                   <Avatar className="h-10 w-10 border border-background">
                                     <AvatarImage
-                                      src={selectedPayee.photoUrl || selectedPayee.profilePhoto || ""}
+                                      src={selectedPayee.profilePhoto || ""}
                                       alt={selectedPayee.name}
-                                      className="object-cover"
                                     />
                                     <AvatarFallback>
                                       {selectedPayee.name.charAt(0).toUpperCase()}

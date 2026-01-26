@@ -21,7 +21,6 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
       return {
         displayName: `${user?.displayName || "You"} (You)`,
         profilePhoto: user?.profilePhoto || null,
-        photoUrl: user?.photoUrl,
         username: user?.username,
       };
     }
@@ -29,7 +28,6 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
     return {
       displayName: friend?.displayName ?? "Unknown",
       profilePhoto: friend?.profilePhoto || null,
-      photoUrl: friend?.photoUrl,
       username: friend?.username,
     };
   };
@@ -51,7 +49,6 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
           {/* Payer */}
           <div className="flex flex-col items-center w-[40%] text-center">
             <Avatar className="h-12 w-12 mb-2">
-              <AvatarImage src={payer.photoUrl || ""} alt={payer.displayName} />
               <AvatarImage src={payer.profilePhoto || ""} alt={payer.displayName} />
               <AvatarFallback className="text-sm">
                 {payer.displayName
@@ -77,7 +74,6 @@ const SettleUpTransactionView: React.FC<SettleUpTransactionViewProps> = ({
           {/* Payee */}
           <div className="flex flex-col items-center w-[40%] text-center">
             <Avatar className="h-12 w-12 mb-2">
-              <AvatarImage src={payee.photoUrl || ""} alt={payee.displayName} />
               <AvatarImage src={payee.profilePhoto || ""} alt={payee.displayName} />
               <AvatarFallback className="text-sm">
                 {payee.displayName

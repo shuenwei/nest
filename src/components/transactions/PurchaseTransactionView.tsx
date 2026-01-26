@@ -21,7 +21,6 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
       return {
         displayName: `${user?.displayName || "You"} (You)`,
         profilePhoto: user?.profilePhoto || null,
-        photoUrl: user?.photoUrl,
         username: user?.username,
       };
     }
@@ -29,7 +28,6 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
     return {
       displayName: friend?.displayName ?? "Unknown",
       profilePhoto: friend?.profilePhoto || null,
-      photoUrl: friend?.photoUrl,
       username: friend?.username,
     };
   };
@@ -47,7 +45,6 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
         </p>
         <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={paidBy.photoUrl || ""} alt={paidBy.displayName} />
             <AvatarImage src={paidBy.profilePhoto || ""} alt={paidBy.displayName} />
             <AvatarFallback className="text-xs">
               {paidBy.displayName
@@ -82,7 +79,6 @@ const PurchaseTransactionView: React.FC<PurchaseTransactionViewProps> = ({
               <div key={index} className="flex items-center justify-between group">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={splitUser.photoUrl || ""} alt={splitUser.displayName} />
                     <AvatarImage src={splitUser.profilePhoto || ""} alt={splitUser.displayName} />
                     <AvatarFallback className="text-xs">
                       {splitUser.displayName

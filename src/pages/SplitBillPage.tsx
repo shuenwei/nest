@@ -318,7 +318,6 @@ const SplitBillPage = () => {
       name: string;
       username: string;
       profilePhoto?: string | null;
-      photoUrl?: string;
     }>
   >([]);
 
@@ -331,7 +330,6 @@ const SplitBillPage = () => {
         name: user?.displayName ?? "You",
         username: user?.username ?? "",
         profilePhoto: user?.profilePhoto,
-        photoUrl: user?.photoUrl,
         isYou: true,
       },
       ...friends.map((friend) => ({
@@ -339,7 +337,6 @@ const SplitBillPage = () => {
         name: friend.name,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       })),
     ],
     [currentUserId, friends, user?.displayName, user?.profilePhoto, user?.username]
@@ -352,7 +349,6 @@ const SplitBillPage = () => {
         name: friend.displayName,
         username: friend.username,
         profilePhoto: friend.profilePhoto,
-        photoUrl: friend.photoUrl,
       }));
 
       setFriends(formattedFriends);
@@ -1196,7 +1192,7 @@ const SplitBillPage = () => {
                                 >
                                   <Avatar className="h-10 w-10 border border-background">
                                     <AvatarImage
-                                      src={selectedPayer.photoUrl || selectedPayer.profilePhoto || ""}
+                                      src={selectedPayer.profilePhoto || ""}
                                       alt={selectedPayer.name}
                                     />
                                     <AvatarFallback>
@@ -1305,7 +1301,7 @@ const SplitBillPage = () => {
                               >
                                 <Avatar className="h-5 w-5 border border-background">
                                   <AvatarImage
-                                    src={person.photoUrl || person.profilePhoto || ""}
+                                    src={person.profilePhoto || ""}
                                     alt={person.name}
                                   />
                                   <AvatarFallback className="text-[10px]">
@@ -1472,7 +1468,7 @@ const SplitBillPage = () => {
                                   >
                                     <Avatar className="h-5 w-5 border border-background">
                                       <AvatarImage
-                                        src={person.photoUrl || person.profilePhoto || ""}
+                                        src={person.profilePhoto || ""}
                                         alt={person.name}
                                       />
                                       <AvatarFallback className="text-[10px]">

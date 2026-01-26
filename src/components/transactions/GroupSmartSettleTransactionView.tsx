@@ -44,7 +44,6 @@ const GroupSmartSettleTransactionView = ({ transaction }: Props) => {
             name: user.displayName ?? "You",
             username: user.username,
             profilePhoto: user.profilePhoto,
-            photoUrl: user.photoUrl,
             isYou: true,
           };
         }
@@ -55,7 +54,6 @@ const GroupSmartSettleTransactionView = ({ transaction }: Props) => {
           name: friend?.displayName ?? "Unknown user",
           username: friend?.username,
           profilePhoto: friend?.profilePhoto,
-          photoUrl: friend?.photoUrl,
           isYou: false,
         };
       }),
@@ -99,7 +97,6 @@ const GroupSmartSettleTransactionView = ({ transaction }: Props) => {
               className="inline-flex items-center gap-2 rounded-lg bg-muted px-3 py-2"
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={participant.photoUrl || ""} />
                 <AvatarImage src={participant.profilePhoto ?? undefined} />
                 <AvatarFallback>
                   {participant.name?.[0]?.toUpperCase() ?? "?"}
