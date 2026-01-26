@@ -86,9 +86,26 @@ const getSmartSettle = async (req: Request, res: Response): Promise<void> => {
               },
             },
           ],
+          groupSmartSettle: [
+            { $match: { type: "groupSmartSettle" } },
+            { $unwind: "$transfers" },
+            {
+              $project: {
+                from: "$transfers.payer",
+                to: "$transfers.payee",
+                amount: "$transfers.amount",
+              },
+            },
+          ],
         },
       },
-      { $project: { rows: { $concatArrays: ["$purchaseBill", "$settleup"] } } },
+      {
+        $project: {
+          rows: {
+            $concatArrays: ["$purchaseBill", "$settleup", "$groupSmartSettle"],
+          },
+        },
+      },
       { $unwind: "$rows" },
       { $replaceRoot: { newRoot: "$rows" } },
       {
