@@ -23,10 +23,10 @@ const getUserByTelegramId = async (
     const user = await User.findOne({ telegramId })
       .populate<{
         friends: IFriend[];
-      }>("friends", "username displayName profilePhoto profilePhotoContentType photoUrl hasSignedUp")
+      }>("friends", "username displayName profilePhoto hasSignedUp")
       .populate<{ blockedUsers: IFriend[] }>(
         "blockedUsers",
-        "username displayName profilePhoto profilePhotoContentType photoUrl hasSignedUp"
+        "username displayName profilePhoto hasSignedUp"
       );
 
     if (!user) {
@@ -36,7 +36,7 @@ const getUserByTelegramId = async (
 
     const base64Photo =
       includePhotos && user.profilePhoto
-        ? `data:${user.get("profilePhotoContentType") || "image/jpeg"};base64,${user.profilePhoto.toString("base64")}`
+        ? `data:image/jpeg;base64,${user.profilePhoto.toString("base64")}`
         : undefined;
 
     const friends = Array.isArray(user.friends) ? user.friends : [];
@@ -49,7 +49,6 @@ const getUserByTelegramId = async (
       username: user.username,
       displayName: user.displayName,
       telegramId: user.telegramId,
-      photoUrl: user.get("photoUrl"),
       verifiedAt: user.verifiedAt,
       hasSignedUp: user.hasSignedUp,
       isAdmin: user.get("isAdmin") || false,
@@ -59,10 +58,9 @@ const getUserByTelegramId = async (
         username: friend.username,
         displayName: friend.displayName,
         hasSignedUp: friend.hasSignedUp,
-        photoUrl: (friend as any).photoUrl,
         profilePhoto:
           includePhotos && friend.profilePhoto
-            ? `data:${(friend as any).profilePhotoContentType || "image/jpeg"};base64,${friend.profilePhoto.toString("base64")}`
+            ? `data:image/jpeg;base64,${friend.profilePhoto.toString("base64")}`
             : undefined,
       })),
       blockedUsers: blockedUsers.map((blocked) => ({
@@ -70,10 +68,9 @@ const getUserByTelegramId = async (
         username: blocked.username,
         displayName: blocked.displayName,
         hasSignedUp: blocked.hasSignedUp,
-        photoUrl: (blocked as any).photoUrl,
         profilePhoto:
           includePhotos && blocked.profilePhoto
-            ? `data:${(blocked as any).profilePhotoContentType || "image/jpeg"};base64,${blocked.profilePhoto.toString("base64")}`
+            ? `data:image/jpeg;base64,${blocked.profilePhoto.toString("base64")}`
             : undefined,
       })),
       monthlyUsage: user.monthlyUsage,

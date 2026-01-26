@@ -98,7 +98,6 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (telegramUser.photo_url) {
-      updateData.photoUrl = telegramUser.photo_url;
       try {
         const response = await axios.get<ArrayBuffer>(
           telegramUser.photo_url,
@@ -110,12 +109,10 @@ const telegramLogin = async (req: Request, res: Response): Promise<void> => {
         const contentType = response.headers["content-type"];
         const photoBuffer = Buffer.from(response.data);
         if (
-          (contentType?.toLowerCase().startsWith("image/jpeg") ||
-           contentType?.toLowerCase().startsWith("image/svg+xml")) &&
+          contentType?.toLowerCase().startsWith("image/jpeg") &&
           photoBuffer.length > 0
         ) {
           updateData.profilePhoto = photoBuffer;
-          updateData.profilePhotoContentType = contentType;
         }
       } catch (photoError) {
         console.error("Failed to fetch Telegram profile photo:", photoError);
