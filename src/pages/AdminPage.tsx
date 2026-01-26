@@ -261,7 +261,7 @@ const AdminPage = () => {
                             <div className="pt-4 border-t animate-in fade-in space-y-4">
                                 <div className="flex items-center gap-4">
                                     <Avatar className="h-12 w-12">
-                                        <AvatarImage src={resolvedUser.profilePhoto} />
+                                        <AvatarImage src={resolvedUser.profilePhoto || resolvedUser.profilePhoto || ""} />
                                         <AvatarFallback>{resolvedUser.displayName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -349,7 +349,7 @@ const AdminPage = () => {
                                     <div key={u._id} className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-10 w-10">
-                                                <AvatarImage src={u.profilePhoto || undefined} />
+                                                <AvatarImage src={u.photoUrl || u.profilePhoto || undefined} />
                                                 <AvatarFallback>{(u.displayName || "?").charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="min-w-0">

@@ -26,6 +26,7 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
       return {
         displayName: `${user?.displayName || "You"} (You)`,
         profilePhoto: user?.profilePhoto || null,
+        photoUrl: user?.photoUrl,
         username: user?.username,
       };
     }
@@ -33,6 +34,7 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
     return {
       displayName: friend?.displayName ?? "Unknown",
       profilePhoto: friend?.profilePhoto || null,
+      photoUrl: friend?.photoUrl,
       username: friend?.username,
     };
   };
@@ -65,6 +67,10 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
         </p>
         <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
           <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={paidBy.photoUrl || ""}
+              alt={paidBy.displayName}
+            />
             <AvatarImage
               src={paidBy.profilePhoto || ""}
               alt={paidBy.displayName}
@@ -107,6 +113,10 @@ const RecurringTransactionView: React.FC<RecurringTransactionViewProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={splitUser.photoUrl || ""}
+                      alt={splitUser.displayName}
+                    />
                     <AvatarImage
                       src={splitUser.profilePhoto || ""}
                       alt={splitUser.displayName}

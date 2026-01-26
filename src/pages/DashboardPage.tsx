@@ -120,10 +120,16 @@ const DashboardPage = () => {
             </div>
             <Avatar className="h-11 w-11 shadow-md" onClick={() => navigate("/settings")}>
               <AvatarImage
+                src={user.photoUrl || ""}
+                alt={user.displayName}
+                className="object-cover"
+              />
+              <AvatarImage
                 src={user.profilePhoto ? user.profilePhoto : ""}
                 alt={user.displayName}
+                className="object-cover"
               />
-              <AvatarFallback className="bg-muted-foreground/10 text-black">
+              <AvatarFallback className="text-black">
                 {user.displayName
                   .split(" ")
                   .map((n) => n[0])

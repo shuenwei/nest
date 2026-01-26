@@ -38,6 +38,7 @@ const ViewRecurringPage = () => {
       return {
         displayName: `${user?.displayName || "You"} (You)`,
         profilePhoto: user?.profilePhoto || null,
+        photoUrl: user?.photoUrl,
         username: user?.username,
       };
     }
@@ -45,6 +46,7 @@ const ViewRecurringPage = () => {
     return {
       displayName: friend?.displayName ?? "Unknown",
       profilePhoto: friend?.profilePhoto || null,
+      photoUrl: friend?.photoUrl,
       username: friend?.username,
     };
   };
@@ -221,7 +223,7 @@ const ViewRecurringPage = () => {
               <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
-                    src={paidBy.profilePhoto || ""}
+                    src={paidBy.photoUrl || paidBy.profilePhoto || ""}
                     alt={paidBy.displayName}
                   />
                   <AvatarFallback className="text-xs">
@@ -265,7 +267,7 @@ const ViewRecurringPage = () => {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
-                            src={splitUser.profilePhoto || ""}
+                            src={splitUser.photoUrl || splitUser.profilePhoto || ""}
                             alt={splitUser.displayName}
                           />
                           <AvatarFallback className="text-xs">
