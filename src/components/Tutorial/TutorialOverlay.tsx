@@ -21,6 +21,11 @@ const steps: Step[] = [
     icon: <span className="text-4xl">🇸🇬</span>,
   },
   {
+    title: "Add friends",
+    description: "Add friends by entering their Telegram username to start splitting bills. You are able to add your friends even if they aren't a Nest user yet. They will be able to view their transaction history upon account creation.",
+    icon: <span className="text-4xl">👥</span>,
+  },
+  {
     title: "Split purchases",
     description: "Split purchases equally, or enter custom split amounts.",
     icon: <span className="text-4xl">🛒</span>,
