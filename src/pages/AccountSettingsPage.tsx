@@ -144,8 +144,14 @@ const AccountSettingsPage = () => {
                 <div className="flex flex-col items-center gap-4">
                   <Avatar className="h-24 w-24">
                     <AvatarImage
+                      src={user?.photoUrl || ""}
+                      alt={user?.displayName}
+                      className="object-cover"
+                    />
+                    <AvatarImage
                       src={user?.profilePhoto || ""}
                       alt={user?.displayName}
+                      className="object-cover"
                     />
                     <AvatarFallback className="text-xl">
                       {user?.displayName?.charAt(0).toUpperCase() || "U"}

@@ -4,7 +4,9 @@ const UserSchema = new mongoose.Schema({
   telegramId: { type: String },
   username: { type: String, required: true, unique: true, lowercase: true },
   displayName: { type: String },
+  photoUrl: { type: String },
   profilePhoto: { type: Buffer },
+  profilePhotoContentType: { type: String, default: "image/jpeg" },
   verifiedAt: { type: Date },
   hasSignedUp: {
     type: Boolean,

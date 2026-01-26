@@ -24,7 +24,7 @@ export function FriendCard({
   const { user } = useUser();
   const friend = user?.friends.find((f) => f.id === userId);
   if (!friend) return null;
-  const { id, displayName, username, profilePhoto, hasSignedUp, balance } =
+  const { id, displayName, username, profilePhoto, photoUrl, hasSignedUp, balance } =
     friend;
 
   return (
@@ -43,8 +43,14 @@ export function FriendCard({
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
             <AvatarImage
-              src={profilePhoto ? profilePhoto : ""}
+              src={photoUrl || ""}
               alt={displayName}
+              className="object-cover"
+            />
+            <AvatarImage
+              src={profilePhoto || ""}
+              alt={displayName}
+              className="object-cover"
             />
             <AvatarFallback>
               {displayName

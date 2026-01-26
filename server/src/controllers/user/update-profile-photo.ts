@@ -42,10 +42,16 @@ const updateProfilePhoto = async (req: Request, res: Response): Promise<void> =>
     if (profilePhoto) {
       // From bot (base64)
       photoBuffer = Buffer.from(profilePhoto, 'base64');
+      user.profilePhotoContentType = "image/jpeg"; // Reset to default or infer if possible
     } else if (photoUrl) {
       // From Telegram login widget (URL)
       const response = await axios.get(photoUrl, { responseType: 'arraybuffer' });
       photoBuffer = Buffer.from(response.data);
+      const contentType = response.headers["content-type"];
+      if (contentType) {
+        user.profilePhotoContentType = contentType;
+      }
+      user.photoUrl = photoUrl;
     }
 
     if (!photoBuffer) {

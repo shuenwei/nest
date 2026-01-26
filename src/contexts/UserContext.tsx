@@ -16,6 +16,7 @@ interface Friend {
   id: string;
   username: string;
   displayName: string;
+  photoUrl?: string;
   profilePhoto?: string;
   balance: number;
   hasSignedUp: boolean;
@@ -25,6 +26,7 @@ interface BlockedUser {
   id: string;
   username: string;
   displayName: string;
+  photoUrl?: string;
   profilePhoto?: string;
   hasSignedUp: boolean;
 }
@@ -34,6 +36,7 @@ interface User {
   telegramId?: string;
   username: string;
   displayName: string;
+  photoUrl?: string;
   profilePhoto?: string;
   verifiedAt?: string;
   hasSignedUp: boolean;
@@ -273,9 +276,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       if (!includePhotos && user) {
         userData.profilePhoto = user.profilePhoto;
+        userData.photoUrl = user.photoUrl;
         userData.friends = userData.friends.map((friend: Friend) => {
           const existingFriend = user.friends.find((f) => f.id === friend.id);
-          return { ...friend, profilePhoto: existingFriend?.profilePhoto };
+          return {
+            ...friend,
+            profilePhoto: existingFriend?.profilePhoto,
+            photoUrl: existingFriend?.photoUrl,
+          };
         });
         userData.blockedUsers = userData.blockedUsers.map(
           (blockedUser: BlockedUser) => {
@@ -285,6 +293,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             return {
               ...blockedUser,
               profilePhoto: existingBlockedUser?.profilePhoto,
+              photoUrl: existingBlockedUser?.photoUrl,
             };
           }
         );
