@@ -196,7 +196,7 @@ const AdminPage = () => {
                 </div>
 
                 {/* System Maintenance Card */}
-                <Card className="mb-4 shadow-xs">
+                <Card className="mb-4 shadow-none">
                     <CardTitle className="px-6 text-lg">System Maintenance</CardTitle>
                     <CardContent className="px-6 space-y-6">
                         <div className="flex items-center justify-between">
@@ -242,7 +242,7 @@ const AdminPage = () => {
                 </Card>
 
                 {/* User Management Card */}
-                <Card className="mb-4 shadow-xs">
+                <Card className="mb-4 shadow-none">
                     <CardTitle className="px-6 text-lg">User Lookup</CardTitle>
                     <CardContent className="px-6 space-y-4">
                         <div className="flex gap-2">
@@ -318,7 +318,7 @@ const AdminPage = () => {
                 </Card>
 
                 {/* All Users Card */}
-                <Card className="mb-4 shadow-xs">
+                <Card className="mb-4 shadow-none">
                     <div className="flex items-center justify-between px-6 pt-3">
                         <CardTitle className="text-lg">All Users</CardTitle>
                         <Button
@@ -346,7 +346,7 @@ const AdminPage = () => {
                         {allUsers.length > 0 && (
                             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                                 {allUsers.map((u: any) => (
-                                    <div key={u._id} className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
+                                    <div key={u._id} className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-none">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-10 w-10">
                                                 <AvatarImage src={u.profilePhoto || undefined} />

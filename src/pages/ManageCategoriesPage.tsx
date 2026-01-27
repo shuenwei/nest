@@ -169,7 +169,7 @@ const ManageCategoriesPage = () => {
                 </Button>
 
                 {user?.categories?.map((category) => (
-                    <Card key={category.id} className="mb-3 py-4 shadow-xs">
+                    <Card key={category.id} className="mb-3 py-4 shadow-none">
                         <CardContent className="px-4 flex items-center justify-between">
                             <div className="font-semibold pl-2">{category.name}</div>
                             <div className="flex items-center gap-2">

@@ -167,7 +167,7 @@ const ViewTransactionPage = () => {
         <TransactionHeader transaction={transaction} />
 
         {/* Transaction Details */}
-        <Card className="mb-3 py-0 shadow-xs">
+        <Card className="mb-3 py-0 shadow-none">
           {transaction.type === "purchase" && (
             <PurchaseTransactionView transaction={transaction} />
           )}

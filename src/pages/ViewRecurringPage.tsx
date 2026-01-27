@@ -186,7 +186,7 @@ const ViewRecurringPage = () => {
         {/* Recurring Template Header */}
         <Card className="mb-6 shadow-none border-none bg-transparent">
           <CardContent className="px-0 pb-4 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-3xl border mb-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-none text-3xl border mb-4">
               🔁
             </div>
 
@@ -211,7 +211,7 @@ const ViewRecurringPage = () => {
         </Card>
 
         {/* Recurring Template Details */}
-        <Card className="mb-3 py-0 shadow-xs">
+        <Card className="mb-3 py-0 shadow-none">
           <CardContent className="p-0 space-y-6 py-6">
             {/* Paid By Section */}
             <div className="px-6">

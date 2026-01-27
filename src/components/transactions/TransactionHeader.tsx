@@ -38,7 +38,7 @@ const TransactionHeader: React.FC<TransactionHeaderProps> = ({
   return (
     <Card className="mb-6 shadow-none border-none bg-transparent">
       <CardContent className="px-0 pb-4 flex flex-col items-center justify-center text-center space-y-3">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-3xl border mb-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-none text-3xl border mb-4">
           {iconMap[transaction.type]}
         </div>
 

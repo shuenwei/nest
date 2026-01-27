@@ -81,7 +81,7 @@ const EmailForwardingPage = () => {
                 </div>
 
                 {/* Email Display Card */}
-                <Card className="shadow-xs mb-8 gap-0">
+                <Card className="shadow-none mb-8 gap-0">
                     <CardTitle className="px-6">
                         Nest Email Address
                     </CardTitle>
@@ -111,7 +111,7 @@ const EmailForwardingPage = () => {
 
                 <h2 className="text-lg font-semibold mb-4">Setup Guides</h2>
                 <Accordion type="single" collapsible className="w-full space-y-4">
-                    <AccordionItem value="gmail" className="border rounded-lg bg-white px-4 shadow-xs">
+                    <AccordionItem value="gmail" className="border rounded-lg bg-white px-4 shadow-none">
                         <AccordionTrigger className="hover:no-underline py-4">
                             <span className="font-medium">Gmail Setup</span>
                         </AccordionTrigger>
@@ -131,7 +131,7 @@ const EmailForwardingPage = () => {
                         </AccordionContent>
                     </AccordionItem>
 
-                    <AccordionItem value="outlook" className="border rounded-lg bg-white px-4 shadow-xs">
+                    <AccordionItem value="outlook" className="border rounded-lg bg-white px-4 shadow-none">
                         <AccordionTrigger className="hover:no-underline py-4">
                             <span className="font-medium">Outlook Setup</span>
                         </AccordionTrigger>
@@ -148,7 +148,7 @@ const EmailForwardingPage = () => {
                         </AccordionContent>
                     </AccordionItem>
 
-                    <AccordionItem value="manual" className="border rounded-lg bg-white px-4 shadow-xs">
+                    <AccordionItem value="manual" className="border rounded-lg bg-white px-4 shadow-none">
                         <AccordionTrigger className="hover:no-underline py-4">
                             <span className="font-medium">Manual Forwarding</span>
                         </AccordionTrigger>

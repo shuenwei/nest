@@ -51,7 +51,7 @@ const SettingsPage = () => {
           <p className="text-muted-foreground text-sm">Profile and Settings</p>
         </div>
 
-        <Card className="mb-6 p-4 shadow-xs">
+        <Card className="mb-6 p-4 shadow-none">
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
               <AvatarImage
@@ -78,7 +78,7 @@ const SettingsPage = () => {
           </div>
         </Card>
 
-        <Card className="mb-6 py-0 shadow-xs">
+        <Card className="mb-6 py-0 shadow-none">
           <CardContent className="px-0 divide-y">
             {[
               ...menuItems,
@@ -111,7 +111,7 @@ const SettingsPage = () => {
         </Card>
 
         {canOpenSettings && !isAccessGranted && (
-          <Card className="mb-6 py-4 shadow-xs border-amber-200 bg-amber-50">
+          <Card className="mb-6 py-4 shadow-none border-amber-200 bg-amber-50">
             <CardContent className="flex items-center justify-between">
               <div>
                 <div className="font-semibold text-sm text-amber-900">

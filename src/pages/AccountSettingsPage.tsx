@@ -138,7 +138,7 @@ const AccountSettingsPage = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Profile Photo Card */}
-            <Card className="shadow-xs">
+            <Card className="shadow-none">
               <CardTitle className="px-6">Profile Photo</CardTitle>
               <CardContent className="px-6">
                 <div className="flex flex-col items-center gap-4">
@@ -171,7 +171,7 @@ const AccountSettingsPage = () => {
             </Card>
 
             {/* Account Information Card */}
-            <Card className="shadow-xs">
+            <Card className="shadow-none">
               <CardTitle className="px-6">User Information</CardTitle>
               <CardContent className="px-6 space-y-4">
                 {/* Display Name */}

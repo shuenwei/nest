@@ -94,7 +94,7 @@ const OTPPage: FC<OTPPageProps> = ({
 
   return (
     <div className="min-h-[100dvh] h-[100dvh] bg-[#F8F8F8] font-outfit flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm rounded-2xl border border-gray-200 shadow-sm">
+      <Card className="w-full max-w-sm rounded-2xl border border-gray-200 shadow-none">
         <div className="px-6 pb-1">
           <Progress value={50} />
         </div>

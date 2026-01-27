@@ -35,7 +35,7 @@ const UsageLimitsPage = () => {
           </p>
         </div>
 
-        <Card className="mb-4 shadow-xs">
+        <Card className="mb-4 shadow-none">
           <CardContent className="px-4 space-y-2">
             <ScanText />
             <div className="flex justify-between">
@@ -49,7 +49,7 @@ const UsageLimitsPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="mb-4 shadow-xs">
+        <Card className="mb-4 shadow-none">
           <CardContent className="px-4 space-y-2">
             <Languages />
             <div className="flex justify-between">

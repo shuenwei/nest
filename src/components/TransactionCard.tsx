@@ -60,7 +60,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   const icon = iconMap[transaction.type];
   return (
     <Card
-      className={`mb-3 py-3 shadow-xs ${className}`}
+      className={`mb-3 py-3 shadow-none ${className}`}
       onClick={() => {
         triggerHapticImpact("light");
         navigate(`/history/${transaction._id}`);

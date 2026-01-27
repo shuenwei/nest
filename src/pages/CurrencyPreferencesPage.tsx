@@ -199,7 +199,7 @@ const CurrencyPreferencesPage = () => {
         <h1 className="text-2xl font-bold mb-6">Currency Preferences</h1>
 
         {/* Currency list */}
-        <Card className="mb-6 shadow-xs">
+        <Card className="mb-6 shadow-none">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">Currencies</CardTitle>

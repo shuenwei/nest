@@ -136,7 +136,7 @@ const ExportTransactionsPage = () => {
                 </div>
 
                 <div className="mb-4 space-y-2">
-                    <Card className="shadow-xs bg-white overflow-hidden gap-0 p-0">
+                    <Card className="shadow-none bg-white overflow-hidden gap-0 p-0">
                         <div className="flex justify-center p-3">
                             <Calendar
                                 initialFocus
@@ -269,7 +269,7 @@ const ExportTransactionsPage = () => {
                     </Card>
                 </div>
 
-                <Card className="mb-4 shadow-xs py-2">
+                <Card className="mb-4 shadow-none py-2">
                     <CardContent className="p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm font-medium">Selected Range</div>

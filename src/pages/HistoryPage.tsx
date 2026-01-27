@@ -96,7 +96,7 @@ const HistoryPage = () => {
         <div className="mb-4 flex gap-2">
           <div className="flex-1">
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full rounded-xl bg-background">
+              <SelectTrigger className="w-full rounded-xl">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
@@ -111,12 +111,12 @@ const HistoryPage = () => {
 
           <button
             onClick={() => setIsCategoryDrawerOpen(true)}
-            className="flex items-center justify-center gap-2 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-w-[44px]"
+            className="flex items-center justify-center gap-2 rounded-xl border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-w-[44px]"
           >
             {selectedCategoryIds.length === 0 ? (
               <Folder size={16} className="text-muted-foreground" />
             ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-black text-[10px] font-medium text-white">
                 {selectedCategoryIds.length}
               </div>
             )}
@@ -136,7 +136,7 @@ const HistoryPage = () => {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <Card key={index} className="mb-3 py-3 shadow-xs">
+              <Card key={index} className="mb-3 py-3 shadow-none">
                 <CardContent className="px-0 divide-y">
                   <div className="px-4 pb-3 flex justify-between items-start">
                     <div className="flex gap-3">

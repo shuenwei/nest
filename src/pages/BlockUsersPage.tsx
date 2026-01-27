@@ -184,7 +184,7 @@ const BlockedUsersPage = () => {
 
         {blocked.map(
           ({ id, displayName, username, profilePhoto, hasSignedUp }) => (
-            <Card key={id} className="mb-3 py-4 shadow-xs">
+            <Card key={id} className="mb-3 py-4 shadow-none">
               <CardContent className="px-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12">

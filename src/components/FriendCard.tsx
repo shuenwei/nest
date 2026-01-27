@@ -29,7 +29,7 @@ export function FriendCard({
 
   return (
     <Card
-      className={`mb-3 py-4 ${variant === "default" ? "shadow-xs" : "shadow-none"}`}
+      className={`mb-3 py-4 ${variant === "default" ? "shadow-none" : "shadow-none"}`}
       onClick={
         disableClick
           ? undefined
