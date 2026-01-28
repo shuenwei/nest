@@ -80,7 +80,7 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
             >
               <div className="flex justify-between items-start">
                 <span className="font-medium text-sm">{item.name}</span>
-                <div className="text-right">
+                <div className="text-right shrink-0 whitespace-nowrap pl-2">
                   <div className="font-semibold text-sm">
                     {transaction.currency} {item.price.toFixed(2)}
                   </div>
