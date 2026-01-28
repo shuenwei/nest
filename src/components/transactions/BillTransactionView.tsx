@@ -216,8 +216,22 @@ const BillTransactionView: React.FC<BillTransactionViewProps> = ({
                     )}
                   </div>
                 </div>
-                <div className="font-semibold text-sm">
-                  ${split.amount.toFixed(2)}
+                <div className="text-right">
+                  {transaction.currency !== "SGD" ? (
+                    <>
+                      <div className="font-semibold text-sm">
+                        SGD {split.amount.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {transaction.currency}{" "}
+                        {(split.amount * transaction.exchangeRate).toFixed(2)}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="font-semibold text-sm">
+                      ${split.amount.toFixed(2)}
+                    </div>
+                  )}
                 </div>
               </div>
             );
