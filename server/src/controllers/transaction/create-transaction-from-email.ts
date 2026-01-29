@@ -10,7 +10,9 @@ import {
 } from "../../utils/telegram-notifications";
 import { BalanceService } from "../../services/balance-service";
 
-import { simpleParser } from "mailparser";
+
+
+import { extractEmailBody } from "../../utils/parse-email";
 
 const createTransactionFromEmail = async (
     req: Request,
@@ -21,14 +23,7 @@ const createTransactionFromEmail = async (
 
         let emailBody = "";
         if (rawEmail) {
-            try {
-                const parsed = await simpleParser(rawEmail);
-                // Prefer text, fall back to html, then raw
-                emailBody = parsed.text || parsed.html || parsed.textAsHtml || rawEmail;
-            } catch (pError) {
-                console.warn("Mailparser failed, falling back to raw.", pError);
-                emailBody = rawEmail;
-            }
+            emailBody = await extractEmailBody(rawEmail);
         }
 
         if (!from || !to || !emailBody) {
