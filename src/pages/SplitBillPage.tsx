@@ -19,7 +19,11 @@ import {
   ScanText,
   CheckCircle,
   Languages,
+  CalendarIcon,
 } from "lucide-react";
+import { format } from "date-fns";
+import { DateTimeDrawer } from "@/components/DateTimeDrawer";
+import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -293,6 +297,7 @@ const SplitBillPage = () => {
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+  const [dateDrawerOpen, setDateDrawerOpen] = useState(false);
   const [activeSharedByIndex, setActiveSharedByIndex] = useState<number | null>(
     null
   );
@@ -1127,6 +1132,36 @@ const SplitBillPage = () => {
                   )}
                 </div>
 
+                {/* Date */}
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date & Time</FormLabel>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full px-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          onClick={() => setDateDrawerOpen(true)}
+                          type="button"
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP p")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-30" />
+                        </Button>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Category */}
                 <FormField
                   control={form.control}
@@ -1887,6 +1922,13 @@ const SplitBillPage = () => {
         onRateConfirm={handleExchangeRateConfirm}
         defaultRate={currentExchangeRate}
         amount={calculateTotalBillAmount()}
+      />
+
+      <DateTimeDrawer
+        open={dateDrawerOpen}
+        onOpenChange={setDateDrawerOpen}
+        date={form.watch("date")}
+        onDateChange={(date) => form.setValue("date", date)}
       />
 
       <ScanningScreen

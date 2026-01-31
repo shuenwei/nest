@@ -12,7 +12,10 @@ import {
   AlertCircle,
   RefreshCw,
   ChevronDown,
+  CalendarIcon,
 } from "lucide-react";
+import { format } from "date-fns";
+import { DateTimeDrawer } from "@/components/DateTimeDrawer";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "@/lib/toast";
 
@@ -431,6 +434,7 @@ const SplitPurchasePage = () => {
   const [paidByDrawerOpen, setPaidByDrawerOpen] = useState(false);
   const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+  const [dateDrawerOpen, setDateDrawerOpen] = useState(false);
   const [showExchangeRateDialog, setShowExchangeRateDialog] = useState(false);
   const { detectedCurrency, detectedCity } = useLocation();
   const navigate = useNavigate();
@@ -901,6 +905,36 @@ const SplitPurchasePage = () => {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="col-span-8 w-full">
+                      <FormLabel>Date & Time</FormLabel>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full px-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          onClick={() => setDateDrawerOpen(true)}
+                          type="button"
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP p")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-30" />
+                        </Button>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-8 gap-x-4 gap-y-2 w-full">
                   {/* --- Amount ---------------------------------------------------- */}
                   <FormField
@@ -1302,6 +1336,13 @@ const SplitPurchasePage = () => {
         onRateConfirm={handleExchangeRateConfirm}
         defaultRate={currentExchangeRate}
         amount={amount}
+      />
+
+      <DateTimeDrawer
+        open={dateDrawerOpen}
+        onOpenChange={setDateDrawerOpen}
+        date={form.watch("date")}
+        onDateChange={(date) => form.setValue("date", date)}
       />
     </div>
   );
