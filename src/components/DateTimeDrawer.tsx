@@ -105,12 +105,13 @@ export function DateTimeDrawer({
 
                 <div className="px-4 pb-20 flex-1 flex flex-col items-center w-full min-h-0">
                     {step === "date" ? (
-                        <div className="w-full flex justify-center items-center h-full pb-20">
+                        <div className="w-full flex justify-center items-center h-full pb-30">
                             <Calendar
                                 mode="single"
                                 selected={internalDate}
                                 onSelect={handleDateSelect}
                                 disabled={{ after: new Date() }}
+                                defaultMonth={internalDate}
                                 initialFocus
                                 classNames={{
                                     root: "w-full p-3"

@@ -923,7 +923,10 @@ const SplitPurchasePage = () => {
                           type="button"
                         >
                           {field.value ? (
-                            format(field.value, "PPP p")
+                            `${format(field.value, "d MMMM yyyy h.mm")}${format(
+                              field.value,
+                              "a"
+                            ).toLowerCase()}`
                           ) : (
                             <span>Pick a date</span>
                           )}
