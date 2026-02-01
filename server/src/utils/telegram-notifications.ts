@@ -19,7 +19,8 @@ export async function notifySplits(
   participants: (string | Types.ObjectId)[],
   splits: Split[],
   currency: string,
-  amount: number
+  amount: number,
+  specificUserIdsToNotify?: string[]
 ): Promise<void> {
   try {
     const payer = await User.findById(paidBy).lean();
@@ -29,10 +30,18 @@ export async function notifySplits(
 
     // Get unique set of user IDs to notify (participants + payer)
     // Note: Set automatically handles duplicates if payer is in participants
-    const userIdsToNotify = new Set([
+    let userIdsToNotify = new Set([
       ...participants.map((p) => p.toString()),
       paidBy.toString(),
     ]);
+
+    if (specificUserIdsToNotify && specificUserIdsToNotify.length > 0) {
+      // If specific users are requested, filter the full set to only those users
+      const specificSet = new Set(specificUserIdsToNotify);
+      userIdsToNotify = new Set(
+        [...userIdsToNotify].filter((id) => specificSet.has(id))
+      );
+    }
 
     for (const userId of userIdsToNotify) {
       const user = await User.findById(userId).lean();

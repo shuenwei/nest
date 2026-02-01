@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Bill } from "../../models/BillTransaction";
 import { BalanceService } from "../../services/balance-service";
-import { notifyTransactionUpdated } from "../../utils/telegram-notifications";
+import {
+  notifyTransactionUpdated,
+  notifySplits,
+} from "../../utils/telegram-notifications";
 
 const updateBill = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -142,14 +145,78 @@ const updateBill = async (req: Request, res: Response): Promise<void> => {
 
     await BalanceService.handleTransactionChange(existingBill, updatedBill);
 
-    await notifyTransactionUpdated(
-      transactionId,
-      transactionName,
-      updatedBill!.participants,
-      authUserId!,
-      currency,
-      amount
+    /* ---------- Notification Logic ---------- */
+    const existingParticipantIds = existingBill.participants.map(
+      (id: Types.ObjectId) => id.toString()
     );
+    const updatedParticipantIds = updatedBill!.participants.map(
+      (id: Types.ObjectId) => id.toString()
+    );
+
+    // 1. Identify participants who were already in the bill (intersection)
+    const continuingParticipantIds = updatedParticipantIds.filter((id: string) =>
+      existingParticipantIds.includes(id)
+    );
+
+    // 2. Identify NEW participants (in updated but not in existing)
+    const newParticipantIds = updatedParticipantIds.filter(
+      (id: string) => !existingParticipantIds.includes(id)
+    );
+
+    // Check if critical details (amount or splits) changed
+    const hasAmountChanged =
+      Math.abs(existingBill.amount - updatedBill!.amount) > 0.001;
+
+    const hasSplitsChanged = (() => {
+      const oldSplits = existingBill.splitsInSgd || [];
+      const newSplits = updatedBill!.splitsInSgd || [];
+      if (oldSplits.length !== newSplits.length) return true;
+
+      const oldMap = new Map(
+        oldSplits.map((s: { user: Types.ObjectId; amount: number }) => [
+          s.user.toString(),
+          Number(s.amount),
+        ])
+      );
+
+      for (const split of newSplits) {
+        const oldAmount = oldMap.get(split.user.toString());
+        // Check for undefined or null explicitly, or ensuring it's a number
+        if (typeof oldAmount !== "number") {
+          return true;
+        }
+        if (Math.abs(oldAmount - Number(split.amount)) > 0.001) {
+          return true;
+        }
+      }
+      return false;
+    })();
+
+    // Notify existing users ONLY if the update affects them financially
+    if (continuingParticipantIds.length > 0 && (hasAmountChanged || hasSplitsChanged)) {
+      await notifyTransactionUpdated(
+        transactionId,
+        transactionName,
+        continuingParticipantIds,
+        authUserId!,
+        currency,
+        amount
+      );
+    }
+
+    // Notify NEW users as if it's a new transaction for them
+    if (newParticipantIds.length > 0) {
+      await notifySplits(
+        updatedBill!.id,
+        transactionName,
+        updatedBill!.paidBy,
+        updatedBill!.participants,
+        splitsInSgdObj, // This uses the updated splits
+        currency,
+        amount,
+        newParticipantIds // Specific list solely for new people
+      );
+    }
 
     if (!updatedBill) {
       res.status(404).json({ error: "Bill not found" });

@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Purchase } from "../../models/PurchaseTransaction";
 import { BalanceService } from "../../services/balance-service";
-import { notifyTransactionUpdated } from "../../utils/telegram-notifications";
+import {
+  notifyTransactionUpdated,
+  notifySplits,
+} from "../../utils/telegram-notifications";
 
 const updatePurchase = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -96,14 +99,77 @@ const updatePurchase = async (req: Request, res: Response): Promise<void> => {
 
     await BalanceService.handleTransactionChange(existingPurchase, updatedPurchase);
 
-    await notifyTransactionUpdated(
-      transactionId,
-      transactionName,
-      updatedPurchase!.participants,
-      authUserId!,
-      currency,
-      amount
+    /* ---------- Notification Logic ---------- */
+    const existingParticipantIds = existingPurchase.participants.map(
+      (id: Types.ObjectId) => id.toString()
     );
+    const updatedParticipantIds = updatedPurchase!.participants.map(
+      (id: Types.ObjectId) => id.toString()
+    );
+
+    // 1. Identify participants who were already in the purchase (intersection)
+    const continuingParticipantIds = updatedParticipantIds.filter((id: string) =>
+      existingParticipantIds.includes(id)
+    );
+
+    // 2. Identify NEW participants (in updated but not in existing)
+    const newParticipantIds = updatedParticipantIds.filter(
+      (id: string) => !existingParticipantIds.includes(id)
+    );
+
+    // Check if critical details (amount or splits) changed
+    const hasAmountChanged =
+      Math.abs(existingPurchase.amount - updatedPurchase!.amount) > 0.001;
+
+    const hasSplitsChanged = (() => {
+      const oldSplits = existingPurchase.splitsInSgd || [];
+      const newSplits = updatedPurchase!.splitsInSgd || [];
+      if (oldSplits.length !== newSplits.length) return true;
+
+      const oldMap = new Map(
+        oldSplits.map((s: { user: Types.ObjectId; amount: number }) => [
+          s.user.toString(),
+          Number(s.amount),
+        ])
+      );
+
+      for (const split of newSplits) {
+        const oldAmount = oldMap.get(split.user.toString());
+        if (typeof oldAmount !== "number") {
+          return true;
+        }
+        if (Math.abs(oldAmount - Number(split.amount)) > 0.001) {
+          return true;
+        }
+      }
+      return false;
+    })();
+
+    // Notify existing users ONLY if the update affects them financially
+    if (continuingParticipantIds.length > 0 && (hasAmountChanged || hasSplitsChanged)) {
+      await notifyTransactionUpdated(
+        transactionId,
+        transactionName,
+        continuingParticipantIds,
+        authUserId!,
+        currency,
+        amount
+      );
+    }
+
+    // Notify NEW users as if it's a new transaction for them
+    if (newParticipantIds.length > 0) {
+      await notifySplits(
+        updatedPurchase!.id,
+        transactionName,
+        updatedPurchase!.paidBy,
+        updatedPurchase!.participants,
+        splitsInSgdObj, // This uses the updated splits
+        currency,
+        amount,
+        newParticipantIds // Specific list solely for new people
+      );
+    }
 
     if (!updatedPurchase) {
       res.status(404).json({ error: "Purchase not found" });
