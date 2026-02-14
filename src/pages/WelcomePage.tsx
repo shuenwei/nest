@@ -1,4 +1,4 @@
-import { useEffect, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import {
   Card,
   CardHeader,
@@ -14,13 +14,36 @@ interface WelcomePageProps {
 }
 
 const WelcomePage: FC<WelcomePageProps> = ({ onNext }) => {
+  const [isRedirectTarget, setIsRedirectTarget] = useState(() => {
+    // Check synchronously on mount to avoid flash
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    const isTelegramApp = Boolean(
+      window.Telegram?.WebApp?.initDataUnsafe?.user
+    );
+    return isMobile && !isTelegramApp;
+  });
 
+  useEffect(() => {
+    const check = () => {
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const isTelegramApp = Boolean(
+        window.Telegram?.WebApp?.initDataUnsafe?.user
+      );
+      if (isMobile && !isTelegramApp) {
+        setIsRedirectTarget(true);
+      }
+    };
+    check();
+  }, []);
 
   const handleNext = () => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isTelegramApp = Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user);
-
-    if (isMobile && !isTelegramApp) {
+    if (isRedirectTarget) {
       window.location.href = "https://t.me/nestExpenseApp_bot?startapp";
     } else {
       onNext();
@@ -40,8 +63,18 @@ const WelcomePage: FC<WelcomePageProps> = ({ onNext }) => {
         </CardContent>
 
         <CardFooter>
-          <Button onClick={handleNext} className="w-full">
-            Let's get started!
+          <Button
+            onClick={handleNext}
+            className={`w-full transition-colors relative overflow-hidden`}
+          >
+            {isRedirectTarget ? (
+              <div className="flex items-center justify-center gap-2">
+                Open in Telegram
+              </div>
+            ) : (
+              "Let's get started!"
+            )}
+
           </Button>
         </CardFooter>
       </Card>
