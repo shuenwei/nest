@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import {
   Card,
   CardHeader,
@@ -14,6 +14,19 @@ interface WelcomePageProps {
 }
 
 const WelcomePage: FC<WelcomePageProps> = ({ onNext }) => {
+
+
+  const handleNext = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTelegramApp = Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user);
+
+    if (isMobile && !isTelegramApp) {
+      window.location.href = "https://t.me/nestExpenseApp_bot?startapp";
+    } else {
+      onNext();
+    }
+  };
+
   return (
     <div className="min-h-[100dvh] h-[100dvh] bg-[#F8F8F8] font-outfit flex items-center justify-center px-4">
       <Card className="w-full max-w-sm text-center">
@@ -27,7 +40,7 @@ const WelcomePage: FC<WelcomePageProps> = ({ onNext }) => {
         </CardContent>
 
         <CardFooter>
-          <Button onClick={onNext} className="w-full">
+          <Button onClick={handleNext} className="w-full">
             Let's get started!
           </Button>
         </CardFooter>
