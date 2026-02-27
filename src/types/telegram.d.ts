@@ -12,7 +12,6 @@ declare global {
         disableVerticalSwipes?: () => void;
         enableVerticalSwipes?: () => void;
         initData?: string;
-        platform?: string;
         initDataUnsafe?: {
           user?: {
             id: number;
