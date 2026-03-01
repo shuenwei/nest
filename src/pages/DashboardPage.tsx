@@ -108,7 +108,7 @@ const DashboardPage = () => {
           }}
         />
 
-        <div className="relative z-10 px-6 pt-[calc(2.5rem+env(safe-area-inset-top))] [.telegram-webapp_&]:pt-[calc(3.75rem+env(safe-area-inset-top))] text-white flex flex-col h-full w-full max-w-md mx-auto">
+        <div className="relative z-10 px-6 pt-[calc(2.5rem+env(safe-area-inset-top))] [.telegram-webapp_&]:pt-[calc(var(--tg-safe-area-inset-top,env(safe-area-inset-top))+var(--tg-content-safe-area-inset-top,0px))] text-white flex flex-col h-full w-full max-w-md mx-auto">
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-xl font-semibold drop-shadow-md">
