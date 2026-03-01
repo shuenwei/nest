@@ -217,7 +217,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
+      const userToSave = {
+        ...user,
+        friends: user.friends?.map(({ profilePhoto, ...friend }) => friend) || [],
+        blockedUsers:
+          user.blockedUsers?.map(
+            ({ profilePhoto, ...blockedUser }) => blockedUser
+          ) || [],
+      };
+      localStorage.setItem("user", JSON.stringify(userToSave));
     } else {
       localStorage.removeItem("user");
     }
