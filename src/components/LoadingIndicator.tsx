@@ -39,10 +39,7 @@ export default function LoadingIndicator() {
             duration: 0.3,
             ease: "easeInOut",
           }}
-          className="fixed top-0 left-0 w-full z-40 bg-green-300"
-          style={{
-            paddingTop: "env(safe-area-inset-top)",
-          }}
+          className="fixed top-0 left-0 w-full z-40 bg-green-300 pt-[env(safe-area-inset-top)] [.telegram-webapp_&]:pt-[calc(var(--tg-safe-area-inset-top)+var(--tg-content-safe-area-inset-top))]"
         >
           <div className="text-primary font-semibold text-sm flex items-center justify-center gap-2 px-3 py-1 w-full">
             {done ? (
