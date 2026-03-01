@@ -184,10 +184,6 @@
   padding-top: env(safe-area-inset-top);
 }
 
-body.telegram-webapp .safe-area-padding {
-  padding-top: calc(var(--tg-safe-area-inset-top) + var(--tg-content-safe-area-inset-top));
-}
-
 /* Telegram Web App handling - only if needed for specific non-hero pages */
 body.telegram-webapp #root {
   /* padding-top removed to allow immersive hero image */
